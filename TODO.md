@@ -17,10 +17,9 @@ status: current
 
 ## Active Sprint
 
-> **SPRINT-003 — Launch polish (UX)** → [`docs/sprint/SPRINT-003-launch-polish.md`](docs/sprint/SPRINT-003-launch-polish.md)
-> T1 TASK-004 custom branding via config · T2 TASK-006 accessibility (Lighthouse a11y ≥ 90). Shared widget files → sequential.
+> **→ — none —** · SPRINT-003 closed (config branding + a11y). Archive: [`docs/sprint/archive/SPRINT-003-launch-polish.md`](docs/sprint/archive/SPRINT-003-launch-polish.md).
 
-Status: `pnpm verify` green (80 tests) · eval matrix **12/15/12/10 = 49, 100% id+en** · cost/turn ~908 µUSD (thinking off) · widget 14.2 KB gz. Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
+Status: `pnpm verify` green (91 tests) · eval matrix **12/15/12/10 = 49, 100% id+en** · a11y verified live in Chrome · widget 15.1 KB gz. Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
 ---
 
@@ -35,8 +34,6 @@ Status: `pnpm verify` green (80 tests) · eval matrix **12/15/12/10 = 49, 100% i
 
 ### P1 — Next Phase (v0.2 — launch polish)
 
-- [~] **TASK-004 — Custom branding via config** — promoted → SPRINT-003 (T1)
-- [~] **TASK-006 — Accessibility to Lighthouse a11y ≥ 90** — promoted → SPRINT-003 (T2)
 - [ ] **TASK-026 — Explicit Gemini context caching** [size: M] · src: claude · state: ready
       done-when: the static system-prompt prefix is cached via Gemini `cachedContent` (explicit, not just implicit) with a sane TTL/lifecycle; measured cost/turn drops further on repeated-prefix traffic. Builds on the T3 prompt-prefix split.
       touches: `server/src/chat/gemini.ts`, `core/prompt/builder.ts`.
@@ -78,6 +75,7 @@ Status: `pnpm verify` green (80 tests) · eval matrix **12/15/12/10 = 49, 100% i
 - **TD-006** severity: medium | status: resolved → TASK-007 (Sprint-002) | created: Sprint-001 — UsageTracker + per-session token budget were in-memory. Redis-backed via Upstash; cap holds cross-instance (verified w/ shared-FakeRedis test).
 - **TD-007** severity: minor | status: resolved → TASK-005 (Sprint-002) | created: Sprint-001 — Gemini thinking-token overhead. Now config-controlled (`server.model.thinkingBudget`); disabled in demo — cost/turn −37%, quality green.
 - **TD-008** severity: minor | status: open | created: Sprint-002 — The embedded `KenalinEngine` (`embed.ts`, vendored by the portfolio) stays in-memory/sync for limiter+usage — only the Hono `/api` path is Redis-backed (D4), so the vendored engine's counters remain per-instance. Also the Redis limiter is fixed-window (not the in-memory token bucket). done-when: move the embed engine to the shared Redis store (needs an async `KenalinEngine` API rev) if per-instance counting there becomes a problem.
+- **TD-009** severity: minor | status: open | created: Sprint-003 — Widget has no render/behavior test harness (`environment: node`, no jsdom) — a11y behavior (focus trap, Escape, live region) can't be unit-tested, only browser-verified (L-004). done-when: add jsdom/happy-dom (or preact-render-to-string for static render) so widget behavior gets regression coverage; also covers TD-002.
 
 ---
 

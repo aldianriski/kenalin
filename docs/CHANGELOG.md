@@ -11,6 +11,19 @@ All notable changes to Kenalin. Format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+### Added — SPRINT-003 (launch polish → v0.2, 2026-07-06)
+- **Custom branding via config (TASK-004)**: owners set a launcher logo/avatar (image
+  URL) and theme-token overrides in `kenalin.config.ts` — no code. `BrandingConfigSchema`
+  + `ThemeTokensSchema` (both `.strict()`), surfaced through `/api/config/public`
+  (public-safe) and applied by the widget as `--kenalin-*` custom properties on the host,
+  with a K-mark/image fallback. "Powered by Kenalin" footer is non-removable (schema has
+  no hide-field). Default (no branding) is visually unchanged.
+- **Accessibility (TASK-006)**: focus trap in the open panel (Tab/Shift+Tab wrap),
+  Escape-to-close with focus restore to the launcher, `aria-modal` dialog, `role="log"` +
+  `aria-live="polite"` message log so streamed answers are announced, and WCAG-AA contrast
+  (new light/dark-aware `--k-accent-text` token fixes teal-as-text). Verified live in
+  Chrome on the plain-HTML example. Widget 15.1 KB gz (budget 60).
+
 ### Added — SPRINT-002 (harden for scale → v0.2, 2026-07-06)
 - **Distributed rate limiter + usage counters**: Upstash Redis-backed limiter and
   UsageTracker/token-budget (via REST over `fetch`, no SDK dep) so both hold across
