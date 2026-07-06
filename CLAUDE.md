@@ -5,17 +5,18 @@
 
 ## Current phase
 
-**All phases (0–6) are implemented and green.** MVP complete.
+**All phases (0–6) are implemented and green + MVP-launch hardening done.**
 
-Quality gates: `pnpm verify` (owner-string grep gate + typecheck + build + 57
-tests) passes; eval harness built (Safety + Grounding 100% live; full matrix
-pending non-free-tier quota). The reference (Phase 5, RIZVA) is integrated into
-the external portfolio repo (`D:\Project\portofolio`) as a vendored engine bundle
-+ Next.js routes + widget — see `apps/reference-aldi/README.md`. Its knowledge
-index + live chat need a Gemini ingest run once free-tier quota resets.
+Quality gates: `pnpm verify` (owner-string grep gate + typecheck + build + 62
+tests) passes; **eval matrix 100% and stable** (billing enabled). Hardened for
+launch: token/context budgets, abuse guards, scope + injection resistance,
+secure headers, env-only secrets. The reference (Phase 5, RIZVA) is integrated
+into the external portfolio (`D:\Project\portofolio`) — vendored engine + Next.js
+routes + widget, **knowledge index populated (117 chunks)**; left uncommitted there.
 
-Remaining follow-ups: run the portfolio ingest with Gemini (quota-gated); expand
-eval scenarios to the H2 minimum counts; publish `@kenalin/*` if consuming via npm.
+**Next work + roadmap live in [`TODO.md`](TODO.md)** (v0.2 launch polish → v0.4
+scale). Immediate P0: finalize + commit the portfolio deployment (TASK-001) and
+graceful error UX (TASK-002).
 
 Phase order and dependencies: `0 → 1 → 2 → (3 ∥ 4) → 5 → 6`.
 
