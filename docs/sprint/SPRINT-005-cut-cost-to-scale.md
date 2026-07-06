@@ -45,7 +45,7 @@ bundle. (Portfolio git commit + deploy remain the owner's — TASK-025.)
 - [x] Owner-action noted (checklist): set `UPSTASH_*` + commit/deploy the portfolio (TASK-025). Portfolio files changed but **left uncommitted** for the owner (D1).
 <!-- Verified end-to-end: config thinkingBudget → 0 thoughts; cache active in the embed engine. -->
 
-### T2 — Trim per-turn context `[size: M · risk: med]`
+### T2 — Trim per-turn context `[size: M · risk: med]` — ⚖️ EVALUATED → NOT VIABLE (reverted; see DoD + log)
 Layers: `packages/core/src/policy/constants.ts`, `packages/core/src/prompt/builder.ts`, `evals/*`.
 The ~1782-token prompt is re-sent every turn (99% of cost is this call). Reduce it:
 `maxEvidenceInPrompt` 5→3, `evidenceSnippetChars` 220→150, `llmMessageWindow` 8→4,
@@ -55,11 +55,12 @@ quality drop reverts the specific knob.
 **Acceptance:** measured per-turn prompt tokens drop ~15–20% vs baseline; eval matrix 100%
 green in id + en (no grounding/intent/safety/conversation regression).
 
-**DoD:**
-- [ ] Cost knobs reduced (evidence count/snippet, message window/cap) + verbose prompt text tightened.
-- [ ] Runner reports the new prompt-tokens/turn; reduction measured vs the ~1782 baseline.
-- [ ] Eval matrix 100% green id + en; any group that dips reverts the offending knob (logged).
-<!-- QA: eval is the regression gate; grounding is the most sensitive to less evidence. -->
+**DoD:** ⚖️ EVALUATED → not viable (reverted). Tried evidence 5→3/4, snippet 220→150, window
+8→4, cap 1500→900:
+- Evidence 5→3 dropped grounding to **75%** (profile chunks rank 4th–5th → "got none"); 5→4 still regressed grounding-skills + intent.
+- Snippet/window cuts (evidence kept at 5) destabilized **intent** (100% → 87%, *different* scenarios failing per run) for only ~5% prompt savings (1782→1691).
+- **Reverted all** → eval back to 100% all groups. **Finding:** the per-turn cost is the static safety/grounding prefix (~1400 tok), which is load-bearing; context trimming is not a cost lever. Documented in `constants.ts` to prevent a re-attempt.
+<!-- The real levers are T1 (shipped) + T3 (lite-model) + the response cache. -->
 
 ### T3 — Validate + enable the lite-model swap `[size: S · risk: med]` (TASK-027)
 Layers: `content/demo/kenalin.config.ts`, `evals/*`.
@@ -94,6 +95,14 @@ SPRINT-005 promoted after a cost triage: the live portfolio runs a stale engine 
 ON, no cache) — the likely cause of the alarming test spend. TASK-030 (re-vendor+thinking-off)
 → T1 (biggest lever), TASK-031 (context trim) → T2, TASK-027 (lite-swap) → T3. Governance
 clean; v0.2.0 cut still overdue (4 sprints under [Unreleased]).
+
+### 2026-07-06 | T2 | Evaluated → not viable (reverted) — the prompt is irreducible
+Trimmed evidence/snippet/window and eval-gated each: evidence 5→3 crashed grounding to 75%;
+5→4 still regressed grounding+intent; snippet/window cuts (evidence 5) destabilized intent
+(100%→87%, different scenarios each run) for ~5% prompt savings. Reverted all → 100% restored.
+The per-turn cost is the **static safety/grounding prefix (~1400 tok), which is load-bearing**
+— context trimming isn't a cost lever. Left a `constants.ts` comment so it isn't re-tried.
+Net levers: T1 (shipped) + T3 (lite-model) + response cache.
 
 ### 2026-07-06 | T1 | Done — cost fixes shipped to the portfolio (re-vendor), smoke-verified
 Recon caught that `embed.ts` (the engine the portfolio vendors) built the Orchestrator with

@@ -61,7 +61,10 @@ export const LIMITS = {
   llmMessageCharCap: 1500,
   /** Retrieved chunks considered. */
   retrievalTopK: 6,
-  /** Evidence items placed in the prompt. */
+  /** Evidence items placed in the prompt. NOTE (SPRINT-005 T2): do not trim these cost
+   *  knobs — cutting evidence regresses grounding (profile chunks rank 4th–5th) and
+   *  cutting the snippet/window destabilizes intent. The prompt cost is the static
+   *  safety/grounding prefix, which is load-bearing. Context trimming is not a lever. */
   maxEvidenceInPrompt: 5,
   /** Evidence snippet length in the prompt. */
   evidenceSnippetChars: 220,
