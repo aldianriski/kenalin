@@ -4,7 +4,7 @@ slug: harden-for-scale
 owner: Tech Lead
 last_updated: 2026-07-06
 status: active
-plan_commit: 4ae474b
+plan_commit: 3f34b1b
 close_commit: [sha — set at close]
 update_trigger: sprint execute/close events
 ---
