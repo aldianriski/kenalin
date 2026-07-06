@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "preact/hooks";
 import type { JSX } from "preact";
 import { KenalinClient } from "./api.js";
 import { t, quickSub, detectLang, errorMessage, isRetryable } from "./i18n.js";
+import { avatarUrl } from "./branding.js";
 import {
   LogoMark,
   IconClose,
@@ -167,10 +168,15 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
     void send(last.text, last.seed);
   };
 
+  const brandLogo = config.branding?.logoUrl;
+  const brandAvatar = avatarUrl(config);
+
   if (!open) {
     return (
       <button class="launcher" aria-label={t(lang, "openLabel")} onClick={() => setOpen(true)}>
-        <span class="badge"><LogoMark size={20} /></span>
+        <span class="badge">
+          {brandLogo ? <img class="brandimg" src={brandLogo} alt="" /> : <LogoMark size={20} />}
+        </span>
         {config.assistant.launcherLabel}
       </button>
     );
@@ -181,7 +187,9 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
   return (
     <div class="panel" role="dialog" aria-label={config.assistant.name}>
       <div class="header">
-        <span class="avatar"><LogoMark size={26} /></span>
+        <span class="avatar">
+          {brandAvatar ? <img class="brandimg" src={brandAvatar} alt="" /> : <LogoMark size={26} />}
+        </span>
         <div class="meta">
           <span class="name">{config.assistant.name}</span>
           <span class="sub">{config.assistant.description ?? `${t(lang, "subtitle")} · ${config.owner.preferredName ?? config.owner.name}`}</span>

@@ -16,6 +16,12 @@ export interface PublicConfig {
   modules: string[];
   quickActions: { id: string; label: { id: string; en: string }; seedIntent?: string }[];
   channels: string[];
+  /** Owner branding (TASK-004): imagery + theme tokens. Public-safe (URLs + colors). */
+  branding?: {
+    logoUrl?: string;
+    avatarUrl?: string;
+    theme?: Record<string, string>;
+  };
 }
 
 export function toPublicConfig(config: KenalinConfig): PublicConfig {
@@ -39,5 +45,15 @@ export function toPublicConfig(config: KenalinConfig): PublicConfig {
       seedIntent: q.seedIntent,
     })),
     channels: availableChannels(config),
+    // Branding is already public-safe (image URLs + theme colors, no secrets).
+    ...(config.branding
+      ? {
+          branding: {
+            logoUrl: config.branding.logoUrl,
+            avatarUrl: config.branding.avatarUrl,
+            theme: config.branding.theme as Record<string, string> | undefined,
+          },
+        }
+      : {}),
   };
 }

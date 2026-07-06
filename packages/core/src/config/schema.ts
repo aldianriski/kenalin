@@ -131,6 +131,40 @@ export const ModelConfigSchema = z.object({
   thinkingBudget: z.number().int().min(0).optional(),
 });
 
+/** Owner theme-token overrides (TASK-004). Each maps to a `--kenalin-*` CSS custom
+ *  property the widget already exposes; unset tokens keep the neutral defaults.
+ *  `.strict()` rejects unknown keys — the widget applies only these known tokens. */
+export const ThemeTokensSchema = z
+  .object({
+    navy: z.string().optional(),
+    accent: z.string().optional(),
+    accentStrong: z.string().optional(),
+    accentSoft: z.string().optional(),
+    amber: z.string().optional(),
+    bg: z.string().optional(),
+    surface: z.string().optional(),
+    text: z.string().optional(),
+    muted: z.string().optional(),
+    border: z.string().optional(),
+    userBg: z.string().optional(),
+    radius: z.string().optional(),
+    font: z.string().optional(),
+  })
+  .strict();
+export type ThemeTokens = z.infer<typeof ThemeTokensSchema>;
+
+/** Owner branding (TASK-004): launcher/header imagery + theme tokens, set in config
+ *  without code. `.strict()` — and deliberately NO field that can hide or remove the
+ *  "Powered by Kenalin" footer (same spirit as the B9 no-weakening rule above). */
+export const BrandingConfigSchema = z
+  .object({
+    logoUrl: z.string().url().optional(),
+    avatarUrl: z.string().url().optional(),
+    theme: ThemeTokensSchema.optional(),
+  })
+  .strict();
+export type BrandingConfig = z.infer<typeof BrandingConfigSchema>;
+
 /** CORS allowlist + rate-limit knobs (PRD D6). */
 export const ServerConfigSchema = z.object({
   allowedOrigins: z.array(z.string()).default([]),
@@ -157,6 +191,7 @@ export const KenalinConfigSchema = z
     analytics: AnalyticsConfigSchema.default({}),
     qualification: QualificationConfigSchema.default({}),
     server: ServerConfigSchema.default({}),
+    branding: BrandingConfigSchema.optional(),
   })
   .superRefine((cfg, ctx) => {
     // hardCap must be >= maxQuestions (PRD B5 FR-8 / C4).

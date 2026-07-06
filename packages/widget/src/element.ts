@@ -2,6 +2,7 @@ import { render, h } from "preact";
 import { App } from "./app.js";
 import { STYLES } from "./styles.js";
 import { KenalinClient } from "./api.js";
+import { themeCssVars } from "./branding.js";
 import type { PageContext, PublicConfig } from "./types.js";
 
 /**
@@ -43,6 +44,12 @@ export class KenalinElement extends HTMLElement {
     } catch (err) {
       console.warn("[kenalin] failed to load config:", err);
       return;
+    }
+
+    // Apply owner theme tokens (TASK-004) as `--kenalin-*` overrides on the host,
+    // which `:host` in the Shadow-DOM styles resolves. Unset tokens keep defaults.
+    for (const [name, value] of themeCssVars(config.branding?.theme)) {
+      this.style.setProperty(name, value);
     }
 
     render(

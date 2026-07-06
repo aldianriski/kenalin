@@ -83,6 +83,10 @@ button { font: inherit; cursor: pointer; }
   display: grid; place-items: center; width: 38px; height: 38px; flex: none;
   background: #fff; border-radius: 11px;
 }
+/* Owner logo/avatar image (TASK-004) — fills the badge/avatar square, keeps its radius. */
+.badge .brandimg, .avatar .brandimg {
+  width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;
+}
 .header .meta { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
 .header .name { font-weight: 600; font-size: 15px; }
 .header .sub { font-size: 12px; color: #9DB0C4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

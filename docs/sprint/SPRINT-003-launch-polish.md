@@ -41,10 +41,10 @@ widget with no code change; the Powered-by footer is present and there is no con
 to remove it.
 
 **DoD:**
-- [ ] `branding` config: optional `logoUrl`/`avatarUrl` (validated) + theme preset and/or CSS-token overrides; schema rejects unknown/unsafe fields.
-- [ ] `/api/config/public` exposes branding (no secrets); widget renders logo/avatar + applies theme tokens via CSS custom properties.
-- [ ] "Powered by Kenalin" footer always rendered; **no** config field can hide/remove it (assert in a test).
-- [ ] Default (no branding set) is visually unchanged from today (K-mark + current theme).
+- [x] `branding` config: optional `logoUrl`/`avatarUrl` (`.url()`) + `theme` token overrides; `.strict()` rejects unknown/unsafe fields.
+- [x] `/api/config/public` exposes branding (no secrets — test asserts); widget renders logo/avatar + applies theme tokens as `--kenalin-*` host props.
+- [x] "Powered by Kenalin" footer always rendered (`app.tsx` unconditional); **no** config field can hide it — `branding.test.ts` asserts strict rejects `hideFooter`/`showPoweredBy`/`poweredBy`.
+- [x] Default (no branding) visually unchanged — `<img>` renders only when a URL is set, else the K-mark; no tokens applied when `theme` unset.
 <!-- QA: schema test for the no-hide-footer guarantee; widget render test for logo + token application. -->
 
 ### T2 — Accessibility to Lighthouse a11y ≥ 90 `[size: M · risk: med]`
@@ -87,12 +87,33 @@ SPRINT-003 promoted from Backlog P1 (Launch-polish UX track). TASK-004 → T1,
 TASK-006 → T2. Shared widget files → sequential (D1). Governance: L-002 promoted to
 CONTEXT.md (count 2); TD-002/003/004 flagged for re-review (≥3 sprints, none high).
 
+### 2026-07-06 | G2 | Test-harness approach noted
+No widget render harness exists (`api.test.ts` only, `environment: node`). To avoid a
+network-gated dep install (L-002 lesson), branding logic is extracted to a pure
+`branding.ts` and unit-tested in the node env; schema/server guarantees use existing
+harnesses. A11y *behavior* (focus trap/Escape) will be verified via Lighthouse + manual
+keyboard (implement-direct + note manual step); static a11y attrs are what Lighthouse scores.
+
+### 2026-07-06 | T1 | Done — custom branding via config (all DoD [x])
+Branding threaded core schema (`BrandingConfigSchema`/`ThemeTokensSchema`, both `.strict()`)
+→ `public-config` (public-safe map) → widget `types` → `element.ts` (theme tokens applied as
+`--kenalin-*` on host) + `app.tsx` (logo/avatar `<img>` with K-mark fallback). Powered-by
+footer stays unconditional; strict schema rejects any hide-field (D2). Pure `branding.ts`
+helper unit-tested. `pnpm verify` green (91 tests: core 34 · widget 8 · server 49); widget
+14.6 KB gz (budget 60).
+
 ## Files Changed
 <!-- Filled during execution; feeds CHANGELOG at close. -->
 
 | File | Task | Change (WHY) | Risk | Test |
 |------|------|--------------|------|------|
-| _(pending execution)_ | | | | |
+| `packages/core/src/config/schema.ts` | T1 | `BrandingConfigSchema` + `ThemeTokensSchema` (strict) | Low | `branding.test.ts` |
+| `packages/server/src/public-config.ts` | T1 | Expose branding (public-safe) via `toPublicConfig` | Low | `public-config.test.ts` |
+| `packages/widget/src/types.ts` | T1 | Mirror `branding` on widget `PublicConfig` | Low | typecheck |
+| `packages/widget/src/branding.ts` | T1 | New: pure theme→CSS-var + avatar resolver | Low | `branding.test.ts` (widget) |
+| `packages/widget/src/element.ts` | T1 | Apply theme tokens as `--kenalin-*` on host | Low | build |
+| `packages/widget/src/app.tsx` | T1 | Render logo/avatar `<img>` w/ K-mark fallback | Low | size + verify |
+| `packages/widget/src/styles.ts` | T1 | `.brandimg` fills badge/avatar square | Low | size |
 
 ## Retro
 <!-- Written at close. Route buckets to durable homes (DOCS_Guide §10). -->

@@ -23,6 +23,11 @@ export interface PublicConfig {
   modules: string[];
   quickActions: { id: string; label: { id: string; en: string }; seedIntent?: string }[];
   channels: string[];
+  branding?: {
+    logoUrl?: string;
+    avatarUrl?: string;
+    theme?: Record<string, string>;
+  };
 }
 
 export type Lang = "id" | "en";
