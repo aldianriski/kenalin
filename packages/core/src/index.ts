@@ -15,3 +15,5 @@ export * from "./config/index.js";
 export * from "./interfaces/index.js";
 export * from "./modules/index.js";
 export * from "./policy/index.js";
+export * from "./knowledge/index.js";
+export * from "./retrieval/index.js";

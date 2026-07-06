@@ -1,0 +1,38 @@
+{
+  "name": "@kenalin/server",
+  "version": "0.1.0",
+  "description": "Kenalin server — Hono API, Gemini provider, local knowledge index, ingest CLI. The only package with I/O.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "kenalin": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "ingest": "jiti src/cli.ts ingest",
+    "dev": "jiti src/dev-server.ts",
+    "eval": "jiti ../../evals/runner.ts"
+  },
+  "dependencies": {
+    "@kenalin/core": "workspace:*",
+    "jiti": "^2.4.2",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
