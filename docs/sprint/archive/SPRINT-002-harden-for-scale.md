@@ -5,7 +5,7 @@ owner: Tech Lead
 last_updated: 2026-07-06
 status: closed
 plan_commit: 3f34b1b
-close_commit: [pending — set at close commit]
+close_commit: a9d37fe
 update_trigger: sprint execute/close events
 ---
 
