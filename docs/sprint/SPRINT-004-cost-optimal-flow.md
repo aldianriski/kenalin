@@ -19,15 +19,16 @@ update_trigger: sprint execute/close events
 
 ## Scope
 
-**In:** explicit Gemini context caching (TASK-026) · response/semantic cache keyed on
-retrieval signature (TASK-024).
+**In:** response/semantic cache keyed on retrieval signature (TASK-024).
+**Evaluated → deferred:** ~~explicit Gemini context caching (TASK-026)~~ — spike showed ~3%
+gross / net-marginal at current traffic (see Execution Log); revisit under load.
 **Out (deferred):** ~~deterministic intake (TASK-028)~~ **CUT** — `/council` → **ADR-005**
 rejected it (see Execution Log); lite-model swap (TASK-027), pgvector (TASK-019), provider
 adapters (TASK-020), the P2 UX polish set, TASK-025 (owner-blocked).
 
 ## Plan
 
-### T1 — Explicit Gemini context caching `[size: M · risk: med]`
+### T1 — Explicit Gemini context caching `[size: M · risk: med]` — ⚖️ EVALUATED → DEFERRED (spike; see scope-change log)
 Layers: `packages/server/src/chat/gemini.ts`, `packages/core/src/prompt/builder.ts`.
 Cache the static system prefix (safety+persona+rules+actions — identical per config+
 language) via Gemini `cachedContent`, so cached input tokens bill at the discounted
@@ -37,11 +38,10 @@ split. Biggest safe lever — nothing is skipped, the per-turn call just gets ch
 **Acceptance:** measured cost/turn drops materially vs the SPRINT-002 baseline (908 µUSD),
 eval matrix still 100% green, with a visible non-zero cached-token count.
 
-**DoD:**
-- [ ] Static prefix registered as a cached content resource (with a sane TTL/lifecycle); the per-turn call references it instead of re-sending the prefix.
-- [ ] Falls back cleanly to the current inline prefix when caching is unavailable/expired (no turn ever fails because a cache lapsed).
-- [ ] Cost/turn measured before/after; eval matrix 100% green in id + en; cached tokens reported by the runner.
-<!-- QA: eval is the regression gate; verify a cache-miss path still answers correctly. -->
+**DoD:** ✅ RESOLVED via spike — TASK-026 **evaluated → deferred** (not implemented). Finding:
+explicit caching works (99% of prefix cached) but ~3% gross / net-marginal at current traffic;
+revisit at >5 turns/hr. The evaluation *was* the deliverable; implementation deferred by owner.
+<!-- Original implementation DoD moot — see Execution Log scope-change + the spike numbers. -->
 
 ### T2 — Response/semantic cache `[size: M · risk: med]`
 Layers: `packages/server/src/orchestrator/orchestrator.ts`, new cache store, portfolio route.
@@ -112,6 +112,17 @@ council). Governance: L-003 promoted to CONTEXT.md (count 2, collapsed); TD-002/
 flagged for re-review (≥3 sprints, none high). Flow evaluation recorded in the sprint
 theme: single Gemini call ≈ 99% of cost, prompt-dominated → cache first, skip repeats,
 skip trivial only behind ADR-005.
+
+### 2026-07-06 | scope-change | T1 deprioritized after spike — explicit caching marginal
+Spike (direct Gemini REST, real ~1169-tok prefix): **implicit caching cached 0/3** identical
+calls (unreliable — can't count on it); **explicit `cachedContent` caches 1159/1165 (99%)**
+but min 1024 tokens, saves **~26 µUSD/turn (~3%)**, with a storage break-even of **~5 turns/hr**
+→ net ~0/negative at a personal widget's sporadic traffic, plus lazy-create/TTL/Upstash-name/
+invalidate lifecycle complexity in a stateless serverless path. **Decision (owner):** resolve
+TASK-026 as **evaluated → deferred** (revisit at >5 turns/hr sustained); **T2 becomes the
+sprint's deliverable** — the response cache skips *whole* calls on repeats, no storage cost,
+simpler. My earlier "T1 is the biggest lever" claim was wrong; the measurement says T2 is.
+**Impact:** scope narrows to T2. **G2 re-confirm:** T2 unchanged (D2/D3 hold).
 
 ### 2026-07-06 | scope-change | T3 CUT after /council → ADR-005
 **What broke:** the `/council` (5 advisors + moderator) found the deterministic free-text

@@ -18,7 +18,7 @@ status: current
 ## Active Sprint
 
 > **SPRINT-004 — Cost-optimal chat flow** → [`docs/sprint/SPRINT-004-cost-optimal-flow.md`](docs/sprint/SPRINT-004-cost-optimal-flow.md)
-> T1 TASK-026 context caching · T2 TASK-024 response/semantic cache. (T3 TASK-028 CUT — `/council` → ADR-005 rejected it.)
+> T2 TASK-024 response/semantic cache. (T1 TASK-026 evaluated→deferred — spike: ~3%/marginal. T3 TASK-028 CUT — /council → ADR-005.)
 
 Status: `pnpm verify` green (91 tests) · eval matrix **12/15/12/10 = 49, 100% id+en** · cost/turn ~908 µUSD baseline. Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
@@ -35,7 +35,7 @@ Status: `pnpm verify` green (91 tests) · eval matrix **12/15/12/10 = 49, 100% i
 
 ### P1 — Next Phase (v0.2 — launch polish)
 
-- [~] **TASK-026 — Explicit Gemini context caching** — promoted → SPRINT-004 (T1)
+- [x] **TASK-026 — Explicit Gemini context caching** — ⚖️ EVALUATED → deferred (SPRINT-004): spike showed explicit `cachedContent` works (99% of prefix cached) but ~26 µUSD/turn (~3%), storage break-even ~5 turns/hr → net-marginal at current traffic; implicit caching unreliable (0/3). Revisit at sustained >5 turns/hr. Response cache (TASK-024) is the better lever.
 - [ ] **TASK-027 — Enable + eval-validate the lite-model swap** [size: S] · src: claude · state: ready
       done-when: `server.model.lite` set for the demo (e.g. `gemini-2.5-flash-lite`); eval matrix re-run and still green at 12/15/12/10 id+en (esp. safety 100%); measured cost delta recorded. Capability shipped in T3 but config-gated off pending this validation.
       touches: `content/demo/kenalin.config.ts`, `evals/*`.
