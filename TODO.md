@@ -17,9 +17,9 @@ status: current
 
 ## Active Sprint
 
-> **→ — none —** · MVP (v0.1.0) shipped and green; backlog groomed for v0.2. Promote a sprint to start.
+> **→ active:** [`docs/sprint/SPRINT-001-launch-readiness.md`](docs/sprint/SPRINT-001-launch-readiness.md) — token usage tracker · graceful error UX · finalize deployment.
 
-Status: `pnpm verify` green (62 tests) · eval matrix 100% (stable) · widget 13.6 KB gz · 12 commits on `main`, unpushed · reference integrated into the portfolio (indexed, uncommitted there). Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
+Status: `pnpm verify` green (62 tests) · eval matrix 100% (stable) · widget 13.6 KB gz · reference integrated + indexed (117 chunks). Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
 ---
 
@@ -27,18 +27,12 @@ Status: `pnpm verify` green (62 tests) · eval matrix 100% (stable) · widget 13
 
 ### P0 — Critical / Blocking
 
-- [ ] **TASK-001 — Finalize + commit reference deployment** [size: S] · src: you · state: ready
-      done-when: real handoff channels (WhatsApp/calendar) + prod `allowedOrigins` set in `lib/kenalin/kenalin.config.ts`; portfolio changes committed; live smoke test passes on `next dev`.
-      touches: `D:/Project/portofolio/lib/kenalin/*`, portfolio git.
-- [ ] **TASK-002 — Graceful, typed error UX** [size: M] · src: you · state: ready
-      done-when: quota/no-token, rate_limited, payload_too_large, 5xx, and offline each map to a distinct friendly localized message + retry (not one generic fallback); server returns stable error codes; nothing shows a raw error.
-      touches: `widget/src/api.ts`, `widget/src/app.tsx`, `widget/src/i18n.ts`, `server/src/app.ts`.
+- ~~TASK-001 — Finalize + commit reference deployment~~ → promoted → SPRINT-001
+- ~~TASK-002 — Graceful, typed error UX~~ → promoted → SPRINT-001
 
 ### P1 — Next Phase (v0.2 — launch polish)
 
-- [ ] **TASK-003 — Token usage tracker** [size: M] · src: you · state: ready
-      done-when: each `/api/chat` captures Gemini `usageMetadata` (prompt/candidates/total tokens) + embedding tokens; per-turn structured log; cumulative counters exposed (e.g. `GET /api/usage` or `log` events) with per-session + global totals; optional per-session/day token budget cap that returns a friendly limit message.
-      touches: `server/src/chat/gemini.ts` (surface usage), `server/src/orchestrator`, new `server/src/usage.ts`, `server/src/app.ts`.
+- ~~TASK-003 — Token usage tracker~~ → promoted → SPRINT-001
 - [ ] **TASK-004 — Custom branding via config** [size: M] · src: you · state: ready
       done-when: owner sets launcher logo/avatar (image URL or keep K-mark) + theme preset/tokens in config without code; "Powered by Kenalin" footer is present and not removable by config.
       touches: `core/config/schema.ts`, `server/src/public-config.ts`, `widget/src/app.tsx`, `widget/src/styles.ts`.
