@@ -5,11 +5,11 @@
 
 ## Current phase
 
-**We are in Phase 3 — Widget** (Phase 4 — Modules may interleave, per PRD G4).
+**We are in Phase 4 — Modules.**
 
-Phases 0–2 are complete and green: Foundation, Knowledge (ingest/retrieval),
-and AI Core (Gemini provider, single-pass orchestrator, non-overridable policy
-validators, `/api/chat` SSE). Live Gemini structured-output call verified. Only
+Phases 0–3 are complete and green: Foundation, Knowledge, AI Core, and Widget
+(Preact Web Component, 10.3 KB gz, SSE client). Full pipeline verified LIVE
+end-to-end against Gemini (`gemini-2.5-flash` + `gemini-embedding-001`). Only
 implement the current phase's scope (PRD Part G4). Do **not** start a later phase
 until the current phase's Definition of Done passes. Update this marker as each
 phase's DoD is verified.

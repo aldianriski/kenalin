@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kenalin — plain HTML embed</title>
+    <style>
+      body { font: 16px/1.6 system-ui, sans-serif; max-width: 680px; margin: 40px auto; padding: 0 20px; color: #16181d; }
+      code { background: #f2f4f7; padding: 2px 5px; border-radius: 4px; }
+      /* Host theming: override Kenalin's CSS custom properties. */
+      kenalin-ai { --kenalin-accent: #0f766e; --kenalin-radius: 16px; }
+    </style>
+  </head>
+  <body>
+    <h1>Sari Wibowo</h1>
+    <p>Full-stack engineer &amp; product consultant. This page proves Kenalin embeds
+      into a plain HTML file with no framework and no build step.</p>
+    <p>Open the assistant (bottom-right) and ask something like
+      <em>"Apa itu project QuickHub?"</em> or <em>"Pernah lead engineering team?"</em>.</p>
+
+    <h2>How this page embeds Kenalin</h2>
+    <p>One script tag with <code>data-api-url</code> is enough — it registers the
+      <code>&lt;kenalin-ai&gt;</code> Web Component and auto-mounts it:</p>
+    <pre><code>&lt;script src="/kenalin.js" data-api-url="http://localhost:8787" defer&gt;&lt;/script&gt;</code></pre>
+
+    <p>Or place the element yourself to control position / page context:</p>
+    <pre><code>&lt;kenalin-ai api-url="http://localhost:8787" project-id="quickhub"&gt;&lt;/kenalin-ai&gt;</code></pre>
+
+    <!--
+      Run the API first (from the repo root):
+        pnpm --filter @kenalin/server run ingest -- --config content/demo/kenalin.config.ts --root .
+        pnpm --filter @kenalin/server run dev  -- --config content/demo/kenalin.config.ts --root .
+      Then serve this folder (e.g. `npx serve examples/plain-html`) and open it.
+      The script path below points at the built widget bundle.
+    -->
+    <script src="../../packages/widget/dist/kenalin.js" data-api-url="http://localhost:8787" defer></script>
+  </body>
+</html>

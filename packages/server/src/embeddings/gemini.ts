@@ -1,11 +1,12 @@
 import type { EmbeddingProvider } from "@kenalin/core";
 
 /**
- * Google Gemini embedding provider — `text-embedding-004` (768 dims).
- * Uses the REST API via global fetch (no SDK dependency). Batches requests.
+ * Google Gemini embedding provider — `gemini-embedding-001`, reduced to 768
+ * dims via outputDimensionality. Uses the REST API via global fetch (no SDK
+ * dependency). Batches requests.
  */
 
-const DEFAULT_MODEL = "text-embedding-004";
+const DEFAULT_MODEL = "gemini-embedding-001";
 const DEFAULT_DIMENSIONS = 768;
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta";
 
@@ -35,6 +36,7 @@ export class GeminiEmbeddingProvider implements EmbeddingProvider {
       requests: texts.map((text) => ({
         model: `models/${this.model}`,
         content: { parts: [{ text }] },
+        outputDimensionality: this.dimensions,
       })),
     };
     const res = await fetch(url, {

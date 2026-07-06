@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { resolve } from "node:path";
+import { loadDotEnv } from "./dotenv.js";
 import { loadConfigFile } from "./config/load-file.js";
 import { ingest } from "./ingest/pipeline.js";
 import { selectEmbedder, type EmbedderKind } from "./embeddings/index.js";
@@ -55,6 +56,7 @@ async function cmdIngest(argv: string[]): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  loadDotEnv([".env", "../../.env"]);
   const [cmd, ...rest] = process.argv.slice(2);
   switch (cmd) {
     case "ingest":

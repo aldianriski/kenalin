@@ -28,7 +28,7 @@ One config file. **No database required for a fresh install.**
 
 ## Requirements
 - Node.js ≥ 20 and pnpm ≥ 11 (monorepo).
-- A Google Gemini API key (chat `gemini-2.5-flash` + embeddings `text-embedding-004`).
+- A Google Gemini API key (chat `gemini-2.5-flash` + embeddings `gemini-embedding-001`).
 
 ## Adopt
 

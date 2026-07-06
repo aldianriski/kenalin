@@ -16,7 +16,7 @@ on a usable free tier, is the lowest-friction path for the primary market.
 ## Decision
 
 Ship **one** complete provider for the MVP: **Google Gemini** — `gemini-2.5-flash`
-for chat and `text-embedding-004` for embeddings, behind the `ChatProvider` /
+for chat and `gemini-embedding-001` for embeddings, behind the `ChatProvider` /
 `EmbeddingProvider` interfaces in `core`. Anthropic and OpenAI chat adapters are
 explicitly P1, added behind the same interfaces only when there is a reason to.
 

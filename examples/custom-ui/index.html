@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kenalin — headless API</title>
+    <style>
+      body { font: 15px/1.6 system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 20px; }
+      #log { border: 1px solid #e4e7ec; border-radius: 10px; padding: 12px; min-height: 160px; white-space: pre-wrap; }
+      form { display: flex; gap: 8px; margin-top: 12px; }
+      input { flex: 1; padding: 8px 10px; }
+    </style>
+  </head>
+  <body>
+    <h1>Headless Kenalin</h1>
+    <p>Consume <code>POST /api/chat</code> (SSE) directly — no widget, your own UI.</p>
+    <div id="log"></div>
+    <form id="f">
+      <input id="q" placeholder="Ask about the owner…" autocomplete="off" />
+      <button>Send</button>
+    </form>
+
+    <script type="module">
+      const API = "http://localhost:8787";
+      const log = document.getElementById("log");
+      let state = { intent: "unknown", confidence: 0, intentHistory: [], language: "en",
+        qualification: { stage: null, category: null, complexity: null, answers: [], questionCount: 0 }, handoffOffered: false };
+      const messages = [];
+
+      document.getElementById("f").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const q = document.getElementById("q").value.trim();
+        if (!q) return;
+        document.getElementById("q").value = "";
+        messages.push({ role: "user", content: q });
+        log.textContent += `\n> ${q}\n`;
+
+        const res = await fetch(`${API}/api/chat`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ sessionId: "demo", messages: messages.slice(-12), state, locale: "en" }),
+        });
+        const reader = res.body.getReader();
+        const dec = new TextDecoder();
+        let buf = "", answer = "";
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, { stream: true });
+          const frames = buf.split("\n\n"); buf = frames.pop();
+          for (const fr of frames) {
+            const ev = /event:\s*(\w+)/.exec(fr)?.[1];
+            const data = fr.split("\n").filter(l => l.startsWith("data:")).map(l => l.slice(5).trimStart()).join("\n");
+            if (ev === "delta") { answer += data; log.textContent = log.textContent.replace(/\n<[^]*$/, "") + "\n< " + answer; }
+            else if (ev === "payload") { const p = JSON.parse(data); state = { ...state, ...p.stateUpdates }; messages.push({ role: "assistant", content: p.answer }); }
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,4 +1,5 @@
 import { serve } from "@hono/node-server";
+import { loadDotEnv } from "./dotenv.js";
 import { loadConfigFile } from "./config/load-file.js";
 import { buildAppDeps } from "./factory.js";
 import { createApp } from "./app.js";
@@ -11,6 +12,7 @@ import { resolvePort } from "./env.js";
  * Usage: jiti src/dev-server.ts [--config <path>] [--root <dir>] [--index <dir>]
  */
 async function main(): Promise<void> {
+  loadDotEnv([".env", "../../.env"]);
   const argv = process.argv.slice(2);
   const get = (flag: string, def?: string) => {
     const i = argv.indexOf(flag);

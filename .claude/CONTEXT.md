@@ -18,7 +18,7 @@ status: current
 - **Validation**: Zod — schemas are the single source of truth (types inferred)
 - **Server**: Hono (stateless, SSE)
 - **Widget**: Preact + esbuild, Shadow DOM, single file < 60 KB gz
-- **LLM**: Google Gemini — `gemini-2.5-flash` (chat) + `text-embedding-004` (embeddings)
+- **LLM**: Google Gemini — `gemini-2.5-flash` (chat) + `gemini-embedding-001` (embeddings)
 - **Storage**: local JSONL+vectors knowledge index; lead store `none | database (SQLite) | webhook | both`
 
 ## Architecture
