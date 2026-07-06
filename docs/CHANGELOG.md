@@ -1,6 +1,6 @@
 ---
 owner: Tech Lead
-last_updated: 2026-07-06
+last_updated: 2026-07-07
 update_trigger: A sprint/phase is closed
 status: current
 ---
@@ -11,7 +11,16 @@ All notable changes to Kenalin. Format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
-### Changed — SPRINT-005 (cut cost to scale → v0.2, 2026-07-07)
+_Nothing yet._
+
+## [0.2.0] — 2026-07-07
+
+First tagged release beyond the MVP foundation (0.1.0). Bundles SPRINT-001…005:
+distributed limiter + usage (Upstash), CI gate, model cost tuning + eval expansion
+(12/15/12/10), config branding + accessibility, grounding-safe response cache, and the
+production cost fix (thinking-off + cache re-vendored, ~31 → ~11 IDR/turn).
+
+### Changed — SPRINT-005 (cut cost to scale, 2026-07-07)
 - **Production cost fix (TASK-030)**: the live portfolio ran a stale vendored engine with
   thinking ON and no response cache. Re-vendored the current engine + set
   `server.model.thinkingBudget: 0` in the portfolio config, and **wired the response cache

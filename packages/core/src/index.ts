@@ -8,7 +8,7 @@
  * This package must run in any JS runtime — no Node-only APIs, no file/network I/O.
  */
 
-export const KENALIN_CORE_VERSION = "0.1.0";
+export const KENALIN_CORE_VERSION = "0.2.0";
 
 export * from "./schemas/index.js";
 export * from "./config/index.js";
