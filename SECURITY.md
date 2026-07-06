@@ -20,10 +20,21 @@ and secrets.
   client session. Persistence (SQLite / webhook) is explicit opt-in.
 - **Consent-explicit lead capture.** Personal details are requested only at
   handoff, with a stated purpose; a visitor can decline and still get contact links.
-- **CORS allowlist.** `/api/*` is restricted to the origins listed in
-  `server.allowedOrigins`.
-- **Rate limiting.** A per-IP token bucket (default 20 messages / 10 min) guards
-  the chat endpoint.
+- **CORS allowlist + security headers.** `/api/*` is restricted to
+  `server.allowedOrigins`, and responses carry baseline security headers
+  (nosniff, frame-deny, referrer policy).
+- **Rate limiting + abuse guards.** A per-IP token bucket (default 20 messages /
+  10 min) plus cheap pre-LLM guards reject oversized/over-long inputs before any
+  model spend: per-message ≤ 4000 chars, ≤ 60 messages/request, ≤ 40 turns/session,
+  ≤ 64 KB body. Context sent to the model is trimmed (last 8 messages, capped
+  length, ≤ 5 evidence items) to bound token cost.
+- **Scope + injection resistance.** The assistant only introduces the owner; it
+  declines off-topic requests (general knowledge, coding, etc.) and ignores
+  visitor attempts to override its instructions or reveal the prompt. These are
+  enforced in the core policy and covered by the eval Safety group.
+- **Secrets are env-only.** The webhook signing secret comes solely from
+  `KENALIN_WEBHOOK_SECRET`; the config schema has no secret field, so a secret
+  cannot be committed via `kenalin.config.ts`.
 - **Signed webhooks.** Outbound webhook payloads are signed with
   `X-Kenalin-Signature: hex(hmac_sha256(body, secret))`; verify this on receipt.
 - **Non-overridable safety policy.** The answer pipeline blocks invented URLs,

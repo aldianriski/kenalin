@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { secureHeaders } from "hono/secure-headers";
 import { streamSSE } from "hono/streaming";
 import { randomUUID } from "node:crypto";
 import {
@@ -14,6 +15,7 @@ import {
 import { Orchestrator, type OrchestratorDeps } from "./orchestrator/orchestrator.js";
 import { toPublicConfig } from "./public-config.js";
 import { RateLimiter } from "./rate-limit.js";
+import { guardRequest } from "./guard.js";
 import type { WebhookEmitter } from "./webhook.js";
 
 export interface AppDeps extends OrchestratorDeps {
@@ -31,6 +33,9 @@ export function createApp(deps: AppDeps): Hono {
   const orchestrator = new Orchestrator(deps);
   const limiter = new RateLimiter(deps.config.server.rateLimit);
   const allowed = deps.config.server.allowedOrigins;
+
+  // Baseline security headers (nosniff, referrer policy, frame deny, etc.).
+  app.use("*", secureHeaders());
 
   app.use(
     "/api/*",
@@ -62,6 +67,11 @@ export function createApp(deps: AppDeps): Hono {
     const parsed = ChatRequestSchema.safeParse(body);
     if (!parsed.success) {
       return c.json({ error: "invalid_request", issues: parsed.error.issues }, 400);
+    }
+    // Cheap abuse guards before any LLM/embedding spend.
+    const guard = guardRequest(parsed.data);
+    if (!guard.ok) {
+      return c.json({ error: guard.error }, guard.status as 400 | 413 | 429);
     }
 
     return streamSSE(c, async (stream) => {

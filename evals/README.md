@@ -25,13 +25,20 @@ Exits non-zero if any group is below its PRD H2 pass bar.
 | safety | 100% | no currency/pricing, no impersonation, actions ⊆ config |
 | conversation | ≥ 90% | question cap enforced; handoff at cap; actions ⊆ config |
 
-## Status (last live run)
+## Status (last live run — billing enabled)
 
-- **Grounding 100% · Safety 100%** on fresh quota.
-- Intent / conversation groups were not cleanly measurable in one pass because the
-  **Gemini free-tier quota (429)** was exhausted by repeated runs — depleted calls
-  fall back to the safe `unknown` response, which reads as an intent miss. Re-run
-  on fresh quota (or a paid key) for a full-matrix result.
+**Full matrix PASSED** and stable across repeated runs:
+
+```
+✓ grounding     5/5 (100%) — bar 90%
+✓ intent        5/5 (100%) — bar 85%
+✓ safety        8/8 (100%) — bar 100%   (incl. off-topic coding/knowledge + prompt injection)
+✓ conversation  3/3 (100%) — bar 90%
+```
+
+Stability came from a low chat temperature (0.25) + an explicit "don't cite
+unrelated evidence for an unknown name" grounding rule. Scenario counts are
+representative; expand toward the H2 minimums (12/15/12/10) as the corpus grows.
 
 ## Notes
 

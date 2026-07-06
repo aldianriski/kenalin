@@ -7,6 +7,7 @@ import {
   CORE_SAFETY_POLICY,
   COMPLEXITY_DISCLAIMER,
   INSUFFICIENT_EVIDENCE_FALLBACK,
+  LIMITS,
 } from "../policy/constants.js";
 
 /** Lightweight evidence candidate handed to the prompt (id + text only). */
@@ -67,7 +68,7 @@ function conversationRules(config: KenalinConfig, language: Language): string {
   return [
     "CONVERSATION RULES:",
     "- Infer the visitor's intent this turn and emit it with a confidence 0..1.",
-    "- Cite evidence by id ONLY when a retrieved item actually names the thing asked about; if the visitor asks about a project/entity not present in EVIDENCE, use the insufficient-evidence line and return no evidence ids.",
+    `- Grounding: if the visitor names a specific project, company, or product and NO EVIDENCE item's title or text contains that exact name, treat it as UNKNOWN — reply with "${INSUFFICIENT_EVIDENCE_FALLBACK[language]}" and return an EMPTY evidence list. Never cite loosely-related items to cover an unknown name.`,
     `- When the screening question cap (${cap}) is reached, stop asking and set offerHandoff=true.`,
     "- Ground every claim about the owner in the provided EVIDENCE; reference the evidence you use by id.",
     `- If no evidence supports an owner-claim, do not guess — answer with: "${INSUFFICIENT_EVIDENCE_FALLBACK[language]}" and return no evidence ids.`,
@@ -83,9 +84,12 @@ function evidenceBlock(evidence: EvidenceCandidate[]): string {
   if (evidence.length === 0) {
     return "EVIDENCE: (none retrieved — treat owner-claim questions as unsupported.)";
   }
-  const lines = evidence.map(
-    (e) => `- id=${e.id} [${e.type}] ${e.title}: ${e.snippet.replace(/\s+/g, " ").slice(0, 320)}`,
-  );
+  const lines = evidence
+    .slice(0, LIMITS.maxEvidenceInPrompt)
+    .map(
+      (e) =>
+        `- id=${e.id} [${e.type}] ${e.title}: ${e.snippet.replace(/\s+/g, " ").slice(0, LIMITS.evidenceSnippetChars)}`,
+    );
   return "EVIDENCE (reference by id only; these are the ONLY supported facts):\n" + lines.join("\n");
 }
 

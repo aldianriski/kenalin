@@ -16,6 +16,7 @@ import { LocalKnowledgeStore } from "./knowledge/local-store.js";
 import { GeminiChatProvider } from "./chat/gemini.js";
 import { GeminiEmbeddingProvider } from "./embeddings/gemini.js";
 import { toPublicConfig, type PublicConfig } from "./public-config.js";
+import { guardRequest, type GuardResult } from "./guard.js";
 
 export interface KenalinEngineOptions {
   /** Raw config object (validated here). */
@@ -34,6 +35,8 @@ export interface KenalinEngineOptions {
 export interface KenalinEngine {
   handleChat(request: ChatRequest): Promise<ChatResponse>;
   publicConfig(): PublicConfig;
+  /** Cheap pre-LLM abuse guard — call before handleChat and honor the status. */
+  guard(request: ChatRequest): GuardResult;
 }
 
 /**
@@ -59,9 +62,12 @@ export function createKenalinEngine(opts: KenalinEngineOptions): KenalinEngine {
       return response;
     },
     publicConfig: () => toPublicConfig(config),
+    guard: (request: ChatRequest) => guardRequest(request),
   };
 }
 
-export { loadConfig } from "@kenalin/core";
+export { loadConfig, LIMITS } from "@kenalin/core";
 export { toPublicConfig } from "./public-config.js";
+export { guardRequest } from "./guard.js";
+export type { GuardResult } from "./guard.js";
 export type { ChatRequest, ChatResponse, PublicConfig, KnowledgeChunk, KenalinConfigInput };

@@ -18,6 +18,8 @@ import {
   type ScoredChunk,
   type Language,
   type Intent,
+  type ChatMessage,
+  LIMITS,
 } from "@kenalin/core";
 
 /** Retrieval store accepting the server's embedder-calibrated search options. */
@@ -45,8 +47,14 @@ export interface OrchestrationResult {
   retrievedCount: number;
 }
 
-const TOP_K = 8;
-const SNIPPET_LEN = 200;
+/** Trim the message window sent to the LLM: most-recent N, each char-capped. */
+function trimForLlm(messages: ChatMessage[]): ChatMessage[] {
+  return messages.slice(-LIMITS.llmMessageWindow).map((m) =>
+    m.content.length > LIMITS.llmMessageCharCap
+      ? { ...m, content: m.content.slice(0, LIMITS.llmMessageCharCap) + "…" }
+      : m,
+  );
+}
 
 /**
  * The single-pass orchestration runtime (PRD D1, D5). Stateless: everything is
@@ -64,14 +72,16 @@ export class Orchestrator {
     const lastUser = [...request.messages].reverse().find((m) => m.role === "user");
     const query = lastUser?.content ?? "";
 
-    // 1. Retrieve evidence for this turn.
-    const [queryVector] = await this.deps.embedder.embed([query || " "]);
-    const scored = await this.deps.store.search(queryVector ?? [], {
-      topK: TOP_K,
-      filter: { visibility: "public", projectId: request.pageContext?.projectId },
-      intent: state.intent as Intent,
-      threshold: this.deps.retrievalThreshold,
-    });
+    // 1. Retrieve evidence for this turn (top-K, then cap what reaches the prompt).
+    const [queryVector] = await this.deps.embedder.embed([query.slice(0, LIMITS.llmMessageCharCap) || " "]);
+    const scored = (
+      await this.deps.store.search(queryVector ?? [], {
+        topK: LIMITS.retrievalTopK,
+        filter: { visibility: "public", projectId: request.pageContext?.projectId },
+        intent: state.intent as Intent,
+        threshold: this.deps.retrievalThreshold,
+      })
+    ).slice(0, LIMITS.maxEvidenceInPrompt);
 
     const evidenceCandidates: EvidenceCandidate[] = [];
     const evidenceById = new Map<string, Evidence>();
@@ -83,7 +93,7 @@ export class Orchestrator {
         title: c.title,
         url: c.url,
         type: c.type,
-        snippet: c.content.slice(0, SNIPPET_LEN),
+        snippet: c.content.slice(0, LIMITS.clientSnippetChars),
         tags: c.topics.slice(0, 3),
       });
     }
@@ -153,8 +163,9 @@ export class Orchestrator {
     try {
       for await (const ev of this.deps.chat.generate({
         system,
-        messages: request.messages,
+        messages: trimForLlm(request.messages),
         responseSchema: GEMINI_MODEL_OUTPUT_SCHEMA,
+        maxTokens: LIMITS.maxOutputTokens,
       })) {
         if (ev.type === "final") payload = ev.payload;
         else if (ev.type === "error") {

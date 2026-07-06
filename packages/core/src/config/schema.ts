@@ -67,9 +67,10 @@ export const HandoffConfigSchema = z.object({
   webhook: z
     .object({
       url: z.string().url(),
-      /** Secret is resolved from env at runtime, not stored here. */
-      secret: z.string().optional(),
+      // NOTE: the signing secret is resolved ONLY from env (KENALIN_WEBHOOK_SECRET),
+      // never from config — so it can't be accidentally committed. No secret field here.
     })
+    .strict()
     .optional(),
 });
 

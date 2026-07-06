@@ -31,6 +31,8 @@ export type { BuildDepsOptions } from "./factory.js";
 export { toPublicConfig } from "./public-config.js";
 export type { PublicConfig } from "./public-config.js";
 export { RateLimiter } from "./rate-limit.js";
+export { guardRequest } from "./guard.js";
+export type { GuardResult } from "./guard.js";
 export { WebhookEmitter, signPayload } from "./webhook.js";
 export {
   selectLeadStore,
