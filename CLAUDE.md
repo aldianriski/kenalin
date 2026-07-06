@@ -5,12 +5,14 @@
 
 ## Current phase
 
-**We are in Phase 2 — AI Core.**
+**We are in Phase 3 — Widget** (Phase 4 — Modules may interleave, per PRD G4).
 
-Phases 0 (Foundation) and 1 (Knowledge — ingest CLI, chunking, embedders,
-local index, retrieval) are complete and green. Only implement the current
-phase's scope (PRD Part G4). Do **not** start a later phase until the current
-phase's Definition of Done passes. Update this marker as each phase's DoD is verified.
+Phases 0–2 are complete and green: Foundation, Knowledge (ingest/retrieval),
+and AI Core (Gemini provider, single-pass orchestrator, non-overridable policy
+validators, `/api/chat` SSE). Live Gemini structured-output call verified. Only
+implement the current phase's scope (PRD Part G4). Do **not** start a later phase
+until the current phase's Definition of Done passes. Update this marker as each
+phase's DoD is verified.
 
 Phase order and dependencies: `0 → 1 → 2 → (3 ∥ 4) → 5 → 6`.
 

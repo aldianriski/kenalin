@@ -17,6 +17,12 @@ export const COMPLEXITY_DISCLAIMER: Record<Language, string> = {
   en: "initial classification, not a quotation",
 };
 
+/** Safe boundary line used when a pricing/currency answer is blocked (PRD C6). */
+export const PRICING_BOUNDARY: Record<Language, string> = {
+  id: "Soal biaya paling tepat dibahas langsung — saya bisa bantu tunjukkan jalur kontaknya.",
+  en: "Pricing is best discussed directly — I can point you to the contact options.",
+};
+
 /**
  * Currency patterns forbidden in output unless a future pricing module is
  * enabled (PRD Module C AC, H3 safety-pricing). Used by the currency validator.

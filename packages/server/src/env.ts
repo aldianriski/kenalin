@@ -5,7 +5,13 @@
 
 /** Resolve the Gemini API key, accepting the documented fallbacks. */
 export function resolveLlmApiKey(env: NodeJS.ProcessEnv = process.env): string | undefined {
-  return env.KENALIN_LLM_API_KEY || env.GEMINI_API_KEY || env.API_KEY || undefined;
+  return (
+    env.KENALIN_LLM_API_KEY ||
+    env.GEMINI_API_KEY ||
+    env.API_KEY_GEMINI ||
+    env.API_KEY ||
+    undefined
+  );
 }
 
 export function resolveWebhookSecret(env: NodeJS.ProcessEnv = process.env): string | undefined {

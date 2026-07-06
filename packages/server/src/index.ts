@@ -1,7 +1,8 @@
 /**
- * @kenalin/server — the I/O layer: config file loading, ingest pipeline,
- * local knowledge store, and embedding providers. The Hono API app and Gemini
- * chat provider land in Phase 2.
+ * @kenalin/server — the I/O layer: config loading, ingest pipeline, local
+ * knowledge store, embedding + chat providers, the single-pass orchestrator,
+ * and the Hono API app. Consumed by the dev server and host integrations
+ * (e.g. a Next.js API route on the reference portfolio).
  */
 
 export const KENALIN_SERVER_VERSION = "0.1.0";
@@ -16,4 +17,18 @@ export {
   GeminiEmbeddingProvider,
   type EmbedderKind,
 } from "./embeddings/index.js";
+export { selectChatProvider, GeminiChatProvider, FakeChatProvider } from "./chat/index.js";
+export { Orchestrator } from "./orchestrator/orchestrator.js";
+export type {
+  OrchestratorDeps,
+  OrchestrationResult,
+  RetrievalStore,
+} from "./orchestrator/orchestrator.js";
+export { createApp } from "./app.js";
+export type { AppDeps } from "./app.js";
+export { buildAppDeps } from "./factory.js";
+export type { BuildDepsOptions } from "./factory.js";
+export { toPublicConfig } from "./public-config.js";
+export type { PublicConfig } from "./public-config.js";
+export { RateLimiter } from "./rate-limit.js";
 export { resolveLlmApiKey, resolveWebhookSecret, resolvePort } from "./env.js";

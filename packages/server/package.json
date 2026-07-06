@@ -25,7 +25,9 @@
     "eval": "jiti ../../evals/runner.ts"
   },
   "dependencies": {
+    "@hono/node-server": "^1.13.7",
     "@kenalin/core": "workspace:*",
+    "hono": "^4.6.14",
     "jiti": "^2.4.2",
     "zod": "^3.24.1"
   },
