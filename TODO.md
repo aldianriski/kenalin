@@ -17,7 +17,8 @@ status: current
 
 ## Active Sprint
 
-> **→ — none —** · SPRINT-002 closed (Upstash limiter + CI gate + model tuning −37% cost/turn). Archive: [`docs/sprint/archive/SPRINT-002-harden-for-scale.md`](docs/sprint/archive/SPRINT-002-harden-for-scale.md).
+> **SPRINT-003 — Launch polish (UX)** → [`docs/sprint/SPRINT-003-launch-polish.md`](docs/sprint/SPRINT-003-launch-polish.md)
+> T1 TASK-004 custom branding via config · T2 TASK-006 accessibility (Lighthouse a11y ≥ 90). Shared widget files → sequential.
 
 Status: `pnpm verify` green (80 tests) · eval matrix **12/15/12/10 = 49, 100% id+en** · cost/turn ~908 µUSD (thinking off) · widget 14.2 KB gz. Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
@@ -34,12 +35,8 @@ Status: `pnpm verify` green (80 tests) · eval matrix **12/15/12/10 = 49, 100% i
 
 ### P1 — Next Phase (v0.2 — launch polish)
 
-- [ ] **TASK-004 — Custom branding via config** [size: M] · src: you · state: ready
-      done-when: owner sets launcher logo/avatar (image URL or keep K-mark) + theme preset/tokens in config without code; "Powered by Kenalin" footer is present and not removable by config.
-      touches: `core/config/schema.ts`, `server/src/public-config.ts`, `widget/src/app.tsx`, `widget/src/styles.ts`.
-- [ ] **TASK-006 — Accessibility to Lighthouse a11y ≥ 90** [size: M] · src: claude · state: ready
-      done-when: focus trap in the open panel, ARIA live region for the streaming answer, full keyboard nav, contrast verified; Lighthouse a11y ≥ 90 on the example page (PRD Phase 3 DoD, not yet measured).
-      touches: `widget/src/app.tsx`, `widget/src/styles.ts`.
+- [~] **TASK-004 — Custom branding via config** — promoted → SPRINT-003 (T1)
+- [~] **TASK-006 — Accessibility to Lighthouse a11y ≥ 90** — promoted → SPRINT-003 (T2)
 - [ ] **TASK-026 — Explicit Gemini context caching** [size: M] · src: claude · state: ready
       done-when: the static system-prompt prefix is cached via Gemini `cachedContent` (explicit, not just implicit) with a sane TTL/lifecycle; measured cost/turn drops further on repeated-prefix traffic. Builds on the T3 prompt-prefix split.
       touches: `server/src/chat/gemini.ts`, `core/prompt/builder.ts`.

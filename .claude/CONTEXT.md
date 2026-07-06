@@ -41,6 +41,7 @@ schema, then run through policy validators. See [`ARCHITECTURE.md`](../docs/ARCH
 ❌ Anything in PRD Part G3 → Out of Scope (multi-agent, MCP dependency, CRM, SaaS multi-tenancy, pricing/quotation output).
 ❌ A config field that could weaken a B9 safety guarantee.
 ❌ Emitting a URL not sourced from config actions or retrieved evidence; emitting a monetary figure.
+❌ Declaring work env/secret-blocked without a **verified probe of the real runtime source** — check what the code actually reads (`.env` via `loadDotEnv`, not `process.env`), and sanity-check the probe itself (L-002, promoted).
 
 ## Domain Glossary
 

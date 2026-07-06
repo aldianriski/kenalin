@@ -28,19 +28,7 @@ measurement, or you measure the old code path.
 
 ---
 
-## L-002 [tags: deploy, env] [status: active]: Verify host secrets/env correctly before declaring a block — don't assume, and probe right
-- seen: Sprint-001, Sprint-002
-- count: 2
-- promoted: no
-- related: L-003 (both: measure/verify against the real runtime state, not an assumption)
-
-Sprint-001: the portfolio `.env` had no Gemini key; only the live host smoke caught it.
-Sprint-002: I declared T3 "key-blocked" from a **bad probe** — first read `process.env` (which
-isn't auto-loaded from `.env`), then a buggy inline `.env` parser reported all names empty. A
-clean re-parse showed `API_KEY_GEMINI` was set all along. Before calling something env-blocked,
-probe the actual source the runtime uses (here: `loadDotEnv` reads `.env`) and double-check the
-probe itself. **count ≥ 2 → promote at next sprint-promote** (candidate: a CLAUDE.md anti-pattern
-or `/orchestrator` red-flag — "don't declare env-blocked without a verified probe").
+## L-002 → promoted: `.claude/CONTEXT.md` § Anti-Patterns (verify a real-runtime probe before declaring env/secret-blocked). Seen Sprint-001, Sprint-002. Durable rule is the record now.
 
 The portfolio `.env` had Supabase/Resend/Upstash but no Gemini key; `/api/chat` returned
 `server_misconfigured`. Unit tests + eval (run in the Kenalin repo, which *has* the key) couldn't
