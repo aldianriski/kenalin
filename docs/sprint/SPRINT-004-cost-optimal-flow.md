@@ -20,10 +20,10 @@ update_trigger: sprint execute/close events
 ## Scope
 
 **In:** explicit Gemini context caching (TASK-026) · response/semantic cache keyed on
-retrieval signature (TASK-024) · a skip-LLM fast-path for provably-safe trivial turns,
-**gated on ADR-005 + a `/council` pressure-test** (TASK-028).
-**Out (deferred):** lite-model swap enablement (TASK-027), pgvector store (TASK-019),
-provider adapters (TASK-020), the P2 UX polish set, TASK-025 (owner-blocked).
+retrieval signature (TASK-024).
+**Out (deferred):** ~~deterministic intake (TASK-028)~~ **CUT** — `/council` → **ADR-005**
+rejected it (see Execution Log); lite-model swap (TASK-027), pgvector (TASK-019), provider
+adapters (TASK-020), the P2 UX polish set, TASK-025 (owner-blocked).
 
 ## Plan
 
@@ -62,7 +62,7 @@ a different-entity question is a miss and answers freshly.
 - [ ] A grounding-safety test: a different-entity query must NOT hit another entity's cached answer.
 <!-- QA: cache-poisoning / cross-entity test is the safety gate here. -->
 
-### T3 — Deterministic context-pooling intake → single consolidated LLM call `[size: M · risk: HIGH]` — GATED on ADR-005
+### T3 — Deterministic context-pooling intake → single consolidated LLM call `[size: M · risk: HIGH]` — ❌ CUT (ADR-005 rejected; see scope-change log). Original plan kept below for the record.
 Layers: `packages/core` (intake state machine + canned prompts), `packages/server/src/orchestrator/orchestrator.ts`.
 Collect the intake (name, intention, purpose) with **deterministic canned questions**
 captured into `ConversationState` — **no LLM call per intake turn** (asking a fixed
@@ -94,7 +94,7 @@ eval matrix (incl. every safety scenario + injection-during-intake) stays 100% g
 - [ ] If T2's cache should hold cross-instance, ensure `UPSTASH_*` env is set (reuses the SPRINT-002 store) — else per-instance fallback (T2).
 
 ## Decisions (pre-locked)
-- **D1** — T3 = **deterministic context-pooling intake → one consolidated LLM call**. It DEFERS (does not bypass) the safety/grounding pass — pooled content still gets a full safety-checked one-pass — but it changes the conversation flow and the *timing* of that pass, and adds an off-script fall-through rule → **hard-to-reverse + surprising + a real trade-off** → **ADR-005 required**, pressure-tested via `/council` **before** any T3 implementation. Stays within ADR-001 (still one pass, fewer calls). *No flow-changing/safety-timing code lands without the accepted ADR (L-024 doctrine guard).*
+- **D1** — ✅ RESOLVED → **ADR-005 (accepted): reject the deterministic free-text intake.** The `/council` found it structurally unsound (non-LLM off-script detection unsolvable + English-only; `name`/`purpose` not closed-form; saving negligible). T3 CUT; intake stays inside the single LLM pass; cost win comes from T1/T2 caching. The doctrine guard (L-024) held — the flow-changing/safety-timing idea was pressure-tested and rejected, not shipped.
 - **D2** — The response cache (T2) keys on **retrieved-chunk-ids** (not query similarity alone) so a different entity can never hit another's cached answer; cache carries an index-version so re-ingest invalidates it.
 - **D3** — T1/T2 (caching) are safe and do **not** depend on ADR-005 — they proceed first; T3 waits on the ADR.
 
@@ -112,6 +112,16 @@ council). Governance: L-003 promoted to CONTEXT.md (count 2, collapsed); TD-002/
 flagged for re-review (≥3 sprints, none high). Flow evaluation recorded in the sprint
 theme: single Gemini call ≈ 99% of cost, prompt-dominated → cache first, skip repeats,
 skip trivial only behind ADR-005.
+
+### 2026-07-06 | scope-change | T3 CUT after /council → ADR-005
+**What broke:** the `/council` (5 advisors + moderator) found the deterministic free-text
+intake structurally unsound — non-LLM off-script detection is an unwinnable, English-only
+arms race; `name`/`purpose` can't be closed-form; saving is negligible vs the prompt cost
+caching addresses. **Impact:** T3/TASK-028 dropped from the sprint; scope narrows to T1+T2
+(the safe cost wins). **G2 re-confirm:** T1/T2 unchanged and were never gated on the ADR
+(D3). Decision recorded in **ADR-005** (accepted). Intake stays inside the single LLM pass
+(ADR-001/B9 intact). Verdict: `verdict-context-pooling-intake.md` (scratchpad) — superseded
+by ADR-005. A measured chips-`intention` UX experiment re-filed to the backlog (TASK-029).
 
 ### 2026-07-06 | T3 | Rescoped (pre-build) — context-pooling intake, not generic skip-LLM
 Owner aligned the intent: T3 is **deterministic context-pooling intake → one consolidated

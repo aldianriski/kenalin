@@ -18,7 +18,7 @@ status: current
 ## Active Sprint
 
 > **SPRINT-004 — Cost-optimal chat flow** → [`docs/sprint/SPRINT-004-cost-optimal-flow.md`](docs/sprint/SPRINT-004-cost-optimal-flow.md)
-> T1 TASK-026 context caching · T2 TASK-024 response/semantic cache · T3 TASK-028 skip-LLM fast-path (**ADR-005 + /council gated**). T1/T2 safe & proceed first.
+> T1 TASK-026 context caching · T2 TASK-024 response/semantic cache. (T3 TASK-028 CUT — `/council` → ADR-005 rejected it.)
 
 Status: `pnpm verify` green (91 tests) · eval matrix **12/15/12/10 = 49, 100% id+en** · cost/turn ~908 µUSD baseline. Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
@@ -52,6 +52,7 @@ Status: `pnpm verify` green (91 tests) · eval matrix **12/15/12/10 = 49, 100% i
 - [ ] **TASK-016 — Handoff brief enrichment** [size: S] · src: claude — capture the visitor's actual screening answers into the brief (values currently empty).
 - [ ] **TASK-017 — Evidence dedup by projectId** [size: S] · src: claude — id/en chunks of one project currently both surface as separate cards.
 - [ ] **TASK-018 — Launcher unread badge** [size: S] · src: claude — minimize-to-badge with an unread count.
+- [ ] **TASK-029 — Chips-based `intention` capture (UX/latency A/B)** [size: M] · src: you — closed-form tappable `intention` chips (name/purpose stay LLM-handled), measured as a latency/completion experiment, NOT a cost lever. The only safe residue of the cut TASK-028 (per ADR-005). Needs the widget behavior harness (TD-009) to test.
 
 ### P3 — Long-term (v0.4 — scale & extensibility)
 
@@ -61,7 +62,7 @@ Status: `pnpm verify` green (91 tests) · eval matrix **12/15/12/10 = 49, 100% i
 - [ ] **TASK-022 — `create-kenalin` + publish `@kenalin/*` to npm** [size: M] · src: claude — clean consumption instead of vendoring. Resolves TD-004.
 - [ ] **TASK-023 — Ingestion improvements** [size: M] · src: claude — map MDX frontmatter → type/projectId/url; incremental/scheduled re-index; PII redaction on briefs.
 - [~] **TASK-024 — Response/embedding caching** — promoted → SPRINT-004 (T2)
-- [~] **TASK-028 — Deterministic context-pooling intake → single consolidated LLM call** — created + promoted → SPRINT-004 (T3, ADR-005 + /council gated)
+- [x] **TASK-028 — Deterministic context-pooling intake** — ❌ CUT: `/council` → **ADR-005** rejected (free-text off-script detection unsolvable + English-only; name/purpose not closed-form; saving negligible). Intake stays in the single LLM pass.
 
 ---
 
