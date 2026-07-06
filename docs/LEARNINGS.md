@@ -13,6 +13,19 @@ rule, or a skill red-flag — and marked below. Reviewed at every **Sprint Promo
 
 ---
 
+## L-005 [tags: cost, measurement, planning] [status: active]: Measure cost levers with a live spike before committing sprint scope — don't rank optimizations by intuition
+- seen: Sprint-004
+- count: 1
+- promoted: no
+- related: L-003 (both: measure the real runtime, don't assume)
+
+Twice in one sprint an intuited cost lever was wrong: (1) "implicit Gemini caching is enough" —
+a spike showed cached 0/3 on a real prefix; (2) "context caching (T1) is the biggest lever" —
+the spike showed it saves ~3%/turn, net-marginal at low traffic, while the response cache (T2)
+skips whole calls. A 5-minute direct-API spike reordered the sprint (deprioritized T1, focused
+T2) and would have been wasted effort if built on the assumption. For any cost/perf optimization,
+spike-and-measure the actual saving before scoping the build.
+
 ## L-004 [tags: widget, testing, a11y] [status: active]: Verify widget behavior/a11y via Chrome-MCP Shadow-DOM probes when there's no jsdom harness
 - seen: Sprint-003
 - count: 1

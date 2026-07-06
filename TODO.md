@@ -17,10 +17,9 @@ status: current
 
 ## Active Sprint
 
-> **SPRINT-004 — Cost-optimal chat flow** → [`docs/sprint/SPRINT-004-cost-optimal-flow.md`](docs/sprint/SPRINT-004-cost-optimal-flow.md)
-> T2 TASK-024 response/semantic cache. (T1 TASK-026 evaluated→deferred — spike: ~3%/marginal. T3 TASK-028 CUT — /council → ADR-005.)
+> **→ — none —** · SPRINT-004 closed (response cache; T1 caching deferred, T3 intake cut via ADR-005). Archive: [`docs/sprint/archive/SPRINT-004-cost-optimal-flow.md`](docs/sprint/archive/SPRINT-004-cost-optimal-flow.md).
 
-Status: `pnpm verify` green (91 tests) · eval matrix **12/15/12/10 = 49, 100% id+en** · cost/turn ~908 µUSD baseline. Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
+Status: `pnpm verify` green (101 tests) · eval matrix **12/15/12/10 = 49, 100% id+en** · repeat turns skip the LLM (response cache) · widget 15.1 KB gz. Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
 ---
 
@@ -35,7 +34,7 @@ Status: `pnpm verify` green (91 tests) · eval matrix **12/15/12/10 = 49, 100% i
 
 ### P1 — Next Phase (v0.2 — launch polish)
 
-- [x] **TASK-026 — Explicit Gemini context caching** — ⚖️ EVALUATED → deferred (SPRINT-004): spike showed explicit `cachedContent` works (99% of prefix cached) but ~26 µUSD/turn (~3%), storage break-even ~5 turns/hr → net-marginal at current traffic; implicit caching unreliable (0/3). Revisit at sustained >5 turns/hr. Response cache (TASK-024) is the better lever.
+- [ ] **TASK-026 — Explicit Gemini context caching** [size: M] · src: claude · state: deferred — evaluated in SPRINT-004 (spike: works, ~3%/turn, net-marginal at low traffic). done-when: revisited at sustained >5 turns/hr where the storage economics flip positive.
 - [ ] **TASK-027 — Enable + eval-validate the lite-model swap** [size: S] · src: claude · state: ready
       done-when: `server.model.lite` set for the demo (e.g. `gemini-2.5-flash-lite`); eval matrix re-run and still green at 12/15/12/10 id+en (esp. safety 100%); measured cost delta recorded. Capability shipped in T3 but config-gated off pending this validation.
       touches: `content/demo/kenalin.config.ts`, `evals/*`.
@@ -61,8 +60,6 @@ Status: `pnpm verify` green (91 tests) · eval matrix **12/15/12/10 = 49, 100% i
 - [ ] **TASK-021 — Admin / config UI** [size: L] · src: claude — no-code editing of persona/modules/actions/theme (completes TASK-004 end-to-end).
 - [ ] **TASK-022 — `create-kenalin` + publish `@kenalin/*` to npm** [size: M] · src: claude — clean consumption instead of vendoring. Resolves TD-004.
 - [ ] **TASK-023 — Ingestion improvements** [size: M] · src: claude — map MDX frontmatter → type/projectId/url; incremental/scheduled re-index; PII redaction on briefs.
-- [~] **TASK-024 — Response/embedding caching** — promoted → SPRINT-004 (T2)
-- [x] **TASK-028 — Deterministic context-pooling intake** — ❌ CUT: `/council` → **ADR-005** rejected (free-text off-script detection unsolvable + English-only; name/purpose not closed-form; saving negligible). Intake stays in the single LLM pass.
 
 ---
 

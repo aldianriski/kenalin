@@ -3,9 +3,9 @@ sprint: 004
 slug: cost-optimal-flow
 owner: Tech Lead
 last_updated: 2026-07-06
-status: active
+status: closed
 plan_commit: ae2f86a
-close_commit: [sha — set at close]
+close_commit: [pending — set at close commit]
 update_trigger: sprint execute/close events
 ---
 
@@ -162,15 +162,27 @@ framing, not a change to the sprint's deliverables.)
 | `packages/server/src/factory.ts` | T2 | `selectResponseCache` — Redis when env set, else memory | Low | build |
 
 ## Retro
-<!-- Written at close. Route buckets to durable homes (DOCS_Guide §10). -->
 
-**Retrieval check** — _(fill at close)_
+Closed 2026-07-06. Shipped **T2** (response cache); **T1** evaluated→deferred (spike);
+**T3** cut (`/council` → ADR-005). `pnpm verify` green (101 tests). This sprint's value was
+as much in what it *didn't* build as what it did — the council + spike killed an unsafe T3
+and a marginal T1 before any wasted implementation.
+
+**Retrieval check** — Contradict a prior `L-NNN`/ADR? No. ADR-001 was nearly violated by T3
+and the guard (council → ADR-005) held. **L-003 applied** — rebuilt core `dist` before every
+cross-package typecheck. No fileable miss.
 
 **Worked**
-- _(fill at close)_
+- **Gate before build paid off twice:** `/council` rejected T3 (unsafe), a live spike showed T1 was ~3% marginal — both stopped before code. The gates aren't ceremony; they redirected the whole sprint.
+- **Live probes over assumptions:** the cache-spike (implicit caching = 0/3) and the response-cache probe (`tokens=0` on a repeat) gave ground truth a unit test alone couldn't.
+- Grounding-safe key design (chunk `id:content`) made the cache correct by construction — the cross-entity miss is structural, not a heuristic.
 
-**Friction**
-- _(fill at close)_
+**Friction (→ routed)**
+- I twice asserted the wrong cost lever (implicit caching "enough"; "T1 is the biggest") — corrected only by measuring. → **Learnings** (L-005).
+- The response cache is exact-repeat, not semantic — lower hit rate than "paraphrase" implied; safe but modest. Design note, not debt.
 
-**Pattern candidate**
-- _(fill at close)_
+**Routed buckets**
+- **Shipped** → `docs/CHANGELOG.md` (SPRINT-004 block).
+- **Tech debt** → none new.
+- **Follow-ups** → none new (TASK-026 explicit caching already filed as deferred-revisit-at-scale; TASK-029 chips UX already filed).
+- **Learnings** → L-005 (measure cost levers with a spike before committing scope).

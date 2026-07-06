@@ -11,6 +11,23 @@ All notable changes to Kenalin. Format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+### Added — SPRINT-004 (cost-optimal chat flow → v0.2, 2026-07-06)
+- **Grounding-safe response cache (TASK-024)**: caches the validated `ChatResponse` keyed
+  on `SHA-1(normalized query + language + sorted retrieved chunk id:content)`; a hit on a
+  non-screening turn returns the stored response **without the Gemini call** (~99% of
+  cost/turn). Keying on the retrieved-chunk signature keeps it grounding-safe (a different
+  entity retrieves different chunks → miss, never a cross-entity answer); chunk content in
+  the key self-invalidates on re-ingest. In-memory LRU + Upstash impls (per-instance
+  fallback). Live: identical repeat = 0 tokens vs 1999 on the first turn.
+
+### Decided / not built — SPRINT-004
+- **Deterministic context-pooling intake — rejected (ADR-005)**: a `/council` found a
+  non-LLM off-script detector is an unwinnable, English-only arms race and `name`/`purpose`
+  can't be closed-form; intake stays inside the single LLM pass.
+- **Explicit Gemini context caching — evaluated, deferred (TASK-026)**: a live spike showed
+  `cachedContent` works but saves only ~3%/turn with net-marginal economics at low traffic;
+  revisit at >5 turns/hr sustained.
+
 ### Added — SPRINT-003 (launch polish → v0.2, 2026-07-06)
 - **Custom branding via config (TASK-004)**: owners set a launcher logo/avatar (image
   URL) and theme-token overrides in `kenalin.config.ts` — no code. `BrandingConfigSchema`
