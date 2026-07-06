@@ -5,15 +5,17 @@
 
 ## Current phase
 
-**We are in Phase 5 — Reference deployment** (last, per owner decision:
-integrate into the real portfolio at `D:\Project\portofolio` as a Next.js API
-route + the embedded widget).
+**All phases (0–6) are implemented and green.** MVP complete.
 
-Phases 0–4 and 6 are complete and green. Quality gates: `pnpm verify` (owner-string
-grep gate + typecheck + build + 57 tests) passes; eval harness built (Safety +
-Grounding 100% live; full matrix pending non-free-tier quota). Only implement the
-current phase's scope (PRD Part G4 / Part F). Zero owner-specific strings in
-`packages/*` — the CI grep gate enforces it.
+Quality gates: `pnpm verify` (owner-string grep gate + typecheck + build + 57
+tests) passes; eval harness built (Safety + Grounding 100% live; full matrix
+pending non-free-tier quota). The reference (Phase 5, RIZVA) is integrated into
+the external portfolio repo (`D:\Project\portofolio`) as a vendored engine bundle
++ Next.js routes + widget — see `apps/reference-aldi/README.md`. Its knowledge
+index + live chat need a Gemini ingest run once free-tier quota resets.
+
+Remaining follow-ups: run the portfolio ingest with Gemini (quota-gated); expand
+eval scenarios to the H2 minimum counts; publish `@kenalin/*` if consuming via npm.
 
 Phase order and dependencies: `0 → 1 → 2 → (3 ∥ 4) → 5 → 6`.
 

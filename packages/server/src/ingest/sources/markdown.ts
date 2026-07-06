@@ -4,7 +4,7 @@ import type { ContentType } from "@kenalin/core";
 import { parseFrontmatter } from "../frontmatter.js";
 import type { RawDocument, SourceLoadResult } from "../types.js";
 
-const MD_EXT = new Set([".md", ".markdown"]);
+const MD_EXT = new Set([".md", ".markdown", ".mdx"]);
 
 async function listMarkdown(path: string): Promise<string[]> {
   const s = await stat(path);

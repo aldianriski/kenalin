@@ -9,6 +9,7 @@ import type { EmbeddingProvider } from "@kenalin/core";
 const DEFAULT_MODEL = "gemini-embedding-001";
 const DEFAULT_DIMENSIONS = 768;
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta";
+const BATCH_LIMIT = 100;
 
 export interface GeminiEmbeddingOptions {
   apiKey: string;
@@ -31,6 +32,15 @@ export class GeminiEmbeddingProvider implements EmbeddingProvider {
 
   async embed(texts: string[]): Promise<number[][]> {
     if (texts.length === 0) return [];
+    // Gemini's batchEmbedContents caps at 100 requests per call.
+    const out: number[][] = [];
+    for (let i = 0; i < texts.length; i += BATCH_LIMIT) {
+      out.push(...(await this.embedBatch(texts.slice(i, i + BATCH_LIMIT))));
+    }
+    return out;
+  }
+
+  private async embedBatch(texts: string[]): Promise<number[][]> {
     const url = `${ENDPOINT}/models/${this.model}:batchEmbedContents?key=${this.apiKey}`;
     const body = {
       requests: texts.map((text) => ({
