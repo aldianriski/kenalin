@@ -15,6 +15,7 @@ import { ingest } from "../ingest/pipeline.js";
 import { HashEmbeddingProvider } from "../embeddings/hash.js";
 import { LocalKnowledgeStore } from "../knowledge/local-store.js";
 import { FakeChatProvider } from "../chat/fake.js";
+import { MemoryResponseCache } from "../response-cache.js";
 import { Orchestrator } from "./orchestrator.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -189,6 +190,66 @@ describe("orchestrator + policy pipeline", () => {
     expect(violations).toContain("fallback");
     expect(response.suggestedActions.length).toBeGreaterThan(0);
     expect(response.intent).toBe("unknown");
+  });
+
+  it("[cache] a repeat with the same evidence is served without another LLM call", async () => {
+    const cache = new MemoryResponseCache();
+    let calls = 0;
+    const o = new Orchestrator({
+      config: demoConfig(),
+      store,
+      embedder,
+      retrievalThreshold: 0.08,
+      responseCache: cache,
+      chat: new FakeChatProvider(() => {
+        calls++;
+        return JSON.stringify(baseModel({ answer: "QuickHub adalah tool otomasi approval." }));
+      }),
+    });
+    const r1 = await o.handle(request());
+    const r2 = await o.handle(request());
+    expect(calls).toBe(1); // 2nd turn served from cache — no LLM call
+    expect(r2.response.answer).toBe(r1.response.answer);
+  });
+
+  it("[cache] a different-entity question misses and calls the LLM (grounding-safe, D2)", async () => {
+    const cache = new MemoryResponseCache();
+    let calls = 0;
+    const o = new Orchestrator({
+      config: demoConfig(),
+      store,
+      embedder,
+      retrievalThreshold: 0.08,
+      responseCache: cache,
+      chat: new FakeChatProvider(() => {
+        calls++;
+        return JSON.stringify(baseModel({ answer: "ans" }));
+      }),
+    });
+    await o.handle(request({ messages: [{ role: "user", content: "Apa itu project QuickHub?" }] }));
+    await o.handle(request({ messages: [{ role: "user", content: "Ceritakan tentang LedgerLens" }] }));
+    expect(calls).toBe(2); // different evidence → different key → miss → LLM called both times
+  });
+
+  it("[cache] active screening turns are not cached (state-dependent)", async () => {
+    const cache = new MemoryResponseCache();
+    let calls = 0;
+    const o = new Orchestrator({
+      config: demoConfig(),
+      store,
+      embedder,
+      retrievalThreshold: 0.08,
+      responseCache: cache,
+      chat: new FakeChatProvider(() => {
+        calls++;
+        return JSON.stringify(baseModel({ answer: "screening question" }));
+      }),
+    });
+    const screening = () =>
+      request({ state: { qualification: { stage: "screening", questionCount: 1 } } as ChatRequest["state"] });
+    await o.handle(screening());
+    await o.handle(screening());
+    expect(calls).toBe(2); // screening is state-dependent → never cached
   });
 
   afterAll(async () => {

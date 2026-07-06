@@ -24,6 +24,7 @@ import {
   LIMITS,
 } from "@kenalin/core";
 import { estimateTokens, type TurnUsage } from "../usage.js";
+import { responseCacheKey, type ResponseCache } from "../response-cache.js";
 
 /** Retrieval store accepting the server's embedder-calibrated search options. */
 export interface RetrievalStore {
@@ -44,6 +45,8 @@ export interface OrchestratorDeps {
   log?: (event: Record<string, unknown>) => void;
   /** Per-turn token usage sink (counts only, no PII). */
   onUsage?: (turn: TurnUsage) => void;
+  /** Response cache (TASK-024) — a hit skips the LLM call. Omitted → no caching. */
+  responseCache?: ResponseCache;
 }
 
 export interface OrchestrationResult {
@@ -101,6 +104,27 @@ export class Orchestrator {
         snippet: c.content.slice(0, LIMITS.clientSnippetChars),
         tags: c.topics.slice(0, 3),
       });
+    }
+
+    // Response cache (TASK-024): a repeat that retrieved the SAME evidence can be
+    // answered without the LLM call. Cache only "informational" turns — not active
+    // screening (its answer depends on mutable per-session state).
+    const cache = this.deps.responseCache;
+    const cacheable =
+      !!cache && query.trim().length > 0 && state.qualification.stage == null && !state.handoffOffered;
+    const cacheKey = cacheable
+      ? responseCacheKey(
+          query,
+          language,
+          scored.map((s) => ({ id: s.chunk.id, content: s.chunk.content })),
+        )
+      : undefined;
+    if (cache && cacheKey) {
+      const hit = await cache.get(cacheKey);
+      if (hit) {
+        this.deps.log?.({ event: "response_cache_hit", sessionId: request.sessionId });
+        return { response: hit, violations: [], retrievedCount: scored.length };
+      }
     }
 
     // 2. Available actions from config (id-referenced by the model).
@@ -178,6 +202,13 @@ export class Orchestrator {
     });
     if (violations.length) {
       this.deps.log?.({ event: "policy_corrections", sessionId: request.sessionId, violations });
+    }
+    // Store the validated response for future identical-evidence repeats (best-effort;
+    // never blocks the reply). Fallbacks return earlier, so only clean responses cache.
+    if (cache && cacheKey) {
+      void Promise.resolve(cache.set(cacheKey, response)).catch((err) =>
+        this.deps.log?.({ event: "response_cache_set_error", error: String(err) }),
+      );
     }
     emitUsage();
     return { response, violations, retrievedCount: scored.length };

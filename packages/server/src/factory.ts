@@ -9,6 +9,11 @@ import { resolveRedisConfig, resolveWebhookSecret } from "./env.js";
 import { UpstashRedis } from "./redis.js";
 import { RateLimiter, RedisRateLimiter, type RateLimiterLike } from "./rate-limit.js";
 import { RedisUsageTracker, UsageTracker, type UsageStore } from "./usage.js";
+import {
+  MemoryResponseCache,
+  RedisResponseCache,
+  type ResponseCache,
+} from "./response-cache.js";
 import type { AppDeps } from "./app.js";
 
 export interface BuildDepsOptions {
@@ -48,6 +53,7 @@ export async function buildAppDeps(
   // Distributed rate limit + usage counters when Upstash is configured (TASK-007),
   // else the in-memory implementations (per-instance) — graceful fallback (D1).
   const { limiter, usage } = selectStateStores(config, opts.log);
+  const responseCache = selectResponseCache();
 
   return {
     config,
@@ -59,8 +65,17 @@ export async function buildAppDeps(
     webhookEmitter,
     limiter,
     usage,
+    responseCache,
     log: opts.log,
   };
+}
+
+/** Redis-backed response cache when Upstash is configured, else in-memory (TASK-024). */
+function selectResponseCache(): ResponseCache {
+  const redisConfig = resolveRedisConfig();
+  return redisConfig
+    ? new RedisResponseCache(new UpstashRedis(redisConfig))
+    : new MemoryResponseCache();
 }
 
 /**

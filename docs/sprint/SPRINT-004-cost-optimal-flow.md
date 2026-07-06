@@ -56,11 +56,11 @@ evidence returns without a Gemini call (observable: no token spend on the 2nd hi
 a different-entity question is a miss and answers freshly.
 
 **DoD:**
-- [ ] Cache key = stable hash of retrieved chunk-ids + normalized query + relevant state; stored in-memory with an optional Upstash backing (reuse SPRINT-002 store; per-instance fallback).
-- [ ] Cache hit skips embed-less? (embed still needed to retrieve for the key) → skips the **Gemini** call; returns the cached validated response.
-- [ ] Invalidated when the knowledge index changes (re-ingest bumps a version in the key).
-- [ ] A grounding-safety test: a different-entity query must NOT hit another entity's cached answer.
-<!-- QA: cache-poisoning / cross-entity test is the safety gate here. -->
+- [x] Cache key = SHA-1 of (normalized query + language + sorted retrieved chunk `id:content`). `MemoryResponseCache` (LRU) + `RedisResponseCache` (Upstash), selected in `factory` (per-instance fallback). State-dependence handled by a **guard** (cache only when `stage == null && !handoffOffered`) rather than keying all state.
+- [x] Cache hit skips the Gemini call; returns the cached validated response. **Live: identical repeat = `tokens=0` (440ms) vs 1999 on the 1st turn.** (Embed still runs to retrieve for the key — the LLM call, ~99% of cost, is what's skipped.)
+- [x] Invalidated on index change — chunk **content is in the key**, so a re-ingest that alters a chunk self-invalidates its entries (unit-tested); plus a 1h Redis TTL.
+- [x] Grounding-safety: a different entity retrieves different chunks → different key → miss (unit-tested + live: `LedgerLens` = 2007 tokens, no cross-hit).
+<!-- Note: this is an EXACT-repeat cache (safe), not fuzzy-semantic — keying on the query text stops one question's answer being served for a different question about the same evidence. -->
 
 ### T3 — Deterministic context-pooling intake → single consolidated LLM call `[size: M · risk: HIGH]` — ❌ CUT (ADR-005 rejected; see scope-change log). Original plan kept below for the record.
 Layers: `packages/core` (intake state machine + canned prompts), `packages/server/src/orchestrator/orchestrator.ts`.
@@ -113,6 +113,17 @@ flagged for re-review (≥3 sprints, none high). Flow evaluation recorded in the
 theme: single Gemini call ≈ 99% of cost, prompt-dominated → cache first, skip repeats,
 skip trivial only behind ADR-005.
 
+### 2026-07-06 | T2 | Done — response cache (exact-repeat, grounding-safe)
+New `response-cache.ts`: `ResponseCache` interface + `MemoryResponseCache` (LRU) +
+`RedisResponseCache` (Upstash) + `responseCacheKey` (SHA-1 of normalized query + language +
+sorted chunk `id:content`). Orchestrator checks the cache after retrieval, before the LLM
+call; a hit returns the stored validated response (only for non-screening turns). `factory`
+selects Redis-vs-memory. 10 tests (7 unit + 3 orchestrator integration: hit-skips-LLM,
+cross-entity miss, screening-not-cached). **Live probe:** identical repeat `tokens=0` (440ms)
+vs 1999; different entity = miss (2007). `pnpm verify` green (101 tests). **A2 finding:** it's
+an **exact-repeat** cache (safe), not fuzzy-semantic — keying on query text prevents serving a
+different question's answer for the same evidence; true paraphrases intentionally miss.
+
 ### 2026-07-06 | scope-change | T1 deprioritized after spike — explicit caching marginal
 Spike (direct Gemini REST, real ~1169-tok prefix): **implicit caching cached 0/3** identical
 calls (unreliable — can't count on it); **explicit `cachedContent` caches 1159/1165 (99%)**
@@ -146,7 +157,9 @@ framing, not a change to the sprint's deliverables.)
 
 | File | Task | Change (WHY) | Risk | Test |
 |------|------|--------------|------|------|
-| _(pending execution)_ | | | | |
+| `packages/server/src/response-cache.ts` | T2 | New: cache interface + memory/Redis impls + key (grounding-safe) | Med | `response-cache.test.ts` + live probe |
+| `packages/server/src/orchestrator/orchestrator.ts` | T2 | Cache check before LLM call; store after; screening guard | Med | `orchestrator.test.ts` (3 cache tests) |
+| `packages/server/src/factory.ts` | T2 | `selectResponseCache` — Redis when env set, else memory | Low | build |
 
 ## Retro
 <!-- Written at close. Route buckets to durable homes (DOCS_Guide §10). -->
