@@ -146,6 +146,11 @@ export function assembleResponse(model: ModelOutput, ctx: AssembleContext): Asse
   const intentHistory =
     state.intentHistory.at(-1) === intent ? state.intentHistory : [...state.intentHistory, intent];
 
+  // Suggested screening replies: short, deduped, capped at 4 (guideline).
+  const suggestedReplies = dedupe(model.suggestedReplies.map((r) => r.trim()).filter(Boolean))
+    .filter((r) => r.length <= 48)
+    .slice(0, 4);
+
   // 10. Assemble + schema-validate the final response (never returns raw).
   const response = ChatResponseSchema.parse({
     answer: answer || fallbackAnswer(language),
@@ -153,6 +158,7 @@ export function assembleResponse(model: ModelOutput, ctx: AssembleContext): Asse
     confidence,
     evidence,
     suggestedActions,
+    suggestedReplies,
     qualification,
     handoff,
     stateUpdates: {

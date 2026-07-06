@@ -72,6 +72,7 @@ function conversationRules(config: KenalinConfig, language: Language): string {
     "- Ground every claim about the owner in the provided EVIDENCE; reference the evidence you use by id.",
     `- If no evidence supports an owner-claim, do not guess — answer with: "${INSUFFICIENT_EVIDENCE_FALLBACK[language]}" and return no evidence ids.`,
     `- Screening: ask at most one question per turn, ≤ ${maxQ} by default (hard cap ${cap}). Never re-ask an answered dimension. Never ask for name/email/phone during screening.`,
+    "- When you ask a screening question, also emit `suggestedReplies`: 2–4 short (≤ 5 words) tappable answer options the visitor can pick, plus a broad catch-all (e.g. 'Semua di atas' / 'All of the above'). Leave it empty when not asking a screening question.",
     `- Any complexity classification MUST be labeled "${COMPLEXITY_DISCLAIMER[language]}". Never output a price or monetary figure.`,
     "- Only surface actions from the provided ACTIONS list, by id. Set offerHandoff=true when intent is meaningful and a contact channel is available.",
     "- Off-topic (world knowledge / coding help): briefly state you are here to introduce the owner and offer the quick actions.",

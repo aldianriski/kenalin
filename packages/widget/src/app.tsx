@@ -37,6 +37,7 @@ interface UiMessage {
   time?: string;
   evidence?: Evidence[];
   actions?: Action[];
+  replies?: string[];
   complexity?: string | null;
   pending?: boolean;
   failed?: boolean;
@@ -138,6 +139,7 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
               content: res.answer || streamed,
               evidence: res.evidence,
               actions,
+              replies: res.suggestedReplies,
               complexity: res.qualification?.complexity ?? null,
               time: now(),
               pending: false,
@@ -189,7 +191,14 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
 
       <div class="log" ref={logRef}>
         {messages.map((m, i) => (
-          <MessageView key={i} m={m} lang={lang} onRetry={retry} />
+          <MessageView
+            key={i}
+            m={m}
+            lang={lang}
+            isLast={i === messages.length - 1}
+            onRetry={retry}
+            onReply={(txt) => send(txt)}
+          />
         ))}
 
         {showQuick && (
@@ -227,7 +236,19 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
   );
 }
 
-function MessageView({ m, lang, onRetry }: { m: UiMessage; lang: Lang; onRetry: () => void }): JSX.Element {
+function MessageView({
+  m,
+  lang,
+  isLast,
+  onRetry,
+  onReply,
+}: {
+  m: UiMessage;
+  lang: Lang;
+  isLast: boolean;
+  onRetry: () => void;
+  onReply: (text: string) => void;
+}): JSX.Element {
   if (m.failed) {
     return (
       <div class="row assistant">
@@ -265,6 +286,17 @@ function MessageView({ m, lang, onRetry }: { m: UiMessage; lang: Lang; onRetry: 
       {m.actions && m.actions.length > 0 && (
         <div class="actions">
           {m.actions.map((a) => <ActionButton key={a.id} a={a} primary={a.id === "handoff"} />)}
+        </div>
+      )}
+
+      {isLast && !m.pending && m.replies && m.replies.length > 0 && (
+        <div class="chips" role="group">
+          {m.replies.map((r) => (
+            <button class="chip" key={r} onClick={() => onReply(r)}>
+              <span>{r}</span>
+              <IconChevron size={16} />
+            </button>
+          ))}
         </div>
       )}
 

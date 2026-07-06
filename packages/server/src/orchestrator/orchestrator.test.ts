@@ -49,6 +49,7 @@ const baseModel = (over: Partial<ModelOutput>): ModelOutput => ({
   suggestedActionIds: [],
   qualification: null,
   askDimension: null,
+  suggestedReplies: [],
   offerHandoff: false,
   ...over,
 });

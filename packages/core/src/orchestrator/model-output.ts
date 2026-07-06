@@ -33,6 +33,11 @@ export const ModelOutputSchema = z.object({
     .default(null),
   /** The next screening question's dimension, if the model chose to ask one. */
   askDimension: QualificationDimensionSchema.nullable().default(null),
+  /**
+   * 2–4 short, tappable answer options offered when a screening question is
+   * asked (PRD B8 / guideline). Empty otherwise.
+   */
+  suggestedReplies: z.array(z.string()).default([]),
   /** Whether to offer a human handoff this turn. */
   offerHandoff: z.boolean().default(false),
 });
@@ -76,6 +81,7 @@ export const GEMINI_MODEL_OUTPUT_SCHEMA: JsonSchema = {
       nullable: true,
       enum: ["goal", "current_state", "friction", "stage", "scope"],
     },
+    suggestedReplies: { type: "ARRAY", items: { type: "STRING" } },
     offerHandoff: { type: "BOOLEAN" },
   },
   required: ["answer", "intent", "confidence", "evidenceIds", "suggestedActionIds", "offerHandoff"],

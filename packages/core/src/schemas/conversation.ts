@@ -101,6 +101,8 @@ export const ChatResponseSchema = z.object({
   confidence: z.number().min(0).max(1),
   evidence: z.array(EvidenceSchema).default([]),
   suggestedActions: z.array(ActionSchema).default([]),
+  /** Short, tappable answer options for a screening question (guideline). */
+  suggestedReplies: z.array(z.string()).default([]),
   qualification: z
     .object({
       stage: QualificationStageSchema.nullable(),
