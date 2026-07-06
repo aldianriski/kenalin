@@ -3,6 +3,9 @@ import type { KenalinConfig } from "@kenalin/core";
 import { LocalKnowledgeStore } from "./knowledge/local-store.js";
 import { selectEmbedder } from "./embeddings/index.js";
 import { selectChatProvider } from "./chat/index.js";
+import { selectLeadStore } from "./lead-store/index.js";
+import { WebhookEmitter } from "./webhook.js";
+import { resolveWebhookSecret } from "./env.js";
 import type { AppDeps } from "./app.js";
 
 export interface BuildDepsOptions {
@@ -30,5 +33,21 @@ export async function buildAppDeps(
   const chat = selectChatProvider();
   // The lexical hash embedder needs a lower cosine floor than Gemini's 768-dim.
   const retrievalThreshold = embedder.name === "hash-local" ? 0.08 : undefined;
-  return { config, store, embedder, chat, retrievalThreshold, log: opts.log };
+
+  const webhookSecret = resolveWebhookSecret();
+  const leadStore = await selectLeadStore(config, { webhookSecret, dataDir: rootDir, log: opts.log });
+  const webhookEmitter = config.handoff.webhook
+    ? new WebhookEmitter({ url: config.handoff.webhook.url, secret: webhookSecret }, opts.log)
+    : undefined;
+
+  return {
+    config,
+    store,
+    embedder,
+    chat,
+    retrievalThreshold,
+    leadStore,
+    webhookEmitter,
+    log: opts.log,
+  };
 }

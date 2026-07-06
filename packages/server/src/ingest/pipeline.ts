@@ -138,9 +138,10 @@ export async function ingest(config: KenalinConfig, opts: IngestOptions): Promis
     JSON.stringify({ embedder: manifest.embedder, dimensions: manifest.dimensions, chunkCount: manifest.chunkCount, contentHash }, null, 2) + "\n",
     "utf8",
   );
-  // The curation manifest lives beside content for human review (PRD FR-K3).
+  // The curation manifest lives beside the index (…/content/index.manifest.json
+  // for the default layout) for human review (PRD FR-K3).
   await writeFile(
-    resolve(opts.rootDir, "content", "index.manifest.json"),
+    resolve(outDir, "..", "index.manifest.json"),
     JSON.stringify(manifest, null, 2) + "\n",
     "utf8",
   );

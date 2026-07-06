@@ -5,14 +5,15 @@
 
 ## Current phase
 
-**We are in Phase 4 — Modules.**
+**We are in Phase 6 — Quality & Release** (Phase 5 — reference deferred to last,
+per owner decision: integrate into the real portfolio at `D:\Project\portofolio`).
 
-Phases 0–3 are complete and green: Foundation, Knowledge, AI Core, and Widget
-(Preact Web Component, 10.3 KB gz, SSE client). Full pipeline verified LIVE
-end-to-end against Gemini (`gemini-2.5-flash` + `gemini-embedding-001`). Only
-implement the current phase's scope (PRD Part G4). Do **not** start a later phase
-until the current phase's Definition of Done passes. Update this marker as each
-phase's DoD is verified.
+Phases 0–4 are complete and green: Foundation, Knowledge, AI Core, Widget, and
+Modules (registry/routing, adaptive qualification + caps, contact handoff, signed
+webhook emit, lead-store modes none|webhook|database|both, calendar link-out,
+page context, module-toggle verification). Full pipeline verified LIVE against
+Gemini. Only implement the current phase's scope (PRD Part G4). Update this marker
+as each phase's DoD is verified.
 
 Phase order and dependencies: `0 → 1 → 2 → (3 ∥ 4) → 5 → 6`.
 

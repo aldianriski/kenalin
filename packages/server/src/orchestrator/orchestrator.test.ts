@@ -154,6 +154,28 @@ describe("orchestrator + policy pipeline", () => {
     expect((response.handoff?.brief.length ?? 0)).toBeLessThanOrEqual(700);
   });
 
+  it("[module toggle] disabling contactHandoff suppresses handoff resolution", async () => {
+    const noHandoffConfig = loadConfig({
+      owner: { name: "Sari Wibowo", role: "Engineer", website: "https://demo.kenalin.dev" },
+      assistant: { name: "NARA" },
+      handoff: { whatsapp: { number: "+620000000000" } },
+      modules: {
+        portfolioDiscovery: true, hiringAssistant: true, leadQualification: true,
+        serviceMatching: true, contactHandoff: false, calendarBooking: true, pageContext: true,
+      },
+      knowledge: { sources: [{ kind: "json", path: "content/demo/profile.json" }] },
+    });
+    const o = new Orchestrator({
+      config: noHandoffConfig,
+      store,
+      embedder,
+      chat: new FakeChatProvider(() => JSON.stringify(baseModel({ intent: "business_opportunity", offerHandoff: true }))),
+      retrievalThreshold: 0.08,
+    });
+    const { response } = await o.handle(request());
+    expect(response.handoff).toBeNull();
+  });
+
   it("[fallback] unparseable model output degrades to a safe response", async () => {
     const o = new Orchestrator({
       config: demoConfig(),

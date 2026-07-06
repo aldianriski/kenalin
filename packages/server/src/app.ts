@@ -1,13 +1,25 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { streamSSE } from "hono/streaming";
-import { ChatRequestSchema, type KenalinConfig } from "@kenalin/core";
+import { randomUUID } from "node:crypto";
+import {
+  ChatRequestSchema,
+  type ChatRequest,
+  type ChatResponse,
+  type KenalinConfig,
+  type Lead,
+  type LeadStore,
+  type WebhookEvent,
+} from "@kenalin/core";
 import { Orchestrator, type OrchestratorDeps } from "./orchestrator/orchestrator.js";
 import { toPublicConfig } from "./public-config.js";
 import { RateLimiter } from "./rate-limit.js";
+import type { WebhookEmitter } from "./webhook.js";
 
 export interface AppDeps extends OrchestratorDeps {
   config: KenalinConfig;
+  leadStore?: LeadStore;
+  webhookEmitter?: WebhookEmitter;
 }
 
 /**
@@ -62,6 +74,8 @@ export function createApp(deps: AppDeps): Hono {
           await stream.writeSSE({ event: "delta", data: w });
         }
         await stream.writeSSE({ event: "payload", data: JSON.stringify(response) });
+        // Fire handoff side-effects (lead capture + webhook) without blocking.
+        void emitHandoffSideEffects(deps, parsed.data, response);
       } catch (err) {
         await stream.writeSSE({ event: "error", data: String(err) });
       }
@@ -69,4 +83,48 @@ export function createApp(deps: AppDeps): Hono {
   });
 
   return app;
+}
+
+/**
+ * When a handoff is newly offered this turn, persist a lead (per storage mode)
+ * and emit a `handoff.completed` webhook. Best-effort — never blocks the reply.
+ * No PII is captured here; contact details require the consent flow (PRD B10).
+ */
+async function emitHandoffSideEffects(
+  deps: AppDeps,
+  request: ChatRequest,
+  response: ChatResponse,
+): Promise<void> {
+  const newlyOffered = !request.state.handoffOffered && response.stateUpdates.handoffOffered;
+  if (!response.handoff || !newlyOffered) return;
+
+  const nowIso = new Date().toISOString();
+  const lead: Lead = {
+    id: randomUUID(),
+    createdAt: nowIso,
+    sessionId: request.sessionId,
+    intent: response.intent,
+    category: response.qualification?.category ?? undefined,
+    complexity: response.qualification?.complexity ?? undefined,
+    brief: response.handoff.brief,
+    source: { url: request.pageContext?.url },
+  };
+  try {
+    await deps.leadStore?.save(lead);
+  } catch (err) {
+    deps.log?.({ event: "lead_store_error", error: String(err) });
+  }
+  if (deps.webhookEmitter) {
+    const event: WebhookEvent = {
+      event: "handoff.completed",
+      timestamp: nowIso,
+      sessionId: request.sessionId,
+      data: { brief: response.handoff.brief, state: { ...request.state, ...response.stateUpdates } },
+    };
+    try {
+      await deps.webhookEmitter.emit(event);
+    } catch (err) {
+      deps.log?.({ event: "webhook_emit_error", error: String(err) });
+    }
+  }
 }

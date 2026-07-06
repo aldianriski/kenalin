@@ -31,4 +31,13 @@ export type { BuildDepsOptions } from "./factory.js";
 export { toPublicConfig } from "./public-config.js";
 export type { PublicConfig } from "./public-config.js";
 export { RateLimiter } from "./rate-limit.js";
+export { WebhookEmitter, signPayload } from "./webhook.js";
+export {
+  selectLeadStore,
+  NoneLeadStore,
+  WebhookLeadStore,
+  CompositeLeadStore,
+  SqliteLeadStore,
+} from "./lead-store/index.js";
+export { loadDotEnv } from "./dotenv.js";
 export { resolveLlmApiKey, resolveWebhookSecret, resolvePort } from "./env.js";
