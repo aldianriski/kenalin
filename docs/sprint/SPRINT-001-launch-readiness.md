@@ -63,15 +63,15 @@ live smoke test, then commit the portfolio repo.
 **Acceptance:** a real end-to-end conversation on `next dev` works (grounded answer + handoff); portfolio changes committed.
 
 **DoD:**
-- [ ] Re-vendor engine + widget after T1/T2.
-- [ ] Owner-actions below completed (real channels + prod origins).
-- [ ] Live smoke test: grounded answer, screening chips, WhatsApp handoff all work.
-- [ ] Portfolio repo committed.
+- [x] Re-vendor engine + widget after T1/T2.
+- [~] Live smoke: `/api/config/public` works in the real Next app (proves the vendored bundle loads + route wiring). `/api/chat` blocked — the portfolio `.env` has no Gemini key (owner-action below).
+- [ ] Owner-actions below completed (add key + real channels + prod origins). **Blocked on owner.**
+- [ ] Portfolio repo committed. **Deferred — owner asked to leave uncommitted for review; not ready until owner-actions done.**
 
 ## Owner-action checklist
+- [ ] **Add the Gemini key to the portfolio `.env`** — `API_KEY_GEMINI=…` (or `KENALIN_LLM_API_KEY=…`). **Currently missing** — the portfolio `.env` has Supabase/Resend/Upstash but no Gemini key; the chat route returns `server_misconfigured` without it.
 - [ ] Set real `handoff.whatsapp.number` + `handoff.calendar.url` (and uncomment their actions) in `lib/kenalin/kenalin.config.ts`.
 - [ ] Set `server.allowedOrigins` to the production domain(s).
-- [ ] Confirm `API_KEY_GEMINI` (billed) is present in the portfolio `.env`.
 
 ## Decisions (pre-locked)
 - **D1** — Token usage is read from Gemini `usageMetadata` (authoritative), never estimated client-side.
@@ -91,6 +91,9 @@ Captured Gemini `usageMetadata` (live-confirmed; `total` includes thinking token
 
 ### 2026-07-06 | T2 done | Graceful typed error UX
 Stable error-code taxonomy end-to-end (server → client → localized copy); retryable vs informational; offline detection. Added Gemini transient-retry (surfaced by eval flakiness: mass-fallback runs were transient upstream failures, not intent bugs) → eval now 3/3 stable. Fixed a parallel-ingest manifest race (co-located manifest in the index dir).
+
+### 2026-07-06 | T3 blocked | Deployment — owner-actions outstanding
+Re-vendored engine+widget. Live smoke on `next dev` (port 3007): `/api/config/public` returns the RIZVA persona — proves the vendored bundle + Next route wiring work in the real app. `/api/chat` returns `server_misconfigured`: **the portfolio `.env` has no Gemini key** (only Supabase/Resend/Upstash). T3 can't complete until the owner adds the key + real channels + prod origins; portfolio commit stays deferred per the owner's earlier "leave uncommitted" call. Sprint stays **active**. (Aside: portfolio has Upstash `KV_REST_API_*` — ready-made for TASK-007.)
 
 ## Files Changed
 
