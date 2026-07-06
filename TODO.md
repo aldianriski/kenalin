@@ -17,7 +17,8 @@ status: current
 
 ## Active Sprint
 
-> **→ — none —** · SPRINT-001 closed (T1 token tracker + T2 error UX shipped; T3 → TASK-025). Archive: [`docs/sprint/archive/SPRINT-001-launch-readiness.md`](docs/sprint/archive/SPRINT-001-launch-readiness.md).
+> **SPRINT-002 — Harden for scale** → [`docs/sprint/SPRINT-002-harden-for-scale.md`](docs/sprint/SPRINT-002-harden-for-scale.md)
+> T1 TASK-007 distributed rate limiter (Upstash) · T2 TASK-008 CI gate · T3 TASK-005 model tuning. Resolves TD-005/006/007; progresses TD-001.
 
 Status: `pnpm verify` green (68 tests) · eval matrix 3/3 stable · widget 14.2 KB gz · reference integrated + indexed (117 chunks). Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
@@ -37,18 +38,12 @@ Status: `pnpm verify` green (68 tests) · eval matrix 3/3 stable · widget 14.2 
 - [ ] **TASK-004 — Custom branding via config** [size: M] · src: you · state: ready
       done-when: owner sets launcher logo/avatar (image URL or keep K-mark) + theme preset/tokens in config without code; "Powered by Kenalin" footer is present and not removable by config.
       touches: `core/config/schema.ts`, `server/src/public-config.ts`, `widget/src/app.tsx`, `widget/src/styles.ts`.
-- [ ] **TASK-005 — Model usage optimization + tuning** [size: M] · src: you · state: ready
-      done-when: cost/turn measured (uses TASK-003); thinking-token overhead limited/disabled where quality allows (TD-007); cheap turns (intent/routing) can use a lighter model; static system-prompt prefix cached; eval expanded toward H2 minimums (12/15/12/10) and green in id + en.
-      touches: `server/src/chat`, `core/prompt`, `evals/*`.
 - [ ] **TASK-006 — Accessibility to Lighthouse a11y ≥ 90** [size: M] · src: claude · state: ready
       done-when: focus trap in the open panel, ARIA live region for the streaming answer, full keyboard nav, contrast verified; Lighthouse a11y ≥ 90 on the example page (PRD Phase 3 DoD, not yet measured).
       touches: `widget/src/app.tsx`, `widget/src/styles.ts`.
-- [ ] **TASK-007 — Distributed rate limiter** [size: M] · src: claude · state: ready
-      done-when: rate limiting **and** usage/budget counters backed by Upstash Redis (portfolio already depends on it) so both hold across serverless instances; in-memory kept as fallback. Resolves TD-005 + TD-006.
-      touches: `server/src/rate-limit.ts`, `server/src/usage.ts`, portfolio route.
-- [ ] **TASK-008 — CI gate (GitHub Actions)** [size: S] · src: claude · state: ready
-      done-when: a PR workflow runs `pnpm verify` (owner-string gate + typecheck + build + tests); eval runs on demand with a key secret. Guards the release bars automatically.
-      touches: `.github/workflows/*`.
+- [~] **TASK-005 — Model usage optimization + tuning** — promoted → SPRINT-002 (T3)
+- [~] **TASK-007 — Distributed rate limiter** — promoted → SPRINT-002 (T1)
+- [~] **TASK-008 — CI gate (GitHub Actions)** — promoted → SPRINT-002 (T2)
 
 ### P2 — Quality / Polish
 
