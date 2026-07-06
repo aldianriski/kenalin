@@ -38,14 +38,14 @@ Status: `pnpm verify` green (68 tests) · eval matrix 3/3 stable · widget 14.2 
       done-when: owner sets launcher logo/avatar (image URL or keep K-mark) + theme preset/tokens in config without code; "Powered by Kenalin" footer is present and not removable by config.
       touches: `core/config/schema.ts`, `server/src/public-config.ts`, `widget/src/app.tsx`, `widget/src/styles.ts`.
 - [ ] **TASK-005 — Model usage optimization + tuning** [size: M] · src: you · state: ready
-      done-when: cost/turn measured (uses TASK-003); cheap turns (intent/routing) can use a lighter model; static system-prompt prefix cached; eval expanded toward H2 minimums (12/15/12/10) and green in id + en.
+      done-when: cost/turn measured (uses TASK-003); thinking-token overhead limited/disabled where quality allows (TD-007); cheap turns (intent/routing) can use a lighter model; static system-prompt prefix cached; eval expanded toward H2 minimums (12/15/12/10) and green in id + en.
       touches: `server/src/chat`, `core/prompt`, `evals/*`.
 - [ ] **TASK-006 — Accessibility to Lighthouse a11y ≥ 90** [size: M] · src: claude · state: ready
       done-when: focus trap in the open panel, ARIA live region for the streaming answer, full keyboard nav, contrast verified; Lighthouse a11y ≥ 90 on the example page (PRD Phase 3 DoD, not yet measured).
       touches: `widget/src/app.tsx`, `widget/src/styles.ts`.
 - [ ] **TASK-007 — Distributed rate limiter** [size: M] · src: claude · state: ready
-      done-when: rate limiting backed by Upstash Redis (portfolio already depends on it) so limits hold across serverless instances; in-memory limiter kept as a fallback. Resolves TD-005.
-      touches: `server/src/rate-limit.ts`, portfolio route.
+      done-when: rate limiting **and** usage/budget counters backed by Upstash Redis (portfolio already depends on it) so both hold across serverless instances; in-memory kept as fallback. Resolves TD-005 + TD-006.
+      touches: `server/src/rate-limit.ts`, `server/src/usage.ts`, portfolio route.
 - [ ] **TASK-008 — CI gate (GitHub Actions)** [size: S] · src: claude · state: ready
       done-when: a PR workflow runs `pnpm verify` (owner-string gate + typecheck + build + tests); eval runs on demand with a key secret. Guards the release bars automatically.
       touches: `.github/workflows/*`.
@@ -81,6 +81,8 @@ Status: `pnpm verify` green (68 tests) · eval matrix 3/3 stable · widget 14.2 
 - **TD-003** severity: minor | status: open | created: Sprint-000 — Answer is pseudo-streamed word-by-word, not real token streaming. done-when: TASK-014.
 - **TD-004** severity: minor | status: open | created: Sprint-000 — Portfolio consumes a vendored bundle; must re-vendor on each release. done-when: TASK-022.
 - **TD-005** severity: medium | status: open | created: Sprint-000 — Rate limiter is in-memory (per serverless instance). done-when: TASK-007.
+- **TD-006** severity: medium | status: open | created: Sprint-001 — UsageTracker + per-session token budget are in-memory (per serverless instance) — counts reset and the cap doesn't hold across instances. done-when: back with Upstash under TASK-007.
+- **TD-007** severity: minor | status: open | created: Sprint-001 — Gemini `total` tokens include large thinking-token overhead (cost lever). done-when: TASK-005 (limit/disable thinking on cheap turns).
 
 ---
 
