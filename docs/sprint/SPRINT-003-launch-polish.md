@@ -4,7 +4,7 @@ slug: launch-polish
 owner: Tech Lead
 last_updated: 2026-07-06
 status: active
-plan_commit: [pending — set at plan-lock commit]
+plan_commit: 18f0f6c
 close_commit: [sha — set at close]
 update_trigger: sprint execute/close events
 ---
