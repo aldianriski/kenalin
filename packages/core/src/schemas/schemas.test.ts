@@ -1,8 +1,17 @@
 import { describe, it, expect } from "vitest";
 import { ChatResponseSchema, ConversationStateSchema } from "./conversation.js";
 import { KnowledgeChunkSchema } from "./knowledge.js";
+import { ContentTypeSchema } from "./primitives.js";
 
 describe("data contracts", () => {
+  it("ContentType coerces an unknown/legacy type to 'custom' (agnostic deploy)", () => {
+    // A host index built with its own taxonomy (e.g. 'technical'/'hybrid') must not
+    // crash the engine — it renders as generic 'custom' evidence instead.
+    expect(ContentTypeSchema.parse("technical")).toBe("custom");
+    expect(ContentTypeSchema.parse("hybrid")).toBe("custom");
+    expect(ContentTypeSchema.parse("case_study")).toBe("case_study"); // known types unchanged
+  });
+
   it("ConversationState fills sensible defaults from {}", () => {
     const s = ConversationStateSchema.parse({});
     expect(s.intent).toBe("unknown");

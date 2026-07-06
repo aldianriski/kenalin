@@ -19,18 +19,26 @@ export const IntentSchema = z.enum([
 export type Intent = z.infer<typeof IntentSchema>;
 
 /** Knowledge content type (PRD B7 FR-K4 / Part E). */
-export const ContentTypeSchema = z.enum([
-  "profile",
-  "experience",
-  "project",
-  "case_study",
-  "service",
-  "article",
-  "skill",
-  "testimonial",
-  "contact",
-  "custom",
-]);
+/**
+ * Content type for knowledge chunks + evidence. `.catch("custom")` makes the engine
+ * agnostic to the index taxonomy: an unknown/legacy type (e.g. from a host's own
+ * content frontmatter) coerces to "custom" instead of throwing, so any locally-managed
+ * context deploys without a schema dependency. Evidence still renders, just as generic.
+ */
+export const ContentTypeSchema = z
+  .enum([
+    "profile",
+    "experience",
+    "project",
+    "case_study",
+    "service",
+    "article",
+    "skill",
+    "testimonial",
+    "contact",
+    "custom",
+  ])
+  .catch("custom");
 export type ContentType = z.infer<typeof ContentTypeSchema>;
 
 /** Conversation language. Bilingual id/en by default (PRD B8). */

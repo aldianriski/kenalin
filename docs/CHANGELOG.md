@@ -20,6 +20,12 @@ distributed limiter + usage (Upstash), CI gate, model cost tuning + eval expansi
 (12/15/12/10), config branding + accessibility, grounding-safe response cache, and the
 production cost fix (thinking-off + cache re-vendored, ~31 → ~11 IDR/turn).
 
+### Fixed — release prep
+- **Agnostic deploy**: `ContentType` coerces an unknown/legacy chunk type to `custom`
+  (`.catch("custom")`) instead of throwing — so a host index built with its own taxonomy
+  (e.g. `technical`/`hybrid`) deploys and answers without a schema dependency. Caught by a
+  live smoke of the reference portfolio (110/117 chunks used non-enum types).
+
 ### Changed — SPRINT-005 (cut cost to scale, 2026-07-07)
 - **Production cost fix (TASK-030)**: the live portfolio ran a stale vendored engine with
   thinking ON and no response cache. Re-vendored the current engine + set
