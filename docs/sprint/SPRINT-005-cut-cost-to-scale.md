@@ -62,7 +62,7 @@ green in id + en (no grounding/intent/safety/conversation regression).
 - **Reverted all** → eval back to 100% all groups. **Finding:** the per-turn cost is the static safety/grounding prefix (~1400 tok), which is load-bearing; context trimming is not a cost lever. Documented in `constants.ts` to prevent a re-attempt.
 <!-- The real levers are T1 (shipped) + T3 (lite-model) + the response cache. -->
 
-### T3 — Validate + enable the lite-model swap `[size: S · risk: med]` (TASK-027)
+### T3 — Validate + enable the lite-model swap `[size: S · risk: med]` (TASK-027) — ⚖️ EVALUATED → NOT VIABLE (reverted)
 Layers: `content/demo/kenalin.config.ts`, `evals/*`.
 Enable the whole-turn lite-model swap shipped (config-gated) in SPRINT-002: set
 `server.model.lite: gemini-2.5-flash-lite` for the demo, re-run the eval, and keep only if
@@ -71,10 +71,13 @@ it holds. ~half price on trivial turns.
 **Acceptance:** with `lite` set, the eval matrix stays 100% green (esp. safety 100%) in id +
 en; measured cost delta on lite-routed turns recorded. If it regresses, leave `lite` unset.
 
-**DoD:**
-- [ ] `server.model.lite` set for the demo; eval matrix re-run 100% green at 12/15/12/10 id + en.
-- [ ] Measured cost delta on lite-routed turns recorded; kept only if quality holds (else reverted + logged).
-<!-- QA: safety must stay 100% — flash-lite on a safety turn is the risk. -->
+**DoD:** ⚖️ EVALUATED → not viable (reverted). Set `lite: gemini-2.5-flash-lite`, ran the eval
+twice: **cost −35%** (908 → 593 µUSD/turn) but **grounding/intent/conversation are unstable on
+flash-lite** — run 1 passed, run 2 = grounding 75% · intent 80% · conversation 70% (all below
+bar). **Safety held 100% both runs** (the policy is robust), but the rest isn't. Too much
+variance for the quality bars → `lite` left UNSET; the capability stays config-gated for a
+future stronger lite model. Logged in the demo config.
+<!-- Interesting: safety survives flash-lite, grounding/conversation don't. The heuristic routes short first-turn grounding questions to lite, which need the stronger model. -->
 
 ## Owner-action checklist
 - [ ] Set `UPSTASH_*` env in the portfolio (response cache + rate limiter cross-instance) (T1).
@@ -95,6 +98,14 @@ SPRINT-005 promoted after a cost triage: the live portfolio runs a stale engine 
 ON, no cache) — the likely cause of the alarming test spend. TASK-030 (re-vendor+thinking-off)
 → T1 (biggest lever), TASK-031 (context trim) → T2, TASK-027 (lite-swap) → T3. Governance
 clean; v0.2.0 cut still overdue (4 sprints under [Unreleased]).
+
+### 2026-07-06 | T3 | Evaluated → not viable (reverted) — flash-lite too unstable
+Set `lite: gemini-2.5-flash-lite`, eval ×2: cost −35% (908→593 µUSD) but huge variance —
+run 1 passed, run 2 grounding 75% / intent 80% / conversation 70% (below bar). Safety held
+100% both times. The whole-turn heuristic routes short first-turn *grounding* questions to
+lite, which need the stronger model → unreliable. Reverted (`lite` unset); capability kept
+config-gated for a future stronger lite model. Net cost win this sprint = **T1 only**
+(~50%/turn + repeats free), which is substantial and shipped.
 
 ### 2026-07-06 | T2 | Evaluated → not viable (reverted) — the prompt is irreducible
 Trimmed evidence/snippet/window and eval-gated each: evidence 5→3 crashed grounding to 75%;
