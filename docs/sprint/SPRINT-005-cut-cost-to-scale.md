@@ -4,7 +4,7 @@ slug: cut-cost-to-scale
 owner: Tech Lead
 last_updated: 2026-07-06
 status: active
-plan_commit: [pending — set at plan-lock commit]
+plan_commit: b060042
 close_commit: [sha — set at close]
 update_trigger: sprint execute/close events
 ---
