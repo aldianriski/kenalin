@@ -17,6 +17,7 @@ import { GeminiChatProvider } from "./chat/gemini.js";
 import { GeminiEmbeddingProvider } from "./embeddings/gemini.js";
 import { toPublicConfig, type PublicConfig } from "./public-config.js";
 import { guardRequest, type GuardResult } from "./guard.js";
+import { UsageTracker, type SessionUsage, type UsageSnapshot } from "./usage.js";
 
 export interface KenalinEngineOptions {
   /** Raw config object (validated here). */
@@ -37,6 +38,10 @@ export interface KenalinEngine {
   publicConfig(): PublicConfig;
   /** Cheap pre-LLM abuse guard — call before handleChat and honor the status. */
   guard(request: ChatRequest): GuardResult;
+  /** True when a session has spent its token budget — return a usage_limit reply. */
+  overBudget(sessionId: string): boolean;
+  /** Token-usage snapshot (counts only). Global totals, or one session's. */
+  usage(sessionId?: string): UsageSnapshot | SessionUsage;
 }
 
 /**
@@ -48,6 +53,7 @@ export function createKenalinEngine(opts: KenalinEngineOptions): KenalinEngine {
   const store = LocalKnowledgeStore.fromChunks(opts.chunks);
   const embedder = new GeminiEmbeddingProvider({ apiKey: opts.apiKey });
   const chat = new GeminiChatProvider({ apiKey: opts.apiKey, model: opts.chatModel });
+  const usage = new UsageTracker();
   const orchestrator = new Orchestrator({
     config,
     store,
@@ -55,6 +61,7 @@ export function createKenalinEngine(opts: KenalinEngineOptions): KenalinEngine {
     chat,
     retrievalThreshold: opts.retrievalThreshold ?? 0.45,
     log: opts.log,
+    onUsage: (turn) => usage.record(turn),
   });
   return {
     async handleChat(request: ChatRequest): Promise<ChatResponse> {
@@ -63,6 +70,8 @@ export function createKenalinEngine(opts: KenalinEngineOptions): KenalinEngine {
     },
     publicConfig: () => toPublicConfig(config),
     guard: (request: ChatRequest) => guardRequest(request),
+    overBudget: (sessionId: string) => usage.overBudget(sessionId),
+    usage: (sessionId?: string) => (sessionId ? usage.session(sessionId) : usage.global()),
   };
 }
 
@@ -70,4 +79,5 @@ export { loadConfig, LIMITS } from "@kenalin/core";
 export { toPublicConfig } from "./public-config.js";
 export { guardRequest } from "./guard.js";
 export type { GuardResult } from "./guard.js";
+export type { SessionUsage, UsageSnapshot } from "./usage.js";
 export type { ChatRequest, ChatResponse, PublicConfig, KnowledgeChunk, KenalinConfigInput };

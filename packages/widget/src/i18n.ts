@@ -40,6 +40,44 @@ export const QUICK_SUB: Record<string, Record<Lang, string>> = {
   business_need: { id: "Ceritakan kebutuhan Anda.", en: "Tell us what you need." },
 };
 
+/** Friendly, localized copy per server error code (never a raw message). */
+export const ERROR_MESSAGES: Record<string, Record<Lang, string>> = {
+  rate_limited: {
+    id: "Wah, pesannya cepat sekali. Tunggu sebentar lalu coba lagi ya.",
+    en: "That's a lot of messages quickly — wait a moment, then try again.",
+  },
+  payload_too_large: {
+    id: "Pesannya terlalu panjang. Coba persingkat, ya.",
+    en: "That message is too long — please shorten it.",
+  },
+  too_many_messages: {
+    id: "Percakapan ini sudah panjang. Mari lanjutkan lewat kontak langsung.",
+    en: "This chat has gotten long — let's continue via direct contact.",
+  },
+  conversation_too_long: {
+    id: "Percakapan ini sudah panjang. Mari lanjutkan lewat kontak langsung.",
+    en: "This chat has gotten long — let's continue via direct contact.",
+  },
+  usage_limit: {
+    id: "Asisten sedang sibuk saat ini. Coba lagi nanti atau hubungi langsung.",
+    en: "The assistant is busy right now — try again later or reach out directly.",
+  },
+  offline: {
+    id: "Sepertinya Anda sedang offline. Cek koneksi lalu coba lagi.",
+    en: "You appear to be offline — check your connection and try again.",
+  },
+};
+
+/** Codes the visitor can meaningfully retry (vs. informational ones). */
+const RETRYABLE = new Set(["rate_limited", "offline", "upstream_error", "bad_payload", "generic"]);
+
+export function errorMessage(lang: Lang, code: string): string {
+  return ERROR_MESSAGES[code]?.[lang] ?? t(lang, "error");
+}
+export function isRetryable(code: string): boolean {
+  return RETRYABLE.has(code);
+}
+
 export function t(lang: Lang, key: string): string {
   return STRINGS[lang]?.[key] ?? STRINGS.en[key] ?? key;
 }

@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "preact/hooks";
 import type { JSX } from "preact";
 import { KenalinClient } from "./api.js";
-import { t, quickSub, detectLang } from "./i18n.js";
+import { t, quickSub, detectLang, errorMessage, isRetryable } from "./i18n.js";
 import {
   LogoMark,
   IconClose,
@@ -41,6 +41,7 @@ interface UiMessage {
   complexity?: string | null;
   pending?: boolean;
   failed?: boolean;
+  errorCode?: string;
 }
 
 const EMPTY_STATE: ConversationState = {
@@ -145,7 +146,8 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
               pending: false,
             });
           },
-          onError: () => patchLastAssistant({ content: streamed, pending: false, failed: !streamed }),
+          onError: (err) =>
+            patchLastAssistant({ content: streamed, pending: false, failed: !streamed, errorCode: err.code }),
         },
       );
       setBusy(false);
@@ -250,11 +252,14 @@ function MessageView({
   onReply: (text: string) => void;
 }): JSX.Element {
   if (m.failed) {
+    const code = m.errorCode ?? "generic";
     return (
       <div class="row assistant">
         <div class="fallback">
-          <div class="fmsg">{t(lang, "error")}</div>
-          <button class="retry" onClick={onRetry}><IconRefresh /> {t(lang, "retry")}</button>
+          <div class="fmsg">{errorMessage(lang, code)}</div>
+          {isRetryable(code) && (
+            <button class="retry" onClick={onRetry}><IconRefresh /> {t(lang, "retry")}</button>
+          )}
         </div>
       </div>
     );

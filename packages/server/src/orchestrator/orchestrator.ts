@@ -19,8 +19,10 @@ import {
   type Language,
   type Intent,
   type ChatMessage,
+  type TokenUsage,
   LIMITS,
 } from "@kenalin/core";
+import { estimateTokens, type TurnUsage } from "../usage.js";
 
 /** Retrieval store accepting the server's embedder-calibrated search options. */
 export interface RetrievalStore {
@@ -39,6 +41,8 @@ export interface OrchestratorDeps {
   retrievalThreshold?: number;
   /** Optional structured logger for quality/observability events (PRD D10). */
   log?: (event: Record<string, unknown>) => void;
+  /** Per-turn token usage sink (counts only, no PII). */
+  onUsage?: (turn: TurnUsage) => void;
 }
 
 export interface OrchestrationResult {
@@ -117,8 +121,23 @@ export class Orchestrator {
       actions: actionCandidates,
     });
 
+    // Accumulate token usage for this turn (embedding is estimated — the embed
+    // API doesn't report counts; chat is authoritative from usageMetadata).
+    const usage = { prompt: 0, completion: 0, embedding: estimateTokens(query || " "), total: 0 };
+    const addUsage = (u?: TokenUsage) => {
+      if (!u) return;
+      usage.prompt += u.promptTokens;
+      usage.completion += u.completionTokens;
+      usage.total += u.totalTokens;
+    };
+    const emitUsage = () => {
+      usage.total += usage.embedding;
+      this.deps.onUsage?.({ sessionId: request.sessionId, ...usage });
+    };
+
     // 4. One structured LLM call, then one repair attempt if it doesn't parse.
     const first = await this.callProvider(system, request);
+    addUsage(first.usage);
     let model = parseModelOutput(first.payload);
     if (!model && !first.errored) {
       this.deps.log?.({ event: "structured_output_repair", sessionId: request.sessionId });
@@ -127,12 +146,14 @@ export class Orchestrator {
         "\n\nIMPORTANT: your previous reply did not match the required JSON schema. " +
         "Reply again with ONLY the JSON object, no prose, no code fences.";
       const second = await this.callProvider(repairSystem, request);
+      addUsage(second.usage);
       model = parseModelOutput(second.payload);
     }
 
     // 5. Fallback if still unusable.
     if (!model) {
       this.deps.log?.({ event: "fallback_shown", sessionId: request.sessionId, reason: "unparseable" });
+      emitUsage();
       return {
         response: buildFallbackResponse(config, { language, state }),
         violations: ["fallback"],
@@ -151,15 +172,17 @@ export class Orchestrator {
     if (violations.length) {
       this.deps.log?.({ event: "policy_corrections", sessionId: request.sessionId, violations });
     }
+    emitUsage();
     return { response, violations, retrievedCount: scored.length };
   }
 
   private async callProvider(
     system: string,
     request: ChatRequest,
-  ): Promise<{ payload: unknown; errored: boolean }> {
+  ): Promise<{ payload: unknown; errored: boolean; usage?: TokenUsage }> {
     let payload: unknown = null;
     let errored = false;
+    let usage: TokenUsage | undefined;
     try {
       for await (const ev of this.deps.chat.generate({
         system,
@@ -167,8 +190,10 @@ export class Orchestrator {
         responseSchema: GEMINI_MODEL_OUTPUT_SCHEMA,
         maxTokens: LIMITS.maxOutputTokens,
       })) {
-        if (ev.type === "final") payload = ev.payload;
-        else if (ev.type === "error") {
+        if (ev.type === "final") {
+          payload = ev.payload;
+          usage = ev.usage;
+        } else if (ev.type === "error") {
           errored = true;
           this.deps.log?.({ event: "provider_error", error: ev.error });
         }
@@ -177,6 +202,6 @@ export class Orchestrator {
       errored = true;
       this.deps.log?.({ event: "provider_exception", error: String(err) });
     }
-    return { payload, errored };
+    return { payload, errored, usage };
   }
 }

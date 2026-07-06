@@ -1,5 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
-import { resolve, join } from "node:path";
+import { join } from "node:path";
 import {
   chunkText,
   type EmbeddingProvider,
@@ -138,10 +138,10 @@ export async function ingest(config: KenalinConfig, opts: IngestOptions): Promis
     JSON.stringify({ embedder: manifest.embedder, dimensions: manifest.dimensions, chunkCount: manifest.chunkCount, contentHash }, null, 2) + "\n",
     "utf8",
   );
-  // The curation manifest lives beside the index (…/content/index.manifest.json
-  // for the default layout) for human review (PRD FR-K3).
+  // The curation manifest is co-located with the index for human review
+  // (…/content/index/index.manifest.json for the default layout) (PRD FR-K3).
   await writeFile(
-    resolve(outDir, "..", "index.manifest.json"),
+    join(outDir, "index.manifest.json"),
     JSON.stringify(manifest, null, 2) + "\n",
     "utf8",
   );

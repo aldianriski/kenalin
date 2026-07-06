@@ -35,11 +35,11 @@ estimating, aggregate per-session + global, and expose them.
 **Acceptance:** every chat turn records prompt/candidates/total tokens (+ embedding tokens); cumulative usage is retrievable; an optional per-session token cap returns a friendly limit response instead of spending unboundedly.
 
 **DoD:**
-- [ ] `GeminiChatProvider` surfaces `usageMetadata` (prompt/candidates/total) on the final event.
-- [ ] `GeminiEmbeddingProvider` reports embedding token counts where available.
-- [ ] `UsageTracker` (`usage.ts`) aggregates per-session + global counters; unit-tested.
-- [ ] Orchestrator records per-turn usage via the `log` hook; `GET /api/usage` (or structured log) exposes totals — no PII, no message bodies.
-- [ ] Optional per-session/day token budget → friendly `usage_limit` response (ties into T2 error mapping).
+- [x] `GeminiChatProvider` surfaces `usageMetadata` (prompt/candidates/total) on the final event. *(live-confirmed: total includes thinking tokens.)*
+- [x] Embedding tokens accounted for — the embed API returns no counts, so estimated (chars/4) in the orchestrator.
+- [x] `UsageTracker` (`usage.ts`) aggregates per-session + global counters; unit-tested (5 tests).
+- [x] Orchestrator records per-turn usage via `onUsage`; `GET /api/usage` exposes totals — app test asserts no message content leaks.
+- [x] Per-session token budget (`LIMITS.maxSessionTokens`) → `usage_limit` 429 in app + engine `overBudget`.
 
 ### T2 — Graceful, typed error UX `[size: M · risk: med]`
 Layers: `server/src/app.ts`, `widget/src/api.ts`, `widget/src/app.tsx`, `widget/src/i18n.ts`.
@@ -49,10 +49,11 @@ distinct, localized, actionable message with the right recovery (retry vs wait).
 **Acceptance:** rate-limit, payload-too-large, quota/usage-limit, upstream/5xx, and offline each render a distinct friendly id/en message with an appropriate action; no raw error string appears.
 
 **DoD:**
-- [ ] Server returns stable error codes (`rate_limited`, `payload_too_large`, `usage_limit`, `upstream_error`) with correct HTTP status.
-- [ ] `KenalinClient` surfaces the status/code (not just a generic string) to `onError`.
-- [ ] Widget maps codes → localized messages + retry/wait affordance; offline detected.
-- [ ] Widget test covers the error-mapping paths.
+- [x] Server returns stable error codes (`rate_limited`, `payload_too_large`, `usage_limit`, `upstream_error`) with correct status; in-stream errors emit a code, never a raw message.
+- [x] `KenalinClient` surfaces `{code, status}` to `onError` (parses the JSON error body; distinguishes offline).
+- [x] Widget maps codes → localized id/en messages; retryable codes show Retry, informational ones don't; offline detected.
+- [x] Widget tests cover the error-mapping paths (in-stream code, non-2xx code+status, offline).
+- [x] Bonus: Gemini provider retries transient failures (429/5xx/timeout, 3 attempts, backoff) so a hiccup doesn't degrade to fallback — stabilized the eval (3/3).
 
 ### T3 — Finalize + commit reference deployment `[size: S · risk: low]`
 Layers: `D:/Project/portofolio/lib/kenalin/*`, portfolio git. Depends on T1+T2 landing in the vendored bundle.
@@ -85,11 +86,28 @@ live smoke test, then commit the portfolio repo.
 ### 2026-07-06 | promote | Sprint planned + locked
 Pulled TASK-003/002/001 from Backlog. Governance review clean (no LEARNINGS, no aged TD, TODO under cap).
 
+### 2026-07-06 | T1 done | Token usage tracker
+Captured Gemini `usageMetadata` (live-confirmed; `total` includes thinking tokens — flags a cost lever for TASK-005). UsageTracker + `/api/usage` + per-session budget. 41 server tests green.
+
+### 2026-07-06 | T2 done | Graceful typed error UX
+Stable error-code taxonomy end-to-end (server → client → localized copy); retryable vs informational; offline detection. Added Gemini transient-retry (surfaced by eval flakiness: mass-fallback runs were transient upstream failures, not intent bugs) → eval now 3/3 stable. Fixed a parallel-ingest manifest race (co-located manifest in the index dir).
+
 ## Files Changed
 
 | File | Task | Change (WHY) | Risk | Test |
 |------|------|--------------|------|------|
-| _(none yet)_ | — | — | — | — |
+| `core/interfaces/providers.ts` | T1 | `TokenUsage` type + usage on final event | Low | typecheck |
+| `core/policy/constants.ts` | T1 | `LIMITS.maxSessionTokens` budget | Low | — |
+| `server/src/usage.ts` | T1 | UsageTracker (per-session+global, budget) | Low | usage.test (5) |
+| `server/src/chat/gemini.ts` | T1 | parse `usageMetadata` | Low | live check |
+| `server/src/orchestrator/orchestrator.ts` | T1 | accumulate + emit per-turn usage | Low | — |
+| `server/src/app.ts` | T1/T2 | `/api/usage` + budget check; in-stream error → code | Low | app.test |
+| `server/src/embed.ts` | T1 | expose usage + `overBudget` to hosts | Low | typecheck |
+| `widget/src/api.ts` | T2 | typed `{code,status}` errors; offline detect | Low | api.test (4) |
+| `widget/src/i18n.ts` | T2 | localized error copy + retryable map | Low | — |
+| `widget/src/app.tsx` | T2 | render mapped error + conditional retry | Low | in-browser |
+| `server/src/chat/gemini.ts` | T2 | retry transient upstream failures | Med | eval 3/3 |
+| `server/src/ingest/pipeline.ts` | T2 | co-locate manifest (fix test race) | Low | pipeline.test |
 
 ## Retro
 _(written at close)_

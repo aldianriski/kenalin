@@ -89,6 +89,22 @@ describe("Hono app", () => {
     expect(res.status).toBe(400);
   });
 
+  it("GET /api/usage → counts, incrementing after a chat", async () => {
+    const before = await (await app.request("/api/usage")).json();
+    await app.request("/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ sessionId: "u1", messages: [{ role: "user", content: "Siapa Sari?" }] }),
+    });
+    const after = await (await app.request("/api/usage")).json();
+    expect(after.turns).toBe(before.turns + 1);
+    expect(typeof after.total).toBe("number");
+    // no message content leaks into the usage payload
+    expect(JSON.stringify(after)).not.toMatch(/Sari|Siapa/);
+    const sess = await (await app.request("/api/usage?sessionId=u1")).json();
+    expect(sess.session.turns).toBe(1);
+  });
+
   afterAll(async () => {
     await rm(out, { recursive: true, force: true });
   });

@@ -71,6 +71,8 @@ export const LIMITS = {
   maxSessionTurns: 40,
   /** Max output tokens requested from the model (a ceiling — you pay for used, not cap). */
   maxOutputTokens: 2048,
+  /** Per-session total-token budget; over this, requests get a friendly usage-limit reply. */
+  maxSessionTokens: 120_000,
 } as const;
 
 

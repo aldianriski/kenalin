@@ -16,12 +16,15 @@ import { Orchestrator, type OrchestratorDeps } from "./orchestrator/orchestrator
 import { toPublicConfig } from "./public-config.js";
 import { RateLimiter } from "./rate-limit.js";
 import { guardRequest } from "./guard.js";
+import { UsageTracker } from "./usage.js";
 import type { WebhookEmitter } from "./webhook.js";
 
 export interface AppDeps extends OrchestratorDeps {
   config: KenalinConfig;
   leadStore?: LeadStore;
   webhookEmitter?: WebhookEmitter;
+  /** Token-usage tracker; one is created automatically if omitted. */
+  usage?: UsageTracker;
 }
 
 /**
@@ -30,7 +33,16 @@ export interface AppDeps extends OrchestratorDeps {
  */
 export function createApp(deps: AppDeps): Hono {
   const app = new Hono();
-  const orchestrator = new Orchestrator(deps);
+  const usage = deps.usage ?? new UsageTracker();
+  // Record every turn's tokens into the tracker (preserving any caller hook).
+  const callerOnUsage = deps.onUsage;
+  const orchestrator = new Orchestrator({
+    ...deps,
+    onUsage: (turn) => {
+      usage.record(turn);
+      callerOnUsage?.(turn);
+    },
+  });
   const limiter = new RateLimiter(deps.config.server.rateLimit);
   const allowed = deps.config.server.allowedOrigins;
 
@@ -48,6 +60,13 @@ export function createApp(deps: AppDeps): Hono {
   app.get("/healthz", (c) => c.json({ ok: true, owner: deps.config.owner.name }));
 
   app.get("/api/config/public", (c) => c.json(toPublicConfig(deps.config)));
+
+  // Token usage — counts only, never message content. Global totals, or a
+  // single session's totals with ?sessionId=.
+  app.get("/api/usage", (c) => {
+    const sessionId = c.req.query("sessionId");
+    return c.json(sessionId ? { session: usage.session(sessionId) } : usage.global());
+  });
 
   app.post("/api/chat", async (c) => {
     const ip =
@@ -73,6 +92,10 @@ export function createApp(deps: AppDeps): Hono {
     if (!guard.ok) {
       return c.json({ error: guard.error }, guard.status as 400 | 413 | 429);
     }
+    // Per-session token budget (TASK-003) — friendly limit, not a spend.
+    if (usage.overBudget(parsed.data.sessionId)) {
+      return c.json({ error: "usage_limit" }, 429);
+    }
 
     return streamSSE(c, async (stream) => {
       try {
@@ -87,7 +110,9 @@ export function createApp(deps: AppDeps): Hono {
         // Fire handoff side-effects (lead capture + webhook) without blocking.
         void emitHandoffSideEffects(deps, parsed.data, response);
       } catch (err) {
-        await stream.writeSSE({ event: "error", data: String(err) });
+        // Never leak a raw error to the visitor — emit a stable code; log detail.
+        deps.log?.({ event: "chat_stream_error", error: String(err) });
+        await stream.writeSSE({ event: "error", data: "upstream_error" });
       }
     });
   });

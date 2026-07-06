@@ -33,6 +33,8 @@ export type { PublicConfig } from "./public-config.js";
 export { RateLimiter } from "./rate-limit.js";
 export { guardRequest } from "./guard.js";
 export type { GuardResult } from "./guard.js";
+export { UsageTracker, estimateTokens } from "./usage.js";
+export type { TurnUsage, SessionUsage, UsageSnapshot } from "./usage.js";
 export { WebhookEmitter, signPayload } from "./webhook.js";
 export {
   selectLeadStore,

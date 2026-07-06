@@ -61,7 +61,7 @@ describe("ingest pipeline (demo content)", () => {
 
   it("writes a curation manifest listing every source + chunk count", async () => {
     await ingest(demoConfig(), { rootDir: repoRoot, outDir: outA, embedder: new HashEmbeddingProvider() });
-    const manifest = JSON.parse(await readFile(resolve(outA, "..", "index.manifest.json"), "utf8"));
+    const manifest = JSON.parse(await readFile(join(outA, "index.manifest.json"), "utf8"));
     expect(manifest.sources.length).toBe(2);
     expect(manifest.chunkCount).toBeGreaterThan(0);
     expect(manifest.embedder).toBe("hash-local");

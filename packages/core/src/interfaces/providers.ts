@@ -10,10 +10,17 @@ import type { ChatMessage } from "../schemas/conversation.js";
 /** A JSON Schema object describing the structured output the model must emit. */
 export type JsonSchema = Record<string, unknown>;
 
+/** Authoritative token counts reported by the provider for one call. */
+export interface TokenUsage {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+}
+
 /** Streaming events emitted by a ChatProvider.generate() call. */
 export type ProviderEvent =
   | { type: "text"; delta: string }
-  | { type: "final"; payload: unknown }
+  | { type: "final"; payload: unknown; usage?: TokenUsage }
   | { type: "error"; error: string };
 
 export interface ChatGenerateRequest {

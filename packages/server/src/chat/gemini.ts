@@ -13,6 +13,10 @@ import type { ChatGenerateRequest, ChatProvider, ProviderEvent } from "@kenalin/
 
 const DEFAULT_MODEL = "gemini-2.5-flash";
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta";
+const MAX_ATTEMPTS = 3;
+const BASE_DELAY_MS = 400;
+const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export interface GeminiChatOptions {
   apiKey: string;
@@ -54,36 +58,70 @@ export class GeminiChatProvider implements ChatProvider {
       },
     };
 
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), this.timeoutMs);
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(body),
-        signal: controller.signal,
-      });
-      if (!res.ok) {
-        const detail = await res.text().catch(() => "");
-        yield { type: "error", error: `Gemini chat failed (${res.status}): ${detail.slice(0, 200)}` };
+    // Retry transient upstream failures (rate spikes, 5xx, timeouts) before
+    // giving up — a single hiccup shouldn't degrade a visitor to the fallback.
+    let lastError = "provider error";
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        });
+        if (!res.ok) {
+          const detail = await res.text().catch(() => "");
+          lastError = `Gemini chat failed (${res.status}): ${detail.slice(0, 160)}`;
+          if (RETRYABLE_STATUS.has(res.status) && attempt < MAX_ATTEMPTS) {
+            await sleep(BASE_DELAY_MS * 2 ** (attempt - 1));
+            continue;
+          }
+          yield { type: "error", error: lastError };
+          return;
+        }
+        const json = (await res.json()) as GeminiResponse;
+        const text = json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
+        if (!text) {
+          lastError = "Gemini returned an empty candidate";
+          if (attempt < MAX_ATTEMPTS) {
+            await sleep(BASE_DELAY_MS * 2 ** (attempt - 1));
+            continue;
+          }
+          yield { type: "error", error: lastError };
+          return;
+        }
+        const u = json.usageMetadata;
+        const usage = u
+          ? {
+              promptTokens: u.promptTokenCount ?? 0,
+              completionTokens: u.candidatesTokenCount ?? 0,
+              totalTokens: u.totalTokenCount ?? 0,
+            }
+          : undefined;
+        yield { type: "final", payload: text, usage };
         return;
-      }
-      const json = (await res.json()) as GeminiResponse;
-      const text = json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
-      if (!text) {
-        yield { type: "error", error: "Gemini returned an empty candidate" };
+      } catch (err) {
+        lastError = err instanceof Error && err.name === "AbortError" ? "provider timeout" : String(err);
+        if (attempt < MAX_ATTEMPTS) {
+          await sleep(BASE_DELAY_MS * 2 ** (attempt - 1));
+          continue;
+        }
+        yield { type: "error", error: lastError };
         return;
+      } finally {
+        clearTimeout(timer);
       }
-      yield { type: "final", payload: text };
-    } catch (err) {
-      const msg = err instanceof Error && err.name === "AbortError" ? "provider timeout" : String(err);
-      yield { type: "error", error: msg };
-    } finally {
-      clearTimeout(timer);
     }
   }
 }
 
 interface GeminiResponse {
   candidates?: { content?: { parts?: { text?: string }[] } }[];
+  usageMetadata?: {
+    promptTokenCount?: number;
+    candidatesTokenCount?: number;
+    totalTokenCount?: number;
+  };
 }

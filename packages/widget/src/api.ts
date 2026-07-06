@@ -5,10 +5,16 @@ import type { ChatMessage, ChatResponse, ConversationState, PageContext, PublicC
  * it never imports server or core logic at runtime (PRD D1 boundary).
  */
 
+/** A stable, mappable error — never a raw message shown to a visitor. */
+export interface ChatError {
+  code: string;
+  status?: number;
+}
+
 export interface ChatStreamHandlers {
   onDelta: (text: string) => void;
   onPayload: (response: ChatResponse) => void;
-  onError: (message: string) => void;
+  onError: (error: ChatError) => void;
 }
 
 export interface ChatArgs {
@@ -32,13 +38,29 @@ export class KenalinClient {
   /** POST /api/chat and dispatch SSE events (delta text, then final payload). */
   async chat(args: ChatArgs, handlers: ChatStreamHandlers): Promise<void> {
     const url = `${this.apiUrl.replace(/\/$/, "")}/api/chat`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "content-type": "application/json", accept: "text/event-stream" },
-      body: JSON.stringify(args),
-    });
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json", accept: "text/event-stream" },
+        body: JSON.stringify(args),
+      });
+    } catch {
+      // Network failure — distinguish offline from a transient upstream problem.
+      const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+      handlers.onError({ code: offline ? "offline" : "upstream_error" });
+      return;
+    }
     if (!res.ok || !res.body) {
-      handlers.onError(`chat failed: ${res.status}`);
+      // Prefer the server's stable error code from the JSON body.
+      let code = "upstream_error";
+      try {
+        const body = (await res.clone().json()) as { error?: string };
+        if (body.error) code = body.error;
+      } catch {
+        /* non-JSON body */
+      }
+      handlers.onError({ code, status: res.status });
       return;
     }
     const reader = res.body.getReader();
@@ -69,7 +91,7 @@ function dispatchFrame(frame: string, handlers: ChatStreamHandlers): void {
     try {
       handlers.onPayload(JSON.parse(data) as ChatResponse);
     } catch {
-      handlers.onError("bad payload");
+      handlers.onError({ code: "bad_payload" });
     }
-  } else if (event === "error") handlers.onError(data);
+  } else if (event === "error") handlers.onError({ code: data || "upstream_error" });
 }

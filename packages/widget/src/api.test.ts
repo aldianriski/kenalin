@@ -37,14 +37,40 @@ describe("KenalinClient SSE parsing", () => {
     vi.unstubAllGlobals();
   });
 
-  it("surfaces error frames", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => sseResponse(["event: error\ndata: boom\n\n"])));
-    let err = "";
+  it("surfaces an in-stream error code", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => sseResponse(["event: error\ndata: upstream_error\n\n"])));
+    let code = "";
     await new KenalinClient("http://x").chat(
       { sessionId: "s", messages: [{ role: "user", content: "hi" }], state: {} as never },
-      { onDelta: () => {}, onPayload: () => {}, onError: (m) => (err = m) },
+      { onDelta: () => {}, onPayload: () => {}, onError: (e) => (code = e.code) },
     );
-    expect(err).toBe("boom");
+    expect(code).toBe("upstream_error");
+    vi.unstubAllGlobals();
+  });
+
+  it("surfaces the server's error code + status on a non-2xx response", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(JSON.stringify({ error: "rate_limited" }), { status: 429 })),
+    );
+    let received: { code: string; status?: number } | null = null;
+    await new KenalinClient("http://x").chat(
+      { sessionId: "s", messages: [{ role: "user", content: "hi" }], state: {} as never },
+      { onDelta: () => {}, onPayload: () => {}, onError: (e) => (received = e) },
+    );
+    expect(received).toEqual({ code: "rate_limited", status: 429 });
+    vi.unstubAllGlobals();
+  });
+
+  it("maps a network failure to offline / upstream_error", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("network down"); }));
+    vi.stubGlobal("navigator", { onLine: false });
+    let code = "";
+    await new KenalinClient("http://x").chat(
+      { sessionId: "s", messages: [{ role: "user", content: "hi" }], state: {} as never },
+      { onDelta: () => {}, onPayload: () => {}, onError: (e) => (code = e.code) },
+    );
+    expect(code).toBe("offline");
     vi.unstubAllGlobals();
   });
 });
