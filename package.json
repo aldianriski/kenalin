@@ -1,0 +1,28 @@
+{
+  "name": "kenalin-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Kenalin — open-source, embeddable AI introduction layer for portfolio and professional websites.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "build": "pnpm -r --filter \"./packages/*\" run build",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "pnpm -r run test",
+    "eval": "pnpm --filter @kenalin/server run eval",
+    "ingest": "pnpm --filter @kenalin/server run ingest"
+  },
+  "dependencies": {
+    "@kenalin/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

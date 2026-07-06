@@ -1,0 +1,28 @@
+{
+  "owner": "Sari Wibowo",
+  "role": "Full-stack engineer & product consultant",
+  "website": "https://demo.kenalin.dev",
+  "summary": "Sari Wibowo is a full-stack engineer and independent product consultant who helps small teams turn messy manual operations into reliable internal software. Ten years across web platforms, workflow automation, and data-visibility tooling.",
+  "experience": [
+    {
+      "id": "exp-founder-lumina",
+      "title": "Founder & Principal Engineer — Lumina Studio",
+      "period": "2021–present",
+      "content": "Founded Lumina Studio, a two-person product engineering practice building internal tools and workflow automation for logistics and retail SMEs. Led delivery of process-automation systems replacing spreadsheet and chat-based approval flows.",
+      "topics": ["leadership", "founding", "process_automation", "internal_tooling"]
+    },
+    {
+      "id": "exp-lead-paygrid",
+      "title": "Engineering Lead — PayGrid",
+      "period": "2018–2021",
+      "content": "Led a cross-functional team of eight building payment reconciliation and reporting tooling. Owned architecture for a Go microservices backend and a React operations dashboard. Grew the team from three to eight engineers.",
+      "topics": ["leadership", "team_lead", "go", "microservices", "react", "data_visibility"]
+    }
+  ],
+  "skills": [
+    { "id": "skill-ts", "name": "TypeScript / Node", "topics": ["typescript", "node", "web"] },
+    { "id": "skill-go", "name": "Go microservices", "topics": ["go", "microservices", "backend"] },
+    { "id": "skill-automation", "name": "Workflow automation", "topics": ["process_automation", "integration"] },
+    { "id": "skill-dataviz", "name": "Operational dashboards", "topics": ["data_visibility", "react"] }
+  ]
+}
