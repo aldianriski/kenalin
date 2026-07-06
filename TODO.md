@@ -17,9 +17,9 @@ status: current
 
 ## Active Sprint
 
-> **→ — none —** · SPRINT-005 closed (production cost fix shipped: thinking-off + cache re-vendored; context-trim + lite-swap evaluated not-viable). Archive: [`docs/sprint/archive/SPRINT-005-cut-cost-to-scale.md`](docs/sprint/archive/SPRINT-005-cut-cost-to-scale.md).
+> **→ — none —** · **v0.2.0 RELEASED** (2026-07-07) — pushed to GitHub (`main` + tag `v0.2.0`). SPRINT-001…005 all closed. Archives: [`docs/sprint/archive/`](docs/sprint/archive/) · [`docs/sprint/INDEX.md`](docs/sprint/INDEX.md).
 
-Status: `pnpm verify` green (101 tests) · eval matrix **12/15/12/10 = 49, 100% id+en** · **production cost/turn ~31 → ~11 IDR** (thinking off + response cache re-vendored; owner commits/deploys the portfolio — TASK-025). Detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
+Status: `pnpm verify` green (**102 tests**) · eval matrix **12/15/12/10 = 49, 100% id+en** · **cost/turn ~11 IDR** (thinking off + response cache). **Reference portfolio integration merged to `main` + pushed** (aldianrizki/portofolio); Next build verified; **production Vercel deploy owner-confirmed** — live `/api/chat` smoke still to confirm (TASK-032). Detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
 ---
 
@@ -27,10 +27,11 @@ Status: `pnpm verify` green (101 tests) · eval matrix **12/15/12/10 = 49, 100% 
 
 ### P0 — Critical / Blocking
 
-- [ ] **TASK-025 — Finalize + commit reference deployment** [size: S] · src: you · state: blocked (owner)
-      done-when: `API_KEY_GEMINI` added to the portfolio `.env`; real `handoff.whatsapp`/`calendar` + prod `allowedOrigins` set; live `/api/chat` smoke passes; portfolio committed.
-      touches: `D:/Project/portofolio/lib/kenalin/*` + `.env`, portfolio git.
-      note: engine+widget already re-vendored; `/api/config/public` validated live. Was SPRINT-001 T3 (descoped — owner-blocked).
+- [x] **TASK-025 — Finalize + commit reference deployment** — DONE (2026-07-07): `API_KEY_GEMINI` present; v0.2.0 engine + widget re-vendored; integration committed (`0a5efcf`), merged to `main`, pushed; Next build verified; local + vendored smoke green (grounded, thinking=0, cache hit, ~11 IDR). Production deploy owner-confirmed. Residual live-smoke → TASK-032.
+- [ ] **TASK-032 — Confirm live production deploy + `/api/chat` smoke** [size: S] · src: claude · state: ready
+      done-when: `www.aldianrizki.com/api/config/public` returns 200 and a real `/api/chat` turn answers grounded (my automated poll last saw the routes 404 mid-deploy — verify the Vercel deploy for `0a5efcf` went green and the routes are live). If 404 persists: check Vercel Production Branch = `main` + build logs.
+- [ ] **TASK-033 — Add Upstash REST env to the portfolio (cross-instance cache/limiter)** [size: S] · src: claude · state: ready
+      done-when: `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` set in the portfolio Vercel env (only `REDIS_URL` is set today → cache + rate-limiter run in-memory per-instance). Resolves TD-010.
 
 ### P1 — Next Phase (v0.2 — launch polish)
 
@@ -72,6 +73,8 @@ Status: `pnpm verify` green (101 tests) · eval matrix **12/15/12/10 = 49, 100% 
 - **TD-007** severity: minor | status: resolved → TASK-005 (Sprint-002) | created: Sprint-001 — Gemini thinking-token overhead. Now config-controlled (`server.model.thinkingBudget`); disabled in demo — cost/turn −37%, quality green.
 - **TD-008** severity: minor | status: open | created: Sprint-002 — The embedded `KenalinEngine` (`embed.ts`, vendored by the portfolio) stays in-memory/sync for limiter+usage — only the Hono `/api` path is Redis-backed (D4), so the vendored engine's counters remain per-instance. Also the Redis limiter is fixed-window (not the in-memory token bucket). done-when: move the embed engine to the shared Redis store (needs an async `KenalinEngine` API rev) if per-instance counting there becomes a problem.
 - **TD-009** severity: minor | status: open | created: Sprint-003 — Widget has no render/behavior test harness (`environment: node`, no jsdom) — a11y behavior (focus trap, Escape, live region) can't be unit-tested, only browser-verified (L-004). done-when: add jsdom/happy-dom (or preact-render-to-string for static render) so widget behavior gets regression coverage; also covers TD-002.
+- **TD-010** severity: minor | status: open | created: 2026-07-07 (release) — Portfolio prod runs cache + rate-limiter **in-memory per-instance**: only `REDIS_URL` is set, not the `UPSTASH_REDIS_REST_URL`/`_TOKEN` REST pair my `resolveRedisConfig` reads. Fine at low traffic; cross-instance needs the REST vars. done-when: TASK-033.
+- **TD-011** severity: minor | status: open | created: 2026-07-07 (release) — Portfolio case-study MDX frontmatter uses non-standard `type: technical`/`hybrid` (110/117 chunks); the engine now coerces unknown → `custom` (agnostic-deploy fix), so those evidence cards render as generic instead of typed (wrong icon/style). done-when: map the frontmatter to canonical `ContentType`s + re-ingest, OR extend ingestion's frontmatter→type mapping (relates TASK-023).
 
 ---
 
