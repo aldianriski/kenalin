@@ -1,0 +1,116 @@
+---
+sprint: 005
+slug: cut-cost-to-scale
+owner: Tech Lead
+last_updated: 2026-07-06
+status: active
+plan_commit: [pending — set at plan-lock commit]
+close_commit: [sha — set at close]
+update_trigger: sprint execute/close events
+---
+
+# SPRINT-005 — Cut cost to scale (MVP-release blocker)
+
+> **Theme:** The live portfolio runs a **stale vendored engine** with thinking ON and no
+> response cache — none of SPRINT-002/004's cost work has reached production, so every
+> real turn pays full price. Ship what's already built to the live site, then squeeze the
+> per-turn prompt and validate the lighter model. Goal: production cost/turn from ~31 IDR
+> → ~10 IDR, so the MVP can handle real conversation volume.
+
+## Scope
+
+**In:** re-vendor the current engine + thinking-off into the portfolio (TASK-030) · trim
+per-turn context (TASK-031) · validate the lite-model swap (TASK-027).
+**Out (deferred):** explicit context caching (TASK-026 — evaluated marginal), pgvector
+(TASK-019), the P2 UX polish set. Portfolio **commit/deploy** stays an owner-action (TASK-025).
+
+## Plan
+
+### T1 — Ship cost optimizations to the live portfolio (re-vendor + thinking-off) `[size: M · risk: med]`
+Layers: `D:/Project/portofolio/lib/kenalin/*` (vendored engine bundle), portfolio `kenalin.config.ts`.
+The portfolio's `kenalin-engine.mjs` predates the thinking-disable + response cache
+(0 matches for `thinkingConfig`/`responseCache`). Rebuild the current engine from this
+repo, vendor it in, and set `server.model.thinkingBudget: 0` in the portfolio config. This
+is the **single biggest cost win** — already-built code, just not shipped. Biggest-lever,
+do first. **No new logic** — a deployment refresh.
+
+**Acceptance:** a local smoke against the portfolio's engine shows thinking tokens = 0 and a
+response-cache hit (0 tokens) on a repeated question; measured cost/turn drops vs the stale
+bundle. (Portfolio git commit + deploy remain the owner's — TASK-025.)
+
+**DoD:**
+- [ ] Current engine rebuilt + vendored into `portofolio/lib/kenalin/` (has `thinkingConfig` + response cache).
+- [ ] Portfolio `kenalin.config.ts` sets `server.model.thinkingBudget: 0`.
+- [ ] Local smoke: thinking=0, repeat question = cache hit (0 tokens), cost/turn measured before/after.
+- [ ] Owner-action noted: set `UPSTASH_*` env + commit/deploy the portfolio (ties to TASK-025).
+<!-- QA: verify the vendored engine actually reads the config's thinkingBudget end to end. -->
+
+### T2 — Trim per-turn context `[size: M · risk: med]`
+Layers: `packages/core/src/policy/constants.ts`, `packages/core/src/prompt/builder.ts`, `evals/*`.
+The ~1782-token prompt is re-sent every turn (99% of cost is this call). Reduce it:
+`maxEvidenceInPrompt` 5→3, `evidenceSnippetChars` 220→150, `llmMessageWindow` 8→4,
+`llmMessageCharCap` 1500→~800, and compress the most verbose rule text. Eval-gated — any
+quality drop reverts the specific knob.
+
+**Acceptance:** measured per-turn prompt tokens drop ~15–20% vs baseline; eval matrix 100%
+green in id + en (no grounding/intent/safety/conversation regression).
+
+**DoD:**
+- [ ] Cost knobs reduced (evidence count/snippet, message window/cap) + verbose prompt text tightened.
+- [ ] Runner reports the new prompt-tokens/turn; reduction measured vs the ~1782 baseline.
+- [ ] Eval matrix 100% green id + en; any group that dips reverts the offending knob (logged).
+<!-- QA: eval is the regression gate; grounding is the most sensitive to less evidence. -->
+
+### T3 — Validate + enable the lite-model swap `[size: S · risk: med]` (TASK-027)
+Layers: `content/demo/kenalin.config.ts`, `evals/*`.
+Enable the whole-turn lite-model swap shipped (config-gated) in SPRINT-002: set
+`server.model.lite: gemini-2.5-flash-lite` for the demo, re-run the eval, and keep only if
+it holds. ~half price on trivial turns.
+
+**Acceptance:** with `lite` set, the eval matrix stays 100% green (esp. safety 100%) in id +
+en; measured cost delta on lite-routed turns recorded. If it regresses, leave `lite` unset.
+
+**DoD:**
+- [ ] `server.model.lite` set for the demo; eval matrix re-run 100% green at 12/15/12/10 id + en.
+- [ ] Measured cost delta on lite-routed turns recorded; kept only if quality holds (else reverted + logged).
+<!-- QA: safety must stay 100% — flash-lite on a safety turn is the risk. -->
+
+## Owner-action checklist
+- [ ] Set `UPSTASH_*` env in the portfolio (response cache + rate limiter cross-instance) (T1).
+- [ ] Commit + deploy the portfolio after the re-vendor; live `/api/chat` smoke (TASK-025).
+
+## Decisions (pre-locked)
+- **D1** — T1 ships already-built code to production (no new logic) → biggest lever, do first. The portfolio git commit/deploy stays the owner's (TASK-025); the dev work is rebuild + vendor + config + local smoke.
+- **D2** — T2/T3 are **eval-gated**: the matrix is the no-regression guard; any knob or the lite model that drops a group is reverted, not shipped.
+
+## Assumptions
+- **A1** — Trimming evidence + message window won't drop grounding/quality at our corpus size. *Confirm: eval matrix after T2.*
+- **A2** — `gemini-2.5-flash-lite` holds safety 100% + intent on the demo. *Confirm: eval after T3 (this is SPRINT-002's open A3).*
+
+## Execution Log
+
+### 2026-07-06 | promote | Plan locked
+SPRINT-005 promoted after a cost triage: the live portfolio runs a stale engine (thinking
+ON, no cache) — the likely cause of the alarming test spend. TASK-030 (re-vendor+thinking-off)
+→ T1 (biggest lever), TASK-031 (context trim) → T2, TASK-027 (lite-swap) → T3. Governance
+clean; v0.2.0 cut still overdue (4 sprints under [Unreleased]).
+
+## Files Changed
+
+| File | Task | Change (WHY) | Risk | Test |
+|------|------|--------------|------|------|
+| _(pending execution)_ | | | | |
+
+## Retro
+<!-- Written at close. Route buckets to durable homes (DOCS_Guide §10). -->
+
+**Retrieval check** — _(fill at close)_
+
+**Worked**
+- _(fill at close)_
+
+**Friction**
+- _(fill at close)_
+
+**Pattern candidate**
+- _(fill at close)_

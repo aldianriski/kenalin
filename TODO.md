@@ -17,9 +17,10 @@ status: current
 
 ## Active Sprint
 
-> **→ — none —** · SPRINT-004 closed (response cache; T1 caching deferred, T3 intake cut via ADR-005). Archive: [`docs/sprint/archive/SPRINT-004-cost-optimal-flow.md`](docs/sprint/archive/SPRINT-004-cost-optimal-flow.md).
+> **SPRINT-005 — Cut cost to scale** → [`docs/sprint/SPRINT-005-cut-cost-to-scale.md`](docs/sprint/SPRINT-005-cut-cost-to-scale.md)
+> T1 TASK-030 re-vendor+thinking-off (portfolio) · T2 TASK-031 trim per-turn context · T3 TASK-027 lite-model swap. Focus: cut production cost/turn (~31→~10 IDR).
 
-Status: `pnpm verify` green (101 tests) · eval matrix **12/15/12/10 = 49, 100% id+en** · repeat turns skip the LLM (response cache) · widget 15.1 KB gz. Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
+Status: `pnpm verify` green (101 tests) · eval matrix **12/15/12/10 = 49, 100% id+en**. **Cost finding:** live portfolio runs a stale engine (thinking ON, no cache) → SPRINT-005 ships the fix. Detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
 ---
 
@@ -35,9 +36,9 @@ Status: `pnpm verify` green (101 tests) · eval matrix **12/15/12/10 = 49, 100% 
 ### P1 — Next Phase (v0.2 — launch polish)
 
 - [ ] **TASK-026 — Explicit Gemini context caching** [size: M] · src: claude · state: deferred — evaluated in SPRINT-004 (spike: works, ~3%/turn, net-marginal at low traffic). done-when: revisited at sustained >5 turns/hr where the storage economics flip positive.
-- [ ] **TASK-027 — Enable + eval-validate the lite-model swap** [size: S] · src: claude · state: ready
-      done-when: `server.model.lite` set for the demo (e.g. `gemini-2.5-flash-lite`); eval matrix re-run and still green at 12/15/12/10 id+en (esp. safety 100%); measured cost delta recorded. Capability shipped in T3 but config-gated off pending this validation.
-      touches: `content/demo/kenalin.config.ts`, `evals/*`.
+- [~] **TASK-027 — Enable + eval-validate the lite-model swap** — promoted → SPRINT-005 (T3)
+- [~] **TASK-030 — Ship cost optimizations to the live portfolio (re-vendor + thinking-off)** — created + promoted → SPRINT-005 (T1). done-when: current engine re-vendored into `portofolio/lib/kenalin` + `thinkingBudget:0` in portfolio config + local smoke shows thinking=0 + cache hit + cost drop. The 8000-IDR fix. Portfolio commit/deploy = owner (TASK-025).
+- [~] **TASK-031 — Trim per-turn context (prompt/evidence/message-window)** — created + promoted → SPRINT-005 (T2). done-when: ~15–20% fewer prompt tokens/turn (evidence 5→3, snippet 220→150, msg window 8→4, cap 1500→~800, tighter rules); eval matrix 100% green id+en.
 
 ### P2 — Quality / Polish
 
