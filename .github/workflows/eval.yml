@@ -1,0 +1,33 @@
+name: Eval
+
+# The eval matrix runs against the live Gemini API and spends tokens, so it is
+# manual-only (workflow_dispatch), not part of the per-PR gate (SPRINT-002 D2).
+# Requires the repo secret KENALIN_LLM_API_KEY (Settings → Secrets → Actions).
+
+on:
+  workflow_dispatch:
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.9.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run eval matrix
+        run: pnpm eval
+        env:
+          KENALIN_LLM_API_KEY: ${{ secrets.KENALIN_LLM_API_KEY }}

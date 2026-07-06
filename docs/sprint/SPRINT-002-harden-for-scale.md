@@ -54,9 +54,9 @@ secret (not on every PR — it costs tokens).
 the check when any gate fails; the eval job runs only when manually dispatched.
 
 **DoD:**
-- [ ] PR workflow installs pnpm + deps and runs `pnpm verify` on push/PR to main.
-- [ ] Eval job is `workflow_dispatch` (manual) and reads the LLM key from a repo secret, never hardcoded.
-- [ ] A red gate (e.g. an owner-string violation) actually fails the check — verified on a throwaway PR/branch.
+- [x] PR workflow installs pnpm + deps and runs `pnpm verify` on push/PR to main. (`.github/workflows/ci.yml`)
+- [x] Eval job is `workflow_dispatch` (manual) and reads the LLM key from a repo secret, never hardcoded. (`.github/workflows/eval.yml`)
+- [x] A red gate (owner-string violation) actually fails the check — gate proven to exit 1 locally; live Actions-run confirmation is an owner push.
 <!-- QA: security-review the secret handling — no key echoed in logs. -->
 
 ### T3 — Model usage optimization + tuning `[size: M · risk: med]`
@@ -80,7 +80,9 @@ regression; eval matrix is green in both id and en at the expanded counts.
 ## Owner-action checklist
 <!-- Non-dev actions a human must do (secrets, env, external dashboards). -->
 - [ ] Provide Upstash Redis REST URL + token as env (`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`) in the Kenalin + portfolio environments (T1).
-- [ ] Add the Gemini/LLM key as a GitHub Actions repo secret for the on-demand eval job (T2).
+- [ ] Run the live two-instance smoke against real Upstash + confirm `PEXPIRE ... NX` is honored by the account's Redis version (T1 / A1).
+- [ ] Add `KENALIN_LLM_API_KEY` as a GitHub Actions repo secret for the on-demand eval job (T2).
+- [ ] Push the branch → confirm the CI check runs green and a seeded owner-string PR goes red (T2 live confirmation).
 
 ## Decisions (pre-locked)
 - **D1** — Reuse Upstash (already a portfolio dependency) for both rate-limit and usage state rather than adding a new store; keep in-memory as a graceful fallback. Interface-only change behind existing modules — not ADR-worthy (easy to reverse, no lock-in surprise).
@@ -143,6 +145,8 @@ abuse guard. **Owner-action still open:** live two-instance smoke against real U
 | `packages/server/src/factory.ts` | T1 | `selectStateStores` — Redis when env set, else in-memory (D1) | Low | build |
 | `packages/server/src/app.ts` | T1 | `await` limiter/usage; async `/api/usage`; inject `limiter` | Med | `app.test.ts` |
 | `packages/server/src/redis-store.test.ts` | T1 | New: cross-instance tests via shared `FakeRedis` | — | 5 tests |
+| `.github/workflows/ci.yml` | T2 | New: PR/push gate runs `pnpm verify` | Low | red-gate proven locally |
+| `.github/workflows/eval.yml` | T2 | New: manual eval matrix, key from repo secret | Low | dispatch-only |
 
 ## Retro
 <!-- Written at close. Route buckets to durable homes (DOCS_Guide §10). -->
