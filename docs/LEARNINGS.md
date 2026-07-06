@@ -13,6 +13,30 @@ rule, or a skill red-flag — and marked below. Reviewed at every **Sprint Promo
 
 ---
 
+## L-007 [tags: deploy, architecture] [status: active]: The portfolio vendors the `embed` engine, not the Hono app — wire production features into `embed.ts` too
+- seen: Sprint-005
+- count: 1
+- promoted: no
+- related: L-003 (both: verify the real artifact that ships)
+
+The live site imports the vendored `kenalin-engine.mjs` (built from `embed.ts` / `createKenalinEngine`),
+NOT the Hono `createApp`. So a feature added only to the Hono path never reaches production: the
+response cache (SPRINT-004, D4 "Hono-path only") was invisible to the portfolio until wired into
+`embed.ts` in SPRINT-005. When adding a prod-facing capability, ask "does the embed engine get it?"
+and smoke the **vendored bundle**, not the repo source.
+
+## L-006 [tags: cost, models, eval] [status: active]: Validate a cheaper-model swap across MULTIPLE eval runs — cheap models trade quality for variance
+- seen: Sprint-005
+- count: 1
+- promoted: no
+- related: L-005 (both: measure the real behavior before committing)
+
+`gemini-2.5-flash-lite` is ~35% cheaper but its quality is *unstable*: one eval run passed all bars,
+the next gave grounding 75% / intent 80% / conversation 70%. **Safety held 100% both runs** (the
+policy prompt is robust), but grounding/intent/conversation don't. A single green eval is not enough
+for a cheap-model swap — run it several times and look at the variance, not just one pass. Cheaper
+models fail *silently and intermittently*, which is worse than failing consistently.
+
 ## L-005 [tags: cost, measurement, planning] [status: active]: Measure cost levers with a live spike before committing sprint scope — don't rank optimizations by intuition
 - seen: Sprint-004
 - count: 1

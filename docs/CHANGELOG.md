@@ -11,6 +11,19 @@ All notable changes to Kenalin. Format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+### Changed — SPRINT-005 (cut cost to scale → v0.2, 2026-07-07)
+- **Production cost fix (TASK-030)**: the live portfolio ran a stale vendored engine with
+  thinking ON and no response cache. Re-vendored the current engine + set
+  `server.model.thinkingBudget: 0` in the portfolio config, and **wired the response cache
+  into the embed engine** (`createKenalinEngine` — it was Hono-only before). Vendored-bundle
+  smoke: thinking=0, repeat=cache-hit (0 tokens), **cost/turn ~31 → ~11 IDR**. (Portfolio
+  commit/deploy is the owner's — TASK-025.)
+- **Evaluated → not adopted:** per-turn **context trimming (TASK-031)** — evidence/snippet/
+  window cuts regress grounding + destabilize intent for ~5%; the prompt cost is the static
+  safety/grounding prefix, which is load-bearing. **lite-model swap (TASK-027)** — flash-lite
+  is ~35% cheaper but grounding/intent/conversation are unstable on it (safety holds); left
+  config-gated for a future stronger lite model.
+
 ### Added — SPRINT-004 (cost-optimal chat flow → v0.2, 2026-07-06)
 - **Grounding-safe response cache (TASK-024)**: caches the validated `ChatResponse` keyed
   on `SHA-1(normalized query + language + sorted retrieved chunk id:content)`; a hit on a

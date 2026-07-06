@@ -2,10 +2,10 @@
 sprint: 005
 slug: cut-cost-to-scale
 owner: Tech Lead
-last_updated: 2026-07-06
-status: active
+last_updated: 2026-07-07
+status: closed
 plan_commit: b060042
-close_commit: [sha — set at close]
+close_commit: [pending — set at close commit]
 update_trigger: sprint execute/close events
 ---
 
@@ -133,15 +133,28 @@ uncommitted for the owner** (D1 / TASK-025).
 | `D:/Project/portofolio/lib/kenalin/kenalin.config.ts` | T1 | `thinkingBudget:0` — **owner commits** | Low | vendor smoke |
 
 ## Retro
-<!-- Written at close. Route buckets to durable homes (DOCS_Guide §10). -->
 
-**Retrieval check** — _(fill at close)_
+Closed 2026-07-07. **T1 shipped** (the MVP cost fix); **T2 + T3** evaluated → not viable
+(reverted). `pnpm verify` green (101 tests); eval matrix back to 100%. The sprint's win is
+T1 — production cost/turn ~31 → ~11 IDR (thinking off) + repeats free (cache), verified on the
+vendored bundle. The other two levers were tested with data and correctly rejected.
+
+**Retrieval check** — Consequence of a prior decision surfaced: **D4 (SPRINT-002, "response
+cache/Redis are Hono-path only")** meant the cache never reached the portfolio, which vendors
+the **embed** engine, not the Hono app — production ran uncached. Corrected in T1 by wiring the
+cache into `embed.ts`. → **Learnings** (L-007).
 
 **Worked**
-- _(fill at close)_
+- The cost triage found the real problem in minutes (stale vendored engine) — the 8000-IDR alarm was cumulative testing, not per-conversation; the fix was already-built code not shipped.
+- Eval-gating killed two plausible levers (context trim, lite model) before they shipped quality regressions — exactly the discipline L-005 called for.
+- Smoke-testing the **vendored bundle** (not the repo source) caught that the portfolio path needed the embed-cache wiring.
 
-**Friction**
-- _(fill at close)_
+**Friction (→ routed)**
+- Prod features added to the Hono path (Redis, response cache) silently didn't reach the portfolio, which uses `embed.ts`. → **Learnings** (L-007).
+- flash-lite's run-to-run variance nearly passed a lite config on one run — a single green eval isn't enough for a cheap-model swap. → **Learnings** (L-006).
 
-**Pattern candidate**
-- _(fill at close)_
+**Routed buckets**
+- **Shipped** → `docs/CHANGELOG.md` (SPRINT-005 block).
+- **Tech debt** → none new (lite + explicit-cache stay config-gated capabilities, not debt).
+- **Follow-ups** → TASK-027 kept (revisit lite with a stronger model); TASK-031 closed not-viable (don't refile).
+- **Learnings** → L-006 (validate cheap-model swaps across *multiple* eval runs — variance), L-007 (the portfolio vendors `embed.ts`, not the Hono app — wire prod features into embed too).

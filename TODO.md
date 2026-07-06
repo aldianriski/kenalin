@@ -17,10 +17,9 @@ status: current
 
 ## Active Sprint
 
-> **SPRINT-005 — Cut cost to scale** → [`docs/sprint/SPRINT-005-cut-cost-to-scale.md`](docs/sprint/SPRINT-005-cut-cost-to-scale.md)
-> T1 TASK-030 re-vendor+thinking-off (portfolio) · T2 TASK-031 trim per-turn context · T3 TASK-027 lite-model swap. Focus: cut production cost/turn (~31→~10 IDR).
+> **→ — none —** · SPRINT-005 closed (production cost fix shipped: thinking-off + cache re-vendored; context-trim + lite-swap evaluated not-viable). Archive: [`docs/sprint/archive/SPRINT-005-cut-cost-to-scale.md`](docs/sprint/archive/SPRINT-005-cut-cost-to-scale.md).
 
-Status: `pnpm verify` green (101 tests) · eval matrix **12/15/12/10 = 49, 100% id+en**. **Cost finding:** live portfolio runs a stale engine (thinking ON, no cache) → SPRINT-005 ships the fix. Detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
+Status: `pnpm verify` green (101 tests) · eval matrix **12/15/12/10 = 49, 100% id+en** · **production cost/turn ~31 → ~11 IDR** (thinking off + response cache re-vendored; owner commits/deploys the portfolio — TASK-025). Detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
 ---
 
@@ -36,9 +35,7 @@ Status: `pnpm verify` green (101 tests) · eval matrix **12/15/12/10 = 49, 100% 
 ### P1 — Next Phase (v0.2 — launch polish)
 
 - [ ] **TASK-026 — Explicit Gemini context caching** [size: M] · src: claude · state: deferred — evaluated in SPRINT-004 (spike: works, ~3%/turn, net-marginal at low traffic). done-when: revisited at sustained >5 turns/hr where the storage economics flip positive.
-- [~] **TASK-027 — Enable + eval-validate the lite-model swap** — promoted → SPRINT-005 (T3)
-- [~] **TASK-030 — Ship cost optimizations to the live portfolio (re-vendor + thinking-off)** — created + promoted → SPRINT-005 (T1). done-when: current engine re-vendored into `portofolio/lib/kenalin` + `thinkingBudget:0` in portfolio config + local smoke shows thinking=0 + cache hit + cost drop. The 8000-IDR fix. Portfolio commit/deploy = owner (TASK-025).
-- [~] **TASK-031 — Trim per-turn context (prompt/evidence/message-window)** — created + promoted → SPRINT-005 (T2). done-when: ~15–20% fewer prompt tokens/turn (evidence 5→3, snippet 220→150, msg window 8→4, cap 1500→~800, tighter rules); eval matrix 100% green id+en.
+- [ ] **TASK-027 — Enable the lite-model swap** [size: S] · src: claude · state: deferred — evaluated in SPRINT-005: flash-lite ~35% cheaper but grounding/intent/conversation unstable (safety held). Capability config-gated. done-when: re-validate with a stronger lite model (multiple eval runs — L-006).
 
 ### P2 — Quality / Polish
 
