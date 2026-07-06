@@ -139,6 +139,7 @@ export const ThemeTokensSchema = z
     navy: z.string().optional(),
     accent: z.string().optional(),
     accentStrong: z.string().optional(),
+    accentText: z.string().optional(),
     accentSoft: z.string().optional(),
     amber: z.string().optional(),
     bg: z.string().optional(),

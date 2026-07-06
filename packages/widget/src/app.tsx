@@ -77,6 +77,9 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
   const sessionRef = useRef<string>(uuid());
   const clientRef = useRef(new KenalinClient(apiUrl));
   const logRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const launcherRef = useRef<HTMLButtonElement>(null);
+  const restoreFocusRef = useRef(false);
   const lastUserRef = useRef<{ text: string; seed?: string } | null>(null);
 
   useEffect(() => {
@@ -87,6 +90,54 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
   useEffect(() => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
+  // A11y (TASK-006): move focus into the open panel, trap Tab within it, close on
+  // Escape, and restore focus to the launcher on close. Shadow-DOM aware.
+  useEffect(() => {
+    if (!open) {
+      if (restoreFocusRef.current) {
+        launcherRef.current?.focus();
+        restoreFocusRef.current = false;
+      }
+      return;
+    }
+    const panel = panelRef.current;
+    if (!panel) return;
+    const focusables = (): HTMLElement[] =>
+      Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute("disabled") && el.tabIndex !== -1);
+    focusables()[0]?.focus();
+    const activeEl = (): Element | null => {
+      const root = panel.getRootNode();
+      return root instanceof ShadowRoot ? root.activeElement : document.activeElement;
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        restoreFocusRef.current = true;
+        setOpen(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const items = focusables();
+      if (items.length === 0) return;
+      const firstEl = items[0]!;
+      const lastEl = items[items.length - 1]!;
+      const active = activeEl();
+      if (e.shiftKey && active === firstEl) {
+        e.preventDefault();
+        lastEl.focus();
+      } else if (!e.shiftKey && active === lastEl) {
+        e.preventDefault();
+        firstEl.focus();
+      }
+    };
+    panel.addEventListener("keydown", onKeyDown);
+    return () => panel.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   const patchLastAssistant = (patch: Partial<UiMessage>) =>
     setMessages((prev) => {
@@ -173,7 +224,15 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
 
   if (!open) {
     return (
-      <button class="launcher" aria-label={t(lang, "openLabel")} onClick={() => setOpen(true)}>
+      <button
+        class="launcher"
+        ref={launcherRef}
+        aria-label={t(lang, "openLabel")}
+        onClick={() => {
+          restoreFocusRef.current = true;
+          setOpen(true);
+        }}
+      >
         <span class="badge">
           {brandLogo ? <img class="brandimg" src={brandLogo} alt="" /> : <LogoMark size={20} />}
         </span>
@@ -185,7 +244,7 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
   const showQuick = messages.filter((m) => !m.pending).length <= 1 && config.quickActions.length > 0;
 
   return (
-    <div class="panel" role="dialog" aria-label={config.assistant.name}>
+    <div class="panel" role="dialog" aria-modal="true" aria-label={config.assistant.name} ref={panelRef}>
       <div class="header">
         <span class="avatar">
           {brandAvatar ? <img class="brandimg" src={brandAvatar} alt="" /> : <LogoMark size={26} />}
@@ -199,7 +258,7 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
         <button class="iconbtn" aria-label={t(lang, "close")} onClick={() => { setMessages([]); setOpen(false); }}><IconClose /></button>
       </div>
 
-      <div class="log" ref={logRef}>
+      <div class="log" ref={logRef} role="log" aria-live="polite" aria-relevant="additions text">
         {messages.map((m, i) => (
           <MessageView
             key={i}

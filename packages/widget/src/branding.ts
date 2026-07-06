@@ -10,6 +10,7 @@ const TOKEN_VARS: Record<string, string> = {
   navy: "--kenalin-navy",
   accent: "--kenalin-accent",
   accentStrong: "--kenalin-accent-strong",
+  accentText: "--kenalin-accent-text",
   accentSoft: "--kenalin-accent-soft",
   amber: "--kenalin-amber",
   bg: "--kenalin-bg",

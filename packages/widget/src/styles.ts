@@ -11,6 +11,9 @@ export const STYLES = /* css */ `
   --k-navy: var(--kenalin-navy, #0F2742);
   --k-accent: var(--kenalin-accent, #22B8A7);
   --k-accent-strong: var(--kenalin-accent-strong, #1AA090);
+  /* Accent used as TEXT on a light surface — darkened to meet WCAG AA (TASK-006).
+     Overridden to the bright accent in dark mode below. */
+  --k-accent-text: var(--kenalin-accent-text, #0F766E);
   --k-accent-soft: var(--kenalin-accent-soft, #8DE2D4);
   --k-amber: var(--kenalin-amber, #D99A2B);
   --k-bg: var(--kenalin-bg, #F8F7F3);
@@ -33,11 +36,14 @@ export const STYLES = /* css */ `
     --k-muted: var(--kenalin-muted, #9AA6B8);
     --k-border: var(--kenalin-border, #263042);
     --k-user: var(--kenalin-user-bg, #12303A);
+    /* On dark surfaces the bright accent already exceeds AA — use it for text. */
+    --k-accent-text: var(--kenalin-accent-text, #22B8A7);
   }
 }
 :host([data-theme="dark"]) {
   --k-bg: #0E1420; --k-surface: #172033; --k-text: #EEF1F6;
   --k-muted: #9AA6B8; --k-border: #263042; --k-user: #12303A;
+  --k-accent-text: var(--kenalin-accent-text, #22B8A7);
 }
 * { box-sizing: border-box; }
 button { font: inherit; cursor: pointer; }
@@ -108,7 +114,7 @@ button { font: inherit; cursor: pointer; }
 .row.assistant .bubble { background: var(--k-surface); border: 1px solid var(--k-border); border-top-left-radius: 5px; }
 .row.user .bubble { background: var(--k-user); color: var(--k-text); border-top-right-radius: 5px; }
 .time { font-size: 11px; color: var(--k-muted); display: flex; align-items: center; gap: 3px; padding: 0 3px; }
-.time .tick { color: var(--k-accent); letter-spacing: -2px; }
+.time .tick { color: var(--k-accent-text); letter-spacing: -2px; }
 
 /* ── Quick-action cards ───────────────────────────────────────────────── */
 .qgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
@@ -146,11 +152,11 @@ button { font: inherit; cursor: pointer; }
 .evcard .evsnippet { font-size: 12px; color: var(--k-muted); line-height: 1.4; margin-top: 3px; }
 .evtags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 .evtag { font-size: 10.5px; color: var(--k-muted); background: var(--k-bg); border: 1px solid var(--k-border); border-radius: 6px; padding: 2px 7px; }
-.evmore { display: inline-flex; align-items: center; gap: 3px; color: var(--k-accent); font-size: 12px; font-weight: 600; margin-top: 9px; }
+.evmore { display: inline-flex; align-items: center; gap: 3px; color: var(--k-accent-text); font-size: 12px; font-weight: 600; margin-top: 9px; }
 
 /* ── Complexity block ─────────────────────────────────────────────────── */
 .complex { background: var(--k-surface); border: 1px solid var(--k-border); border-radius: 13px; padding: 13px; }
-.complex .eyebrow { font-size: 10.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--k-accent); }
+.complex .eyebrow { font-size: 10.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--k-accent-text); }
 .complex .clevel { display: flex; align-items: center; gap: 8px; margin: 4px 0 6px; }
 .complex .cval { font-size: 26px; font-weight: 700; color: var(--k-amber); text-transform: capitalize; }
 .complex .cval svg { color: var(--k-amber); }
@@ -179,7 +185,7 @@ button { font: inherit; cursor: pointer; }
 .composer .send:hover { background: var(--k-accent-strong); }
 .composer .send:disabled { opacity: .45; }
 .foot { text-align: center; font-size: 10px; color: var(--k-muted); padding: 6px 0 9px; background: var(--k-surface); }
-.foot b { color: var(--k-accent); font-weight: 600; }
+.foot b { color: var(--k-accent-text); font-weight: 600; }
 
 /* ── States ───────────────────────────────────────────────────────────── */
 .dots span { display: inline-block; width: 6px; height: 6px; margin: 0 2px; border-radius: 50%; background: var(--k-accent); animation: k-blink 1.2s infinite both; }
@@ -188,7 +194,7 @@ button { font: inherit; cursor: pointer; }
 .fallback { display: flex; flex-direction: column; align-items: flex-start; gap: 9px; background: var(--k-surface); border: 1px solid var(--k-border); border-radius: 13px; padding: 13px; }
 .fallback .fmsg { font-size: 13px; color: var(--k-muted); line-height: 1.5; }
 .fallback .retry { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border: 1px solid var(--k-border); border-radius: 9px; color: var(--k-text); font-size: 13px; font-weight: 500; background: transparent; }
-.fallback .retry:hover { border-color: var(--k-accent); color: var(--k-accent); }
+.fallback .retry:hover { border-color: var(--k-accent); color: var(--k-accent-text); }
 
 @media (prefers-reduced-motion: reduce) {
   .panel, .launcher, .dots span { animation: none; transition: none; }
