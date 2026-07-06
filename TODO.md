@@ -61,7 +61,7 @@ Status: `pnpm verify` green (91 tests) · eval matrix **12/15/12/10 = 49, 100% i
 - [ ] **TASK-022 — `create-kenalin` + publish `@kenalin/*` to npm** [size: M] · src: claude — clean consumption instead of vendoring. Resolves TD-004.
 - [ ] **TASK-023 — Ingestion improvements** [size: M] · src: claude — map MDX frontmatter → type/projectId/url; incremental/scheduled re-index; PII redaction on briefs.
 - [~] **TASK-024 — Response/embedding caching** — promoted → SPRINT-004 (T2)
-- [~] **TASK-028 — Skip-LLM fast-path for trivial turns** — created + promoted → SPRINT-004 (T3, ADR-005 + /council gated)
+- [~] **TASK-028 — Deterministic context-pooling intake → single consolidated LLM call** — created + promoted → SPRINT-004 (T3, ADR-005 + /council gated)
 
 ---
 

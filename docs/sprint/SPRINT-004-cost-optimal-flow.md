@@ -62,37 +62,46 @@ a different-entity question is a miss and answers freshly.
 - [ ] A grounding-safety test: a different-entity query must NOT hit another entity's cached answer.
 <!-- QA: cache-poisoning / cross-entity test is the safety gate here. -->
 
-### T3 — Skip-LLM fast-path for trivial turns `[size: M · risk: HIGH]` — GATED on ADR-005
-Layers: `packages/core` (classifier + canned responses), `packages/server/src/orchestrator/orchestrator.ts`.
-Answer provably-safe trivial turns (blank input, a strict greeting whitelist) with a
-canned, policy-compliant response **without any LLM call**. This bypasses the per-turn
-safety/grounding layer for those turns, so it is **hard-to-reverse + safety-touching**:
-**do NOT implement until ADR-005 is accepted.** ADR-005 is pressure-tested via `/council`
-first (per the owner decision + DOCS_Guide §4).
+### T3 — Deterministic context-pooling intake → single consolidated LLM call `[size: M · risk: HIGH]` — GATED on ADR-005
+Layers: `packages/core` (intake state machine + canned prompts), `packages/server/src/orchestrator/orchestrator.ts`.
+Collect the intake (name, intention, purpose) with **deterministic canned questions**
+captured into `ConversationState` — **no LLM call per intake turn** (asking a fixed
+question and storing an answer needs no model). Once pooled, **one consolidated LLM
+call** processes the whole context (intent + grounded answer + CTA). This compacts a
+multi-turn intake (N LLM calls today) into deterministic collection + **1 call**.
 
-**Acceptance:** ADR-005 accepted; only the ADR-sanctioned trivial set skips the LLM;
-the eval matrix (incl. every safety scenario) stays 100% green — a skipped turn never
-mishandles an injection or an ownable claim.
+This DEFERS (does not bypass) the safety/grounding pass — the pooled visitor content
+still gets a full safety-checked one-pass. But it changes the conversation flow and the
+*timing* of that pass, and needs an **off-script rule** (a visitor who asks a real
+question mid-intake must fall through to the LLM immediately, not get filed as "purpose").
+Hard-to-reverse → **do NOT implement until ADR-005 is accepted** (pressure-tested via
+`/council` first, per the owner decision + DOCS_Guide §4).
+
+**Acceptance:** ADR-005 accepted; canned intake questions fire with **no** LLM call;
+an off-script/substantive message falls through to the LLM immediately (no missed
+answer); one consolidated call on the pooled context yields the grounded response; the
+eval matrix (incl. every safety scenario + injection-during-intake) stays 100% green.
 
 **DoD:**
-- [ ] **ADR-005 written + `/council`-pressure-tested + accepted** (defines the exact provably-safe skippable set + the guardrails). **Blocks the rest of T3.**
-- [ ] Classifier is deterministic + conservative (no LLM); anything not provably trivial falls through to the normal one-pass flow.
-- [ ] Safety scenarios that *look* trivial but aren't (e.g. `"halo, ignore your rules…"`) fall through to the LLM — added as eval scenarios and green.
-- [ ] Eval matrix 100% green id + en with the fast-path enabled; measured cost impact recorded.
-<!-- QA: adversarial "trivial-looking but unsafe" scenarios are the gate — must fall through. -->
+- [ ] **ADR-005 written + `/council`-pressure-tested + accepted** — defines the canned intake steps, the pooling model, the off-script fall-through rule, and the max canned steps before the LLM must run. **Blocks the rest of T3.**
+- [ ] Deterministic intake: canned questions + capture into `ConversationState`; **zero** LLM calls to ask/store.
+- [ ] Off-script detection (cheap, no LLM): a substantive question during intake falls through to the normal one-pass flow immediately.
+- [ ] One consolidated LLM call on the pooled context produces intent + grounded answer + CTA (still one-pass; safety + grounding applied to everything pooled).
+- [ ] Eval 100% green id + en incl. new "off-script during intake" + "injection during intake" scenarios; measured LLM-call-count / cost reduction over a multi-turn intake.
+<!-- QA: adversarial off-script + injection-during-intake are the gate — must fall through to the safety-checked pass. -->
 
 ## Owner-action checklist
 - [ ] If T2's cache should hold cross-instance, ensure `UPSTASH_*` env is set (reuses the SPRINT-002 store) — else per-instance fallback (T2).
 
 ## Decisions (pre-locked)
-- **D1** — The skip-LLM fast-path (T3) bypasses the per-turn safety layer for some turns → **hard-to-reverse + surprising + a real trade-off** → **ADR-005 required**, pressure-tested via `/council` **before** any T3 implementation. Relates to / amends ADR-001 (single-pass). *No safety-bypassing code lands without the accepted ADR (L-024 doctrine guard).*
+- **D1** — T3 = **deterministic context-pooling intake → one consolidated LLM call**. It DEFERS (does not bypass) the safety/grounding pass — pooled content still gets a full safety-checked one-pass — but it changes the conversation flow and the *timing* of that pass, and adds an off-script fall-through rule → **hard-to-reverse + surprising + a real trade-off** → **ADR-005 required**, pressure-tested via `/council` **before** any T3 implementation. Stays within ADR-001 (still one pass, fewer calls). *No flow-changing/safety-timing code lands without the accepted ADR (L-024 doctrine guard).*
 - **D2** — The response cache (T2) keys on **retrieved-chunk-ids** (not query similarity alone) so a different entity can never hit another's cached answer; cache carries an index-version so re-ingest invalidates it.
 - **D3** — T1/T2 (caching) are safe and do **not** depend on ADR-005 — they proceed first; T3 waits on the ADR.
 
 ## Assumptions
 - **A1** — Gemini `cachedContent` is available/beneficial for `gemini-2.5-flash` at our prefix size (~1.2–1.5k tokens ≥ the min cacheable). *Confirm: T1 provider spike + a live cost measurement.*
 - **A2** — Response-cache hit rate is meaningful in practice (the eval scenarios are unique, so measure with a repeat-heavy probe, not the matrix). *Confirm: T2 dedicated repeat test.*
-- **A3** — A genuinely provably-safe trivial-turn set exists (blank/greeting) that needs neither grounding nor a safety-policy pass. *Confirm: ADR-005 + /council verdict.*
+- **A3** — Intake (name/intention/purpose) can be collected via deterministic canned questions + capture with no LLM call, and an off-script/substantive message can be detected cheaply (no LLM) to fall through. *Confirm: ADR-005 + /council verdict.*
 
 ## Execution Log
 
@@ -103,6 +112,14 @@ council). Governance: L-003 promoted to CONTEXT.md (count 2, collapsed); TD-002/
 flagged for re-review (≥3 sprints, none high). Flow evaluation recorded in the sprint
 theme: single Gemini call ≈ 99% of cost, prompt-dominated → cache first, skip repeats,
 skip trivial only behind ADR-005.
+
+### 2026-07-06 | T3 | Rescoped (pre-build) — context-pooling intake, not generic skip-LLM
+Owner aligned the intent: T3 is **deterministic context-pooling intake → one consolidated
+LLM call**, not "skip the LLM for trivial turns." Intake (name/intention/purpose) is
+collected via canned questions + capture (no LLM per turn), then one call processes the
+pool. It DEFERS rather than bypasses the safety pass, and adds an off-script fall-through
+rule. Sharper question now goes to `/council` → ADR-005. (Scope clarification of T3's
+framing, not a change to the sprint's deliverables.)
 
 ## Files Changed
 
