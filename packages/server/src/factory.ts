@@ -5,7 +5,10 @@ import { selectEmbedder } from "./embeddings/index.js";
 import { selectChatProvider } from "./chat/index.js";
 import { selectLeadStore } from "./lead-store/index.js";
 import { WebhookEmitter } from "./webhook.js";
-import { resolveWebhookSecret } from "./env.js";
+import { resolveRedisConfig, resolveWebhookSecret } from "./env.js";
+import { UpstashRedis } from "./redis.js";
+import { RateLimiter, RedisRateLimiter, type RateLimiterLike } from "./rate-limit.js";
+import { RedisUsageTracker, UsageTracker, type UsageStore } from "./usage.js";
 import type { AppDeps } from "./app.js";
 
 export interface BuildDepsOptions {
@@ -42,6 +45,10 @@ export async function buildAppDeps(
     ? new WebhookEmitter({ url: config.handoff.webhook.url, secret: webhookSecret }, opts.log)
     : undefined;
 
+  // Distributed rate limit + usage counters when Upstash is configured (TASK-007),
+  // else the in-memory implementations (per-instance) — graceful fallback (D1).
+  const { limiter, usage } = selectStateStores(config, opts.log);
+
   return {
     config,
     store,
@@ -50,6 +57,28 @@ export async function buildAppDeps(
     retrievalThreshold,
     leadStore,
     webhookEmitter,
+    limiter,
+    usage,
     log: opts.log,
+  };
+}
+
+/**
+ * Pick Redis-backed or in-memory limiter + usage tracker from env. A single shared
+ * Redis client serves both; missing/partial Upstash env falls back to in-memory.
+ */
+function selectStateStores(
+  config: KenalinConfig,
+  log?: (event: Record<string, unknown>) => void,
+): { limiter: RateLimiterLike; usage: UsageStore } {
+  const redisConfig = resolveRedisConfig();
+  if (!redisConfig) {
+    return { limiter: new RateLimiter(config.server.rateLimit), usage: new UsageTracker() };
+  }
+  log?.({ event: "state_store", backend: "upstash" });
+  const redis = new UpstashRedis(redisConfig);
+  return {
+    limiter: new RedisRateLimiter(redis, config.server.rateLimit),
+    usage: new RedisUsageTracker(redis),
   };
 }

@@ -14,17 +14,19 @@ import {
 } from "@kenalin/core";
 import { Orchestrator, type OrchestratorDeps } from "./orchestrator/orchestrator.js";
 import { toPublicConfig } from "./public-config.js";
-import { RateLimiter } from "./rate-limit.js";
+import { RateLimiter, type RateLimiterLike } from "./rate-limit.js";
 import { guardRequest } from "./guard.js";
-import { UsageTracker } from "./usage.js";
+import { UsageTracker, type UsageStore } from "./usage.js";
 import type { WebhookEmitter } from "./webhook.js";
 
 export interface AppDeps extends OrchestratorDeps {
   config: KenalinConfig;
   leadStore?: LeadStore;
   webhookEmitter?: WebhookEmitter;
-  /** Token-usage tracker; one is created automatically if omitted. */
-  usage?: UsageTracker;
+  /** Token-usage tracker; in-memory one is created if omitted (Redis via factory). */
+  usage?: UsageStore;
+  /** Rate limiter; in-memory one is created if omitted (Redis via factory). */
+  limiter?: RateLimiterLike;
 }
 
 /**
@@ -39,11 +41,14 @@ export function createApp(deps: AppDeps): Hono {
   const orchestrator = new Orchestrator({
     ...deps,
     onUsage: (turn) => {
-      usage.record(turn);
+      // record() may be async (Redis) — never block the turn; log a write failure.
+      void Promise.resolve(usage.record(turn)).catch((err) =>
+        deps.log?.({ event: "usage_record_error", error: String(err) }),
+      );
       callerOnUsage?.(turn);
     },
   });
-  const limiter = new RateLimiter(deps.config.server.rateLimit);
+  const limiter = deps.limiter ?? new RateLimiter(deps.config.server.rateLimit);
   const allowed = deps.config.server.allowedOrigins;
 
   // Baseline security headers (nosniff, referrer policy, frame deny, etc.).
@@ -63,9 +68,11 @@ export function createApp(deps: AppDeps): Hono {
 
   // Token usage — counts only, never message content. Global totals, or a
   // single session's totals with ?sessionId=.
-  app.get("/api/usage", (c) => {
+  app.get("/api/usage", async (c) => {
     const sessionId = c.req.query("sessionId");
-    return c.json(sessionId ? { session: usage.session(sessionId) } : usage.global());
+    return c.json(
+      sessionId ? { session: await usage.session(sessionId) } : await usage.global(),
+    );
   });
 
   app.post("/api/chat", async (c) => {
@@ -73,7 +80,7 @@ export function createApp(deps: AppDeps): Hono {
       c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ||
       c.req.header("x-real-ip") ||
       "anonymous";
-    if (!limiter.allow(ip)) {
+    if (!(await limiter.allow(ip))) {
       return c.json({ error: "rate_limited" }, 429);
     }
 
@@ -93,7 +100,7 @@ export function createApp(deps: AppDeps): Hono {
       return c.json({ error: guard.error }, guard.status as 400 | 413 | 429);
     }
     // Per-session token budget (TASK-003) — friendly limit, not a spend.
-    if (usage.overBudget(parsed.data.sessionId)) {
+    if (await usage.overBudget(parsed.data.sessionId)) {
       return c.json({ error: "usage_limit" }, 429);
     }
 

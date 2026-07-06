@@ -22,3 +22,16 @@ export function resolvePort(env: NodeJS.ProcessEnv = process.env): number {
   const p = Number(env.PORT);
   return Number.isFinite(p) && p > 0 ? p : 8787;
 }
+
+/**
+ * Resolve Upstash Redis REST credentials for the distributed rate limiter + usage
+ * counters (TASK-007). Returns undefined when either half is missing — callers then
+ * fall back to the in-memory implementations (D1: graceful degradation).
+ */
+export function resolveRedisConfig(
+  env: NodeJS.ProcessEnv = process.env,
+): { url: string; token: string } | undefined {
+  const url = env.UPSTASH_REDIS_REST_URL;
+  const token = env.UPSTASH_REDIS_REST_TOKEN;
+  return url && token ? { url, token } : undefined;
+}
