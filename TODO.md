@@ -17,10 +17,9 @@ status: current
 
 ## Active Sprint
 
-> **SPRINT-002 — Harden for scale** → [`docs/sprint/SPRINT-002-harden-for-scale.md`](docs/sprint/SPRINT-002-harden-for-scale.md)
-> T1 TASK-007 distributed rate limiter (Upstash) · T2 TASK-008 CI gate · T3 TASK-005 model tuning. Resolves TD-005/006/007; progresses TD-001.
+> **→ — none —** · SPRINT-002 closed (Upstash limiter + CI gate + model tuning −37% cost/turn). Archive: [`docs/sprint/archive/SPRINT-002-harden-for-scale.md`](docs/sprint/archive/SPRINT-002-harden-for-scale.md).
 
-Status: `pnpm verify` green (68 tests) · eval matrix 3/3 stable · widget 14.2 KB gz · reference integrated + indexed (117 chunks). Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
+Status: `pnpm verify` green (80 tests) · eval matrix **12/15/12/10 = 49, 100% id+en** · cost/turn ~908 µUSD (thinking off) · widget 14.2 KB gz. Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
 ---
 
@@ -41,9 +40,12 @@ Status: `pnpm verify` green (68 tests) · eval matrix 3/3 stable · widget 14.2 
 - [ ] **TASK-006 — Accessibility to Lighthouse a11y ≥ 90** [size: M] · src: claude · state: ready
       done-when: focus trap in the open panel, ARIA live region for the streaming answer, full keyboard nav, contrast verified; Lighthouse a11y ≥ 90 on the example page (PRD Phase 3 DoD, not yet measured).
       touches: `widget/src/app.tsx`, `widget/src/styles.ts`.
-- [~] **TASK-005 — Model usage optimization + tuning** — promoted → SPRINT-002 (T3)
-- [~] **TASK-007 — Distributed rate limiter** — promoted → SPRINT-002 (T1)
-- [~] **TASK-008 — CI gate (GitHub Actions)** — promoted → SPRINT-002 (T2)
+- [ ] **TASK-026 — Explicit Gemini context caching** [size: M] · src: claude · state: ready
+      done-when: the static system-prompt prefix is cached via Gemini `cachedContent` (explicit, not just implicit) with a sane TTL/lifecycle; measured cost/turn drops further on repeated-prefix traffic. Builds on the T3 prompt-prefix split.
+      touches: `server/src/chat/gemini.ts`, `core/prompt/builder.ts`.
+- [ ] **TASK-027 — Enable + eval-validate the lite-model swap** [size: S] · src: claude · state: ready
+      done-when: `server.model.lite` set for the demo (e.g. `gemini-2.5-flash-lite`); eval matrix re-run and still green at 12/15/12/10 id+en (esp. safety 100%); measured cost delta recorded. Capability shipped in T3 but config-gated off pending this validation.
+      touches: `content/demo/kenalin.config.ts`, `evals/*`.
 
 ### P2 — Quality / Polish
 
@@ -78,6 +80,7 @@ Status: `pnpm verify` green (68 tests) · eval matrix 3/3 stable · widget 14.2 
 - **TD-005** severity: medium | status: resolved → TASK-007 (Sprint-002) | created: Sprint-000 — Rate limiter is in-memory (per serverless instance). Redis-backed via Upstash; in-memory kept as fallback.
 - **TD-006** severity: medium | status: resolved → TASK-007 (Sprint-002) | created: Sprint-001 — UsageTracker + per-session token budget were in-memory. Redis-backed via Upstash; cap holds cross-instance (verified w/ shared-FakeRedis test).
 - **TD-007** severity: minor | status: resolved → TASK-005 (Sprint-002) | created: Sprint-001 — Gemini thinking-token overhead. Now config-controlled (`server.model.thinkingBudget`); disabled in demo — cost/turn −37%, quality green.
+- **TD-008** severity: minor | status: open | created: Sprint-002 — The embedded `KenalinEngine` (`embed.ts`, vendored by the portfolio) stays in-memory/sync for limiter+usage — only the Hono `/api` path is Redis-backed (D4), so the vendored engine's counters remain per-instance. Also the Redis limiter is fixed-window (not the in-memory token bucket). done-when: move the embed engine to the shared Redis store (needs an async `KenalinEngine` API rev) if per-instance counting there becomes a problem.
 
 ---
 

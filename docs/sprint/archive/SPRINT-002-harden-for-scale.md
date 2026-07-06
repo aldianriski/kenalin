@@ -3,9 +3,9 @@ sprint: 002
 slug: harden-for-scale
 owner: Tech Lead
 last_updated: 2026-07-06
-status: active
+status: closed
 plan_commit: 3f34b1b
-close_commit: [sha — set at close]
+close_commit: [pending — set at close commit]
 update_trigger: sprint execute/close events
 ---
 
@@ -186,15 +186,29 @@ abuse guard. **Owner-action still open:** live two-instance smoke against real U
 | `evals/README.md` | T3 | Refresh status table to expanded counts | — | docs |
 
 ## Retro
-<!-- Written at close. Route buckets to durable homes (DOCS_Guide §10). -->
 
-**Retrieval check** — _(fill at close)_
+Closed 2026-07-06. All 3 tasks shipped, every DoD `[x]`. `pnpm verify` green (80 tests:
+core 30 · server 46 · widget 4); eval matrix 100% at 12/15/12/10 (id+en); cost/turn −37%.
+
+**Retrieval check** — Did we contradict a prior `L-NNN`/ADR? Nearly: T3's "lighter model on
+cheap turns" as written would have split intent into its own call, violating **ADR-001**
+(one-pass). The doctrine guard (L-024) held — surfaced it as decision D3 (whole-turn swap)
+instead of silently flipping. No fileable miss; the guard worked.
 
 **Worked**
-- _(fill at close)_
+- Recon-first (2× Explore) before the batch gate mapped the async ripple + the ADR-001 tension up front → no surprises mid-build.
+- Config-gated, default-OFF capabilities (lite-swap) let risky changes land without eval risk.
+- Direct API probes (thinkingBudget 833→0) to confirm a lever before trusting an eval delta — caught a stale-`dist` false reading.
 
-**Friction**
-- _(fill at close)_
+**Friction (→ routed)**
+- I falsely declared T3 key-blocked from a bad env probe (read `process.env`, then a buggy `.env` parser) — wasted a cycle. → **Learnings** (reinforces L-002).
+- `pnpm eval`/tests import workspace deps from `dist`, so tuning silently ran stale until `pnpm build`. → **Learnings** (L-003).
+- Redis limiter is fixed-window, not the in-memory token bucket (semantic shift); `embed.ts` KenalinEngine stays per-instance (D4). → **Tech debt** (TD-008).
 
-**Pattern candidate**
-- _(fill at close)_
+**Routed buckets**
+- **Shipped** → `docs/CHANGELOG.md` (SPRINT-002 block).
+- **Tech debt** → TD-008 (embed.ts engine stays in-memory / limiter semantics note).
+- **Follow-ups** → TASK-026 (explicit Gemini context caching), TASK-027 (enable + eval-validate lite-model swap).
+- **Learnings** → L-003 (rebuild `dist` before measuring); L-002 count bumped (verify env correctly before declaring a block).
+
+**Owner-actions still open** (carried, not blockers to close): live Upstash two-instance smoke + `PEXPIRE NX` check (T1); GitHub secret + push to confirm the CI check live (T2).
