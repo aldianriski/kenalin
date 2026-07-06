@@ -42,6 +42,7 @@ schema, then run through policy validators. See [`ARCHITECTURE.md`](../docs/ARCH
 ❌ A config field that could weaken a B9 safety guarantee.
 ❌ Emitting a URL not sourced from config actions or retrieved evidence; emitting a monetary figure.
 ❌ Declaring work env/secret-blocked without a **verified probe of the real runtime source** — check what the code actually reads (`.env` via `loadDotEnv`, not `process.env`), and sanity-check the probe itself (L-002, promoted).
+❌ Running a cross-package typecheck, test, or live measurement **without rebuilding the changed package's `dist`** first — `@kenalin/*` deps resolve to built `dist`, not `src`, so a stale `dist` silently runs/measures the old code (`pnpm --filter <pkg> build` before verifying) (L-003, promoted).
 
 ## Domain Glossary
 

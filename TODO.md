@@ -17,9 +17,10 @@ status: current
 
 ## Active Sprint
 
-> **→ — none —** · SPRINT-003 closed (config branding + a11y). Archive: [`docs/sprint/archive/SPRINT-003-launch-polish.md`](docs/sprint/archive/SPRINT-003-launch-polish.md).
+> **SPRINT-004 — Cost-optimal chat flow** → [`docs/sprint/SPRINT-004-cost-optimal-flow.md`](docs/sprint/SPRINT-004-cost-optimal-flow.md)
+> T1 TASK-026 context caching · T2 TASK-024 response/semantic cache · T3 TASK-028 skip-LLM fast-path (**ADR-005 + /council gated**). T1/T2 safe & proceed first.
 
-Status: `pnpm verify` green (91 tests) · eval matrix **12/15/12/10 = 49, 100% id+en** · a11y verified live in Chrome · widget 15.1 KB gz. Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
+Status: `pnpm verify` green (91 tests) · eval matrix **12/15/12/10 = 49, 100% id+en** · cost/turn ~908 µUSD baseline. Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
 ---
 
@@ -34,9 +35,7 @@ Status: `pnpm verify` green (91 tests) · eval matrix **12/15/12/10 = 49, 100% i
 
 ### P1 — Next Phase (v0.2 — launch polish)
 
-- [ ] **TASK-026 — Explicit Gemini context caching** [size: M] · src: claude · state: ready
-      done-when: the static system-prompt prefix is cached via Gemini `cachedContent` (explicit, not just implicit) with a sane TTL/lifecycle; measured cost/turn drops further on repeated-prefix traffic. Builds on the T3 prompt-prefix split.
-      touches: `server/src/chat/gemini.ts`, `core/prompt/builder.ts`.
+- [~] **TASK-026 — Explicit Gemini context caching** — promoted → SPRINT-004 (T1)
 - [ ] **TASK-027 — Enable + eval-validate the lite-model swap** [size: S] · src: claude · state: ready
       done-when: `server.model.lite` set for the demo (e.g. `gemini-2.5-flash-lite`); eval matrix re-run and still green at 12/15/12/10 id+en (esp. safety 100%); measured cost delta recorded. Capability shipped in T3 but config-gated off pending this validation.
       touches: `content/demo/kenalin.config.ts`, `evals/*`.
@@ -61,7 +60,8 @@ Status: `pnpm verify` green (91 tests) · eval matrix **12/15/12/10 = 49, 100% i
 - [ ] **TASK-021 — Admin / config UI** [size: L] · src: claude — no-code editing of persona/modules/actions/theme (completes TASK-004 end-to-end).
 - [ ] **TASK-022 — `create-kenalin` + publish `@kenalin/*` to npm** [size: M] · src: claude — clean consumption instead of vendoring. Resolves TD-004.
 - [ ] **TASK-023 — Ingestion improvements** [size: M] · src: claude — map MDX frontmatter → type/projectId/url; incremental/scheduled re-index; PII redaction on briefs.
-- [ ] **TASK-024 — Response/embedding caching** [size: M] · src: claude — cache identical queries + embeddings to cut cost/latency.
+- [~] **TASK-024 — Response/embedding caching** — promoted → SPRINT-004 (T2)
+- [~] **TASK-028 — Skip-LLM fast-path for trivial turns** — created + promoted → SPRINT-004 (T3, ADR-005 + /council gated)
 
 ---
 

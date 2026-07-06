@@ -27,18 +27,7 @@ origin** (:5173, per demo `allowedOrigins`), load the example in Chrome (MCP), a
 =false`, but `.focus()` still sets `shadowRoot.activeElement`, so focus assertions work. This gave
 live proof of the focus trap that no static test could.
 
-## L-003 [tags: build, tooling] [status: active]: Rebuild workspace `dist` before measuring — eval/tests/typecheck import deps from `dist`, not `src`
-- seen: Sprint-002, Sprint-003
-- count: 2
-- promoted: no
-- related: L-004
-
-`pnpm eval`, package tests, AND cross-package `tsc` import `@kenalin/server` / `@kenalin/core` from
-their built `dist`, not source. Sprint-002: eval measured a stale orchestrator (only core rebuilt) —
-a direct API probe (thinkingBudget 833→0) exposed it. Sprint-003: server typecheck failed against a
-stale core `dist` after a schema change until core was rebuilt. Rebuild the packages you changed
-before trusting a typecheck or a live measurement. **count ≥ 2 → promote at next sprint-promote**
-(candidate: a CONTEXT.md convention or an `/orchestrator` note).
+## L-003 → promoted: `.claude/CONTEXT.md` § Anti-Patterns (rebuild a changed package's `dist` before cross-package typecheck/test/measure). Seen Sprint-002, Sprint-003. Durable rule is the record now.
 
 ---
 
