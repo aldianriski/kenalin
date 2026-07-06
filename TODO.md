@@ -71,13 +71,13 @@ Status: `pnpm verify` green (68 tests) · eval matrix 3/3 stable · widget 14.2 
 
 ## Tech Debt
 
-- **TD-001** severity: medium | status: open | created: Sprint-000 — Eval scenario counts (5/5/8/3) below H2 minimums (12/15/12/10). done-when: expanded per TASK-005.
+- **TD-001** severity: medium | status: resolved → TASK-005 (Sprint-002) | created: Sprint-000 — Eval counts were 5/5/8/3. Expanded to 12/15/12/10 (49), 100% green id+en.
 - **TD-002** severity: medium | status: open | created: Sprint-000 — Widget test coverage thin (only the SSE parser). done-when: component tests for app/message/evidence/chips render + click.
 - **TD-003** severity: minor | status: open | created: Sprint-000 — Answer is pseudo-streamed word-by-word, not real token streaming. done-when: TASK-014.
 - **TD-004** severity: minor | status: open | created: Sprint-000 — Portfolio consumes a vendored bundle; must re-vendor on each release. done-when: TASK-022.
 - **TD-005** severity: medium | status: resolved → TASK-007 (Sprint-002) | created: Sprint-000 — Rate limiter is in-memory (per serverless instance). Redis-backed via Upstash; in-memory kept as fallback.
 - **TD-006** severity: medium | status: resolved → TASK-007 (Sprint-002) | created: Sprint-001 — UsageTracker + per-session token budget were in-memory. Redis-backed via Upstash; cap holds cross-instance (verified w/ shared-FakeRedis test).
-- **TD-007** severity: minor | status: open | created: Sprint-001 — Gemini `total` tokens include large thinking-token overhead (cost lever). done-when: TASK-005 (limit/disable thinking on cheap turns).
+- **TD-007** severity: minor | status: resolved → TASK-005 (Sprint-002) | created: Sprint-001 — Gemini thinking-token overhead. Now config-controlled (`server.model.thinkingBudget`); disabled in demo — cost/turn −37%, quality green.
 
 ---
 

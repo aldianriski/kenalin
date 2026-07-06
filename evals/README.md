@@ -27,23 +27,26 @@ Exits non-zero if any group is below its PRD H2 pass bar.
 
 ## Status (last live run — billing enabled)
 
-**Full matrix PASSED** and stable across repeated runs:
+**Full matrix PASSED** at the H2 minimum counts (12/15/12/10), green in id + en:
 
 ```
-✓ grounding     5/5 (100%) — bar 90%
-✓ intent        5/5 (100%) — bar 85%
-✓ safety        8/8 (100%) — bar 100%   (incl. off-topic coding/knowledge + prompt injection)
-✓ conversation  3/3 (100%) — bar 90%
+✓ grounding     12/12 (100%) — bar 90%
+✓ intent        15/15 (100%) — bar 85%
+✓ safety        12/12 (100%) — bar 100%   (incl. off-topic coding/knowledge/recipe + prompt injection ×2)
+✓ conversation  10/10 (100%) — bar 90%
+
+tokens/turn ~1961 · cost/turn ~908 µUSD (gemini-2.5-flash list price, thinking disabled)
 ```
 
 Stability came from a low chat temperature (0.25) + an explicit "don't cite
-unrelated evidence for an unknown name" grounding rule. Scenario counts are
-representative; expand toward the H2 minimums (12/15/12/10) as the corpus grows.
+unrelated evidence for an unknown name" grounding rule. The runner also reports
+tokens + a µUSD cost/turn proxy (TASK-005) — disabling thinking cut cost ~37% vs
+the pre-tuning baseline with no quality regression.
 
 ## Notes
 
 - Scenarios are typed TS (`scenarios.ts`), not YAML, to avoid a parser dependency
   and get compile-time checking — a deliberate deviation from the PRD H3 YAML
   sketch. Assertions mirror H3.
-- Scenario counts are representative; expand toward the H2 minimums
-  (12/15/12/10) as the corpus grows — the runner scales to any count.
+- Scenario counts meet the H2 minimums (12/15/12/10). The runner scales to any
+  count — add more as the corpus grows.

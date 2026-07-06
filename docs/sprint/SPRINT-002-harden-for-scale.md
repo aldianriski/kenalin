@@ -71,11 +71,11 @@ Resolves **TD-007**; progresses **TD-001**.
 regression; eval matrix is green in both id and en at the expanded counts.
 
 **DoD:**
-- [ ] Cost/turn baseline captured, then a measured reduction after tuning (thinking budget + lighter model on cheap turns + prompt-prefix cache).
-- [ ] Thinking-token overhead limited/disabled on turns where quality is unaffected (TD-007).
-- [ ] Eval scenarios expanded toward H2 minimums (12/15/12/10) and green in id + en.
-- [ ] TD-007 marked `resolved → TASK-005`; TD-001 note updated with progress.
-<!-- QA: eval matrix IS the regression gate here — must stay green at the higher counts. -->
+- [x] Cost/turn baseline captured (1445 µUSD), then a measured reduction to 908 µUSD (−37%) — thinking disabled + cache-friendly prompt reorder; whole-turn lite swap shipped (config-gated off).
+- [x] Thinking-token overhead disabled where quality is unaffected (TD-007) — `thinkingBudget:0`, probed (thoughts 833→0), eval green.
+- [x] Eval scenarios expanded to H2 minimums (12/15/12/10 = 49) and green in id + en (100% all groups).
+- [x] TD-007 + TD-001 marked `resolved → TASK-005` in TODO § Tech Debt.
+<!-- QA: eval matrix IS the regression gate here — stayed green at the higher counts. -->
 
 ## Owner-action checklist
 <!-- Non-dev actions a human must do (secrets, env, external dashboards). -->
@@ -122,6 +122,14 @@ Recon (2× Explore) surfaced two forks; owner decided both:
 
 ### 2026-07-06 | T1 | Started — distributed rate limiter + usage counters
 
+### 2026-07-06 | T3 | Done — eval matrix expanded to H2 minimums, 100% green
+Scenarios 21 → **49** (grounding 12, intent 15, safety 12, conversation 10), grounded in
+the demo content (PayGrid team-of-8, Lumina Studio, Go microservices, QuickHub/LedgerLens,
+reconciliation, audit log), balanced id + en. Full matrix **100%** all groups. Cached tokens
+rose 32 → 109/turn as more scenarios share the static prefix — the reorder's implicit-cache
+benefit is volume-sensitive (real production win). TD-001 + TD-007 resolved → TASK-005.
+All T3 DoD [x]. README eval status table refreshed.
+
 ### 2026-07-06 | T3 | Tuning shipped + measured — −37% cost/turn, quality green
 Cost/turn (eval, gemini-2.5-flash list price): **1445 → 908 µUSD (−37%)**, eval matrix
 still 100% green (grounding/intent/safety/conversation) — quality-neutral (A3 confirmed
@@ -166,6 +174,16 @@ abuse guard. **Owner-action still open:** live two-instance smoke against real U
 | `packages/server/src/redis-store.test.ts` | T1 | New: cross-instance tests via shared `FakeRedis` | — | 5 tests |
 | `.github/workflows/ci.yml` | T2 | New: PR/push gate runs `pnpm verify` | Low | red-gate proven locally |
 | `.github/workflows/eval.yml` | T2 | New: manual eval matrix, key from repo secret | Low | dispatch-only |
+| `packages/core/src/config/schema.ts` | T3 | `ModelConfigSchema` (thinkingBudget, lite, liteMaxChars) | Low | build |
+| `packages/core/src/interfaces/providers.ts` | T3 | `model`/`thinkingBudget` on request; `cachedTokens` on usage | Low | typecheck |
+| `packages/core/src/model/routing.ts` | T3 | New: `selectTurnModel` whole-turn swap (ADR-001-safe) | Low | `routing.test.ts` (5) |
+| `packages/core/src/prompt/builder.ts` | T3 | Reorder: static blocks lead → longer cache prefix | Med | eval green |
+| `packages/server/src/chat/gemini.ts` | T3 | Honor per-req model + `thinkingConfig`; capture cached | Med | eval green |
+| `packages/server/src/orchestrator/orchestrator.ts` | T3 | Select model + thinking budget per turn | Med | eval + `orchestrator.test.ts` |
+| `content/demo/kenalin.config.ts` | T3 | Disable thinking (cost tuning) | Low | eval green |
+| `evals/runner.ts` | T3 | Report tokens + µUSD cost/turn | Low | eval run |
+| `evals/scenarios.ts` | T3 | 21 → 49 scenarios (12/15/12/10), id+en | Low | eval 100% |
+| `evals/README.md` | T3 | Refresh status table to expanded counts | — | docs |
 
 ## Retro
 <!-- Written at close. Route buckets to durable homes (DOCS_Guide §10). -->
