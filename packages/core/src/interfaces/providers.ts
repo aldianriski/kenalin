@@ -15,6 +15,9 @@ export interface TokenUsage {
   promptTokens: number;
   completionTokens: number;
   totalTokens: number;
+  /** Prompt tokens served from the provider's context cache (billed cheaper);
+   *  0/undefined when caching didn't apply. Observability only (TASK-005). */
+  cachedTokens?: number;
 }
 
 /** Streaming events emitted by a ChatProvider.generate() call. */
@@ -29,6 +32,10 @@ export interface ChatGenerateRequest {
   /** Structured output enforced by the provider. */
   responseSchema: JsonSchema;
   maxTokens?: number;
+  /** Override the model for this call (whole-turn lite swap); provider default if unset. */
+  model?: string;
+  /** Thinking-token budget for this call: undefined = provider default; 0 = disabled. */
+  thinkingBudget?: number;
 }
 
 export interface ChatProvider {

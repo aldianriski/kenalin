@@ -122,6 +122,25 @@ Recon (2× Explore) surfaced two forks; owner decided both:
 
 ### 2026-07-06 | T1 | Started — distributed rate limiter + usage counters
 
+### 2026-07-06 | T3 | Tuning shipped + measured — −37% cost/turn, quality green
+Cost/turn (eval, gemini-2.5-flash list price): **1445 → 908 µUSD (−37%)**, eval matrix
+still 100% green (grounding/intent/safety/conversation) — quality-neutral (A3 confirmed
+for the default config). Levers: (1) **thinking disabled** (`server.model.thinkingBudget:0`)
+— probed directly: thoughts 833→0, and output tokens are 8× input price so this moves cost
+far more than its token share (TD-007 resolved); (2) **prompt reorder** — config-static
+blocks (safety/persona/rules/actions) lead the per-turn state/evidence, lengthening the
+implicit-cache prefix (cached tokens 0→32 in the eval; more under production volume);
+(3) **whole-turn lite-model swap** (`selectTurnModel`, ADR-001-safe) — capability shipped,
+config-gated OFF (`lite` unset) until an owner opts in + re-evals; unit-tested. Runner now
+reports tokens + a µUSD cost/turn proxy. **Gotcha logged:** `pnpm eval` imports server from
+`dist`, so tuning only takes effect after `pnpm build` — an early run measured a stale path.
+
+### 2026-07-06 | T3 | Correction — key IS present; not blocked
+I briefly logged T3 as key-blocked; that was a false alarm from a bad env probe. `.env`
+carries `API_KEY_GEMINI` (loaded by `runner.ts` via `loadDotEnv`). T3 proceeds with live
+eval able to run. (Kept this note for the audit trail — L-002 reinforced: check env
+correctly before declaring a block.)
+
 ### 2026-07-06 | T1 | Done — Upstash-backed limiter + usage (all DoD [x])
 New `redis.ts` (thin Upstash REST client over `fetch`, no SDK dep) + `RedisRateLimiter`
 and `RedisUsageTracker`; `factory.selectStateStores` picks Redis when `UPSTASH_*` env

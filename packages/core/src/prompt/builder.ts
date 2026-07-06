@@ -119,11 +119,18 @@ function stateBlock(state: ConversationState, page?: PageContext): string {
 /**
  * Assemble the full system prompt for the single orchestration pass (PRD D5 step 6):
  * core safety policy + persona + enabled-module fragments + conversation rules +
- * retrieved evidence + available actions + conversation state. Pure; no I/O.
+ * available actions + retrieved evidence + conversation state. Pure; no I/O.
+ *
+ * Ordering is deliberate (TASK-005): the config-static blocks — safety, persona,
+ * modules, intent, rules, actions — lead, so they form one long stable prefix that
+ * is identical turn-to-turn for a given (config, language). The per-turn blocks
+ * (state, evidence) trail. That maximizes the prefix the provider's implicit
+ * context cache can reuse, cutting the effective prompt cost.
  */
 export function buildSystemPrompt(config: KenalinConfig, ctx: PromptContext): string {
   const moduleFragments = enabledModules(config).map((m) => `- ${m.promptFragment}`);
   return [
+    // --- Static prefix (stable per config+language → cacheable) ---
     CORE_SAFETY_POLICY,
     "",
     personaBlock(config, ctx.language),
@@ -135,11 +142,12 @@ export function buildSystemPrompt(config: KenalinConfig, ctx: PromptContext): st
     "",
     conversationRules(config, ctx.language),
     "",
+    actionsBlock(ctx.actions),
+    "",
+    // --- Dynamic suffix (per-turn) ---
     stateBlock(ctx.state, ctx.pageContext),
     "",
     evidenceBlock(ctx.evidence),
-    "",
-    actionsBlock(ctx.actions),
     "",
     "Respond ONLY with the structured JSON object matching the required schema.",
   ].join("\n");

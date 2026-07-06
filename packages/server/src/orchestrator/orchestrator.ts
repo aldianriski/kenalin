@@ -3,6 +3,7 @@ import {
   buildFallbackResponse,
   buildSystemPrompt,
   parseModelOutput,
+  selectTurnModel,
   GEMINI_MODEL_OUTPUT_SCHEMA,
   ChatRequestSchema,
   type Action,
@@ -123,20 +124,26 @@ export class Orchestrator {
 
     // Accumulate token usage for this turn (embedding is estimated — the embed
     // API doesn't report counts; chat is authoritative from usageMetadata).
-    const usage = { prompt: 0, completion: 0, embedding: estimateTokens(query || " "), total: 0 };
+    const usage = { prompt: 0, completion: 0, embedding: estimateTokens(query || " "), total: 0, cached: 0 };
     const addUsage = (u?: TokenUsage) => {
       if (!u) return;
       usage.prompt += u.promptTokens;
       usage.completion += u.completionTokens;
       usage.total += u.totalTokens;
+      usage.cached += u.cachedTokens ?? 0;
     };
     const emitUsage = () => {
       usage.total += usage.embedding;
       this.deps.onUsage?.({ sessionId: request.sessionId, ...usage });
     };
 
+    // Whole-turn model choice + thinking budget (TASK-005). One call, one model —
+    // ADR-001 preserved (selectTurnModel is a per-turn choice, not a per-concern split).
+    const chatModel = selectTurnModel(config, request);
+    const thinkingBudget = config.server.model.thinkingBudget;
+
     // 4. One structured LLM call, then one repair attempt if it doesn't parse.
-    const first = await this.callProvider(system, request);
+    const first = await this.callProvider(system, request, chatModel, thinkingBudget);
     addUsage(first.usage);
     let model = parseModelOutput(first.payload);
     if (!model && !first.errored) {
@@ -145,7 +152,7 @@ export class Orchestrator {
         system +
         "\n\nIMPORTANT: your previous reply did not match the required JSON schema. " +
         "Reply again with ONLY the JSON object, no prose, no code fences.";
-      const second = await this.callProvider(repairSystem, request);
+      const second = await this.callProvider(repairSystem, request, chatModel, thinkingBudget);
       addUsage(second.usage);
       model = parseModelOutput(second.payload);
     }
@@ -179,6 +186,8 @@ export class Orchestrator {
   private async callProvider(
     system: string,
     request: ChatRequest,
+    model?: string,
+    thinkingBudget?: number,
   ): Promise<{ payload: unknown; errored: boolean; usage?: TokenUsage }> {
     let payload: unknown = null;
     let errored = false;
@@ -189,6 +198,8 @@ export class Orchestrator {
         messages: trimForLlm(request.messages),
         responseSchema: GEMINI_MODEL_OUTPUT_SCHEMA,
         maxTokens: LIMITS.maxOutputTokens,
+        model,
+        thinkingBudget,
       })) {
         if (ev.type === "final") {
           payload = ev.payload;

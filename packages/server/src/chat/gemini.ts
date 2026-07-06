@@ -39,23 +39,30 @@ export class GeminiChatProvider implements ChatProvider {
   }
 
   async *generate(req: ChatGenerateRequest): AsyncIterable<ProviderEvent> {
-    const url = `${ENDPOINT}/models/${this.model}:generateContent?key=${this.apiKey}`;
+    // Per-turn model override (whole-turn lite swap, TASK-005); provider default otherwise.
+    const model = req.model ?? this.model;
+    const url = `${ENDPOINT}/models/${model}:generateContent?key=${this.apiKey}`;
+    const generationConfig: Record<string, unknown> = {
+      responseMimeType: "application/json",
+      responseSchema: req.responseSchema,
+      // Generous budget so a thinking model's reasoning tokens don't truncate
+      // the structured JSON payload (a truncated payload → repair → fallback).
+      maxOutputTokens: req.maxTokens ?? 2048,
+      // Low temperature → consistent policy/grounding compliance (no fabricated
+      // evidence, reliable intent), which matters more here than creative variety.
+      temperature: 0.25,
+    };
+    // Cap/disable thinking-token overhead when configured (TD-007 cost lever).
+    if (req.thinkingBudget !== undefined) {
+      generationConfig.thinkingConfig = { thinkingBudget: req.thinkingBudget };
+    }
     const body = {
       systemInstruction: { parts: [{ text: req.system }] },
       contents: req.messages.map((m) => ({
         role: m.role === "assistant" ? "model" : "user",
         parts: [{ text: m.content }],
       })),
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: req.responseSchema,
-        // Generous budget so a thinking model's reasoning tokens don't truncate
-        // the structured JSON payload (a truncated payload → repair → fallback).
-        maxOutputTokens: req.maxTokens ?? 2048,
-        // Low temperature → consistent policy/grounding compliance (no fabricated
-        // evidence, reliable intent), which matters more here than creative variety.
-        temperature: 0.25,
-      },
+      generationConfig,
     };
 
     // Retry transient upstream failures (rate spikes, 5xx, timeouts) before
@@ -98,6 +105,7 @@ export class GeminiChatProvider implements ChatProvider {
               promptTokens: u.promptTokenCount ?? 0,
               completionTokens: u.candidatesTokenCount ?? 0,
               totalTokens: u.totalTokenCount ?? 0,
+              cachedTokens: u.cachedContentTokenCount ?? 0,
             }
           : undefined;
         yield { type: "final", payload: text, usage };
@@ -123,5 +131,6 @@ interface GeminiResponse {
     promptTokenCount?: number;
     candidatesTokenCount?: number;
     totalTokenCount?: number;
+    cachedContentTokenCount?: number;
   };
 }

@@ -18,4 +18,5 @@ export * from "./policy/index.js";
 export * from "./knowledge/index.js";
 export * from "./retrieval/index.js";
 export * from "./prompt/builder.js";
+export * from "./model/routing.js";
 export * from "./orchestrator/index.js";

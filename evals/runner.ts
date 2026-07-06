@@ -73,7 +73,19 @@ async function main(): Promise<void> {
     rootDir: repoRoot,
     indexDir: join(repoRoot, "content", "index"),
   });
-  const orchestrator = new Orchestrator(deps);
+  // Accumulate token usage across the run so we can report cost/turn (TASK-005).
+  const usageTotals = { turns: 0, prompt: 0, completion: 0, embedding: 0, total: 0, cached: 0 };
+  const orchestrator = new Orchestrator({
+    ...deps,
+    onUsage: (t) => {
+      usageTotals.turns += 1;
+      usageTotals.prompt += t.prompt;
+      usageTotals.completion += t.completion;
+      usageTotals.embedding += t.embedding;
+      usageTotals.total += t.total;
+      usageTotals.cached += t.cached ?? 0;
+    },
+  });
 
   const results: Result[] = [];
   for (const s of SCENARIOS) {
@@ -111,6 +123,30 @@ async function main(): Promise<void> {
     console.log(`${met ? "✓" : "✗"} ${g.padEnd(13)} ${passed}/${gr.length} (${(rate * 100).toFixed(0)}%) — bar ${(bar * 100).toFixed(0)}%`);
     for (const r of gr.filter((x) => !x.ok)) console.log(`    ✗ ${r.id}: ${r.reasons.join("; ")}`);
   }
+  // Cost/turn summary (TASK-005). Thinking overhead is what's left after prompt,
+  // completion, and the embedding estimate — the TD-007 lever.
+  const n = usageTotals.turns || 1;
+  const thinking = Math.max(
+    0,
+    usageTotals.total - usageTotals.prompt - usageTotals.completion - usageTotals.embedding,
+  );
+  const per = (x: number) => (x / n).toFixed(0);
+  // Cost proxy in µUSD/turn using gemini-2.5-flash list price (input $0.30/M,
+  // output $2.50/M incl. thinking, cached input $0.075/M). Output is ~8× input,
+  // so trimming thinking (an output cost) moves the number more than its token
+  // share suggests; cached prompt tokens are billed at the discounted input rate.
+  const IN = 0.3 / 1e6, OUT = 2.5 / 1e6, CACHED_IN = 0.075 / 1e6;
+  const uncachedPrompt = usageTotals.prompt - usageTotals.cached;
+  const costUsd =
+    uncachedPrompt * IN + usageTotals.cached * CACHED_IN + (usageTotals.completion + thinking) * OUT;
+  const costPerTurnMicro = ((costUsd / n) * 1e6).toFixed(1);
+  console.log(
+    `\ntokens/turn: total ${per(usageTotals.total)} — prompt ${per(usageTotals.prompt)} · ` +
+      `completion ${per(usageTotals.completion)} · thinking ${per(thinking)} · embed ${per(usageTotals.embedding)} ` +
+      `· cached ${per(usageTotals.cached)} (${usageTotals.turns} turns)`,
+  );
+  console.log(`cost/turn: ~${costPerTurnMicro} µUSD (gemini-2.5-flash list price)`);
+
   console.log(allBarsMet ? "\n✓ eval matrix PASSED" : "\n✗ eval matrix FAILED");
   process.exit(allBarsMet ? 0 : 1);
 }

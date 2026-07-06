@@ -69,5 +69,10 @@ export default defineKenalinConfig({
   },
   server: {
     allowedOrigins: ["https://demo.kenalin.dev", "http://localhost:5173"],
+    // Cost tuning (TASK-005): disable thinking overhead — the turns here are
+    // structured classification/grounding, not multi-step reasoning, so it adds
+    // cost without measurable quality gain (validated by the eval matrix). Leave
+    // `lite` unset (no whole-turn model swap) until an owner opts in + re-evals.
+    model: { thinkingBudget: 0 },
   },
 });

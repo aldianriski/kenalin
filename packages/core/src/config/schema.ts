@@ -116,6 +116,21 @@ export const QualificationConfigSchema = z.object({
   categories: z.array(z.string()).optional(),
 });
 
+/** Model cost/quality tuning knobs (TASK-005). All optional — defaults preserve
+ * the pre-tuning behavior (flash everywhere, provider-default thinking). */
+export const ModelConfigSchema = z.object({
+  /** Primary chat model. */
+  default: z.string().default("gemini-2.5-flash"),
+  /** Lighter model for trivially-cheap whole turns; unset = never swap (one-pass
+   *  rule preserved — this is a whole-turn model choice, not a per-concern split). */
+  lite: z.string().optional(),
+  /** Max user-message length (chars) for a turn to count as "trivial" → lite. */
+  liteMaxChars: z.number().int().positive().default(120),
+  /** Gemini thinking-token budget: undefined = provider default; 0 = disabled
+   *  (the TD-007 cost lever). Applies to the single structured pass. */
+  thinkingBudget: z.number().int().min(0).optional(),
+});
+
 /** CORS allowlist + rate-limit knobs (PRD D6). */
 export const ServerConfigSchema = z.object({
   allowedOrigins: z.array(z.string()).default([]),
@@ -125,6 +140,7 @@ export const ServerConfigSchema = z.object({
       windowMs: z.number().int().positive().default(10 * 60 * 1000),
     })
     .default({}),
+  model: ModelConfigSchema.default({}),
 });
 
 export const KenalinConfigSchema = z

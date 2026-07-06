@@ -16,6 +16,9 @@ export interface TurnUsage {
   completion: number;
   embedding: number;
   total: number;
+  /** Prompt tokens served from provider context cache (observability only; the
+   *  trackers don't persist this — it's for cost measurement, e.g. the eval). */
+  cached?: number;
 }
 
 export interface SessionUsage {
