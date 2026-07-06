@@ -17,9 +17,9 @@ status: current
 
 ## Active Sprint
 
-> **→ active:** [`docs/sprint/SPRINT-001-launch-readiness.md`](docs/sprint/SPRINT-001-launch-readiness.md) — token usage tracker · graceful error UX · finalize deployment.
+> **→ — none —** · SPRINT-001 closed (T1 token tracker + T2 error UX shipped; T3 → TASK-025). Archive: [`docs/sprint/archive/SPRINT-001-launch-readiness.md`](docs/sprint/archive/SPRINT-001-launch-readiness.md).
 
-Status: `pnpm verify` green (62 tests) · eval matrix 100% (stable) · widget 13.6 KB gz · reference integrated + indexed (117 chunks). Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
+Status: `pnpm verify` green (68 tests) · eval matrix 3/3 stable · widget 14.2 KB gz · reference integrated + indexed (117 chunks). Shipped detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
 ---
 
@@ -27,12 +27,13 @@ Status: `pnpm verify` green (62 tests) · eval matrix 100% (stable) · widget 13
 
 ### P0 — Critical / Blocking
 
-- ~~TASK-001 — Finalize + commit reference deployment~~ → promoted → SPRINT-001
-- ~~TASK-002 — Graceful, typed error UX~~ → promoted → SPRINT-001
+- [ ] **TASK-025 — Finalize + commit reference deployment** [size: S] · src: you · state: blocked (owner)
+      done-when: `API_KEY_GEMINI` added to the portfolio `.env`; real `handoff.whatsapp`/`calendar` + prod `allowedOrigins` set; live `/api/chat` smoke passes; portfolio committed.
+      touches: `D:/Project/portofolio/lib/kenalin/*` + `.env`, portfolio git.
+      note: engine+widget already re-vendored; `/api/config/public` validated live. Was SPRINT-001 T3 (descoped — owner-blocked).
 
 ### P1 — Next Phase (v0.2 — launch polish)
 
-- ~~TASK-003 — Token usage tracker~~ → promoted → SPRINT-001
 - [ ] **TASK-004 — Custom branding via config** [size: M] · src: you · state: ready
       done-when: owner sets launcher logo/avatar (image URL or keep K-mark) + theme preset/tokens in config without code; "Powered by Kenalin" footer is present and not removable by config.
       touches: `core/config/schema.ts`, `server/src/public-config.ts`, `widget/src/app.tsx`, `widget/src/styles.ts`.

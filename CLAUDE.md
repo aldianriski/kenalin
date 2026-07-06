@@ -14,9 +14,11 @@ secure headers, env-only secrets. The reference (Phase 5, RIZVA) is integrated
 into the external portfolio (`D:\Project\portofolio`) — vendored engine + Next.js
 routes + widget, **knowledge index populated (117 chunks)**; left uncommitted there.
 
-**Next work + roadmap live in [`TODO.md`](TODO.md)** (v0.2 launch polish → v0.4
-scale). Immediate P0: finalize + commit the portfolio deployment (TASK-001) and
-graceful error UX (TASK-002).
+SPRINT-001 (token usage tracker + graceful error UX) is **closed** — see
+[`docs/CHANGELOG.md`](docs/CHANGELOG.md) + `docs/sprint/archive/`. **Next work +
+roadmap live in [`TODO.md`](TODO.md)** (v0.2 → v0.4). Immediate **P0: TASK-025** —
+finalize the portfolio deployment (owner-blocked: add the Gemini key to the
+portfolio `.env`, set real channels + prod origins, then commit).
 
 Phase order and dependencies: `0 → 1 → 2 → (3 ∥ 4) → 5 → 6`.
 

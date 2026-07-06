@@ -3,9 +3,9 @@ sprint: 001
 slug: launch-readiness
 owner: Tech Lead
 last_updated: 2026-07-06
-status: active
+status: closed
 plan_commit: de3a898
-close_commit: pending
+close_commit: 00ea4e6
 update_trigger: sprint execute/close events
 ---
 
@@ -113,4 +113,18 @@ Re-vendored engine+widget. Live smoke on `next dev` (port 3007): `/api/config/pu
 | `server/src/ingest/pipeline.ts` | T2 | co-locate manifest (fix test race) | Low | pipeline.test |
 
 ## Retro
-_(written at close)_
+
+**Retrieval check** — no prior `L-NNN`/ADR was contradicted (first sprint; no LEARNINGS existed yet).
+
+**Outcome** — T1 + T2 shipped and green (68 tests, eval 3/3). T3 descoped: re-vendor done + config route validated live, but blocked on owner-actions (portfolio `.env` has no Gemini key; real channels; prod origins). T3's remainder routed to Backlog **TASK-025**.
+
+**Worked**
+- Reading authoritative usage from Gemini `usageMetadata` (incl. thinking tokens) beat estimating.
+- A live smoke test caught the real blocker (missing host key) that unit tests + eval never could.
+
+**Friction**
+- Eval flakiness *looked* like an intent-logic bug but was transient upstream failures degrading to fallback — cost a debugging detour until the provider gained a retry.
+
+**Pattern candidate** (→ `docs/LEARNINGS.md`)
+- L-001: add provider retry so transient upstream failures don't read as logic/quality failures.
+- L-002: verify host secrets/env before a deploy smoke — don't assume the target repo inherited them.

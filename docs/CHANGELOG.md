@@ -9,6 +9,20 @@ status: current
 
 All notable changes to Kenalin. Format loosely follows Keep a Changelog.
 
+## [Unreleased]
+
+### Added — SPRINT-001 (launch readiness, 2026-07-06)
+- **Token usage tracker**: capture Gemini `usageMetadata` per turn (prompt/candidates/total,
+  incl. thinking tokens) + estimated embedding tokens; `UsageTracker` (per-session + global);
+  `GET /api/usage` (counts only, no PII); per-session token budget → `usage_limit`.
+- **Graceful typed error UX**: stable server error-code taxonomy; widget surfaces `{code,status}`
+  and renders localized id/en messages with retryable-vs-informational recovery; offline detection.
+- **Resilience**: Gemini chat provider retries transient failures (429/5xx/timeout, backoff) so a
+  hiccup doesn't degrade a visitor to the fallback.
+- **Fix**: parallel-ingest manifest race (manifest co-located in the index dir).
+
+_(Deferred from this sprint: reference deployment finalization — owner-blocked, → TASK-025.)_
+
 ## [0.1.0] — unreleased
 
 First working end-to-end MVP, built phase-by-phase against `docs/PRD.md` Part G.
