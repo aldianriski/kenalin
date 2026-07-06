@@ -18,6 +18,7 @@ import { GeminiEmbeddingProvider } from "./embeddings/gemini.js";
 import { toPublicConfig, type PublicConfig } from "./public-config.js";
 import { guardRequest, type GuardResult } from "./guard.js";
 import { UsageTracker, type SessionUsage, type UsageSnapshot } from "./usage.js";
+import { MemoryResponseCache, type ResponseCache } from "./response-cache.js";
 
 export interface KenalinEngineOptions {
   /** Raw config object (validated here). */
@@ -30,6 +31,9 @@ export interface KenalinEngineOptions {
   chatModel?: string;
   /** Retrieval cosine floor (default 0.45, calibrated for gemini-embedding-001). */
   retrievalThreshold?: number;
+  /** Response cache — repeats that retrieve the same evidence skip the LLM call.
+   *  Defaults to an in-memory (per-instance) cache; pass one to share across hosts. */
+  responseCache?: ResponseCache;
   log?: (e: Record<string, unknown>) => void;
 }
 
@@ -60,6 +64,7 @@ export function createKenalinEngine(opts: KenalinEngineOptions): KenalinEngine {
     embedder,
     chat,
     retrievalThreshold: opts.retrievalThreshold ?? 0.45,
+    responseCache: opts.responseCache ?? new MemoryResponseCache(),
     log: opts.log,
     onUsage: (turn) => usage.record(turn),
   });

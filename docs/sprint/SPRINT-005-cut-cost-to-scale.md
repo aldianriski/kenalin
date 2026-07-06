@@ -39,11 +39,11 @@ response-cache hit (0 tokens) on a repeated question; measured cost/turn drops v
 bundle. (Portfolio git commit + deploy remain the owner's — TASK-025.)
 
 **DoD:**
-- [ ] Current engine rebuilt + vendored into `portofolio/lib/kenalin/` (has `thinkingConfig` + response cache).
-- [ ] Portfolio `kenalin.config.ts` sets `server.model.thinkingBudget: 0`.
-- [ ] Local smoke: thinking=0, repeat question = cache hit (0 tokens), cost/turn measured before/after.
-- [ ] Owner-action noted: set `UPSTASH_*` env + commit/deploy the portfolio (ties to TASK-025).
-<!-- QA: verify the vendored engine actually reads the config's thinkingBudget end to end. -->
+- [x] Current engine rebuilt + vendored into `portofolio/lib/kenalin/` (`kenalin-engine.mjs`+`.d.mts`) — confirmed `thinkingConfig`:1, response-cache:4. Also **wired the response cache into `embed.ts`** (it wasn't there — D4 was Hono-only), else the re-vendor wouldn't deliver caching.
+- [x] Portfolio `kenalin.config.ts` sets `server.model.thinkingBudget: 0`.
+- [x] Local smoke against the **vendored bundle**: turn 1 = 1537 tok, **thinking=0**; turn 2 (repeat) = **0 tok (cache hit)**. Cost/turn ~11 IDR (was ~31 with thinking on).
+- [x] Owner-action noted (checklist): set `UPSTASH_*` + commit/deploy the portfolio (TASK-025). Portfolio files changed but **left uncommitted** for the owner (D1).
+<!-- Verified end-to-end: config thinkingBudget → 0 thoughts; cache active in the embed engine. -->
 
 ### T2 — Trim per-turn context `[size: M · risk: med]`
 Layers: `packages/core/src/policy/constants.ts`, `packages/core/src/prompt/builder.ts`, `evals/*`.
@@ -95,11 +95,22 @@ ON, no cache) — the likely cause of the alarming test spend. TASK-030 (re-vend
 → T1 (biggest lever), TASK-031 (context trim) → T2, TASK-027 (lite-swap) → T3. Governance
 clean; v0.2.0 cut still overdue (4 sprints under [Unreleased]).
 
+### 2026-07-06 | T1 | Done — cost fixes shipped to the portfolio (re-vendor), smoke-verified
+Recon caught that `embed.ts` (the engine the portfolio vendors) built the Orchestrator with
+**no response cache** (D4 was Hono-only) — so re-vendoring alone wouldn't deliver caching.
+Fixed: wired `MemoryResponseCache` into `createKenalinEngine`. Rebuilt `build:embed`, vendored
+`kenalin-engine.mjs`+`.d.mts` into `portofolio/lib/kenalin/`, set `thinkingBudget:0` in the
+portfolio config. **Smoke on the vendored bundle:** thinking=0, repeat=cache-hit(0 tok),
+~11 IDR/turn (was ~31). Kenalin-repo change (`embed.ts`) committed; **portfolio files left
+uncommitted for the owner** (D1 / TASK-025).
+
 ## Files Changed
 
 | File | Task | Change (WHY) | Risk | Test |
 |------|------|--------------|------|------|
-| _(pending execution)_ | | | | |
+| `packages/server/src/embed.ts` | T1 | Wire response cache into the embed engine (portfolio path) | Med | vendor smoke |
+| `D:/Project/portofolio/lib/kenalin/kenalin-engine.mjs` (+.d.mts) | T1 | Re-vendor current engine (thinking + cache) — **owner commits** | Med | vendor smoke |
+| `D:/Project/portofolio/lib/kenalin/kenalin.config.ts` | T1 | `thinkingBudget:0` — **owner commits** | Low | vendor smoke |
 
 ## Retro
 <!-- Written at close. Route buckets to durable homes (DOCS_Guide §10). -->
