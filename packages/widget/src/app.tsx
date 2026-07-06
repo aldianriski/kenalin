@@ -1,7 +1,19 @@
 import { useState, useRef, useCallback, useEffect } from "preact/hooks";
 import type { JSX } from "preact";
 import { KenalinClient } from "./api.js";
-import { t, detectLang } from "./i18n.js";
+import { t, quickSub, detectLang } from "./i18n.js";
+import {
+  LogoMark,
+  IconClose,
+  IconMinimize,
+  IconChevron,
+  IconSend,
+  IconEvidence,
+  IconRefresh,
+  IconChart,
+  quickActionIcon,
+  actionIcon,
+} from "./icons.js";
 import type {
   Action,
   ConversationState,
@@ -9,7 +21,6 @@ import type {
   Lang,
   PageContext,
   PublicConfig,
-  UiMessage,
 } from "./types.js";
 
 export interface AppProps {
@@ -18,6 +29,17 @@ export interface AppProps {
   config: PublicConfig;
   pageContext?: PageContext;
   startOpen?: boolean;
+}
+
+interface UiMessage {
+  role: "user" | "assistant";
+  content: string;
+  time?: string;
+  evidence?: Evidence[];
+  actions?: Action[];
+  complexity?: string | null;
+  pending?: boolean;
+  failed?: boolean;
 }
 
 const EMPTY_STATE: ConversationState = {
@@ -30,12 +52,21 @@ const EMPTY_STATE: ConversationState = {
 };
 
 function uuid(): string {
-  return typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `s-${Math.random().toString(36).slice(2)}`;
+  return typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `s-${Math.random().toString(36).slice(2)}`;
+}
+function now(): string {
+  try {
+    return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return "";
+  }
 }
 
-export function App({ apiUrl, configUrl, config, pageContext, startOpen }: AppProps): JSX.Element {
+export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.Element {
   const [open, setOpen] = useState(Boolean(startOpen));
-  const [lang, setLang] = useState<Lang>(detectLang((config.assistant.languages[0] as Lang) ?? "id", config.assistant.languages));
+  const [lang] = useState<Lang>(detectLang((config.assistant.languages[0] as Lang) ?? "id", config.assistant.languages));
   const [messages, setMessages] = useState<UiMessage[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -43,16 +74,28 @@ export function App({ apiUrl, configUrl, config, pageContext, startOpen }: AppPr
   const sessionRef = useRef<string>(uuid());
   const clientRef = useRef(new KenalinClient(apiUrl));
   const logRef = useRef<HTMLDivElement>(null);
+  const lastUserRef = useRef<{ text: string; seed?: string } | null>(null);
 
   useEffect(() => {
     if (open && messages.length === 0 && config.assistant.openingMessage) {
-      setMessages([{ role: "assistant", content: config.assistant.openingMessage }]);
+      setMessages([{ role: "assistant", content: config.assistant.openingMessage, time: now() }]);
     }
   }, [open]);
-
   useEffect(() => {
-    logRef.current?.scrollTo({ top: logRef.current.scrollHeight });
+    logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
+  const patchLastAssistant = (patch: Partial<UiMessage>) =>
+    setMessages((prev) => {
+      const next = [...prev];
+      for (let i = next.length - 1; i >= 0; i--) {
+        if (next[i]!.role === "assistant") {
+          next[i] = { ...next[i]!, ...patch };
+          break;
+        }
+      }
+      return next;
+    });
 
   const send = useCallback(
     async (text: string, seedIntent?: string) => {
@@ -60,63 +103,47 @@ export function App({ apiUrl, configUrl, config, pageContext, startOpen }: AppPr
       if (!trimmed || busy) return;
       setInput("");
       setBusy(true);
+      lastUserRef.current = { text: trimmed, seed: seedIntent };
       if (seedIntent) stateRef.current = { ...stateRef.current, intent: seedIntent as ConversationState["intent"] };
 
-      const history = messages
-        .filter((m) => !m.pending)
-        .map((m) => ({ role: m.role, content: m.content }));
+      const history = messages.filter((m) => !m.pending && !m.failed).map((m) => ({ role: m.role, content: m.content }));
       const outbound = [...history, { role: "user" as const, content: trimmed }];
-
       setMessages((prev) => [
         ...prev,
-        { role: "user", content: trimmed },
+        { role: "user", content: trimmed, time: now() },
         { role: "assistant", content: "", pending: true },
       ]);
 
       let streamed = "";
-      const finish = (patch: Partial<UiMessage>) =>
-        setMessages((prev) => {
-          const next = [...prev];
-          for (let i = next.length - 1; i >= 0; i--) {
-            if (next[i]!.role === "assistant") {
-              next[i] = { ...next[i]!, pending: false, ...patch };
-              break;
-            }
-          }
-          return next;
-        });
-
       await clientRef.current.chat(
-        {
-          sessionId: sessionRef.current,
-          messages: outbound.slice(-12),
-          state: stateRef.current,
-          pageContext,
-          locale: lang,
-        },
+        { sessionId: sessionRef.current, messages: outbound.slice(-12), state: stateRef.current, pageContext, locale: lang },
         {
           onDelta: (d) => {
             streamed += d;
-            setMessages((prev) => {
-              const next = [...prev];
-              for (let i = next.length - 1; i >= 0; i--) {
-                if (next[i]!.role === "assistant") {
-                  next[i] = { ...next[i]!, content: streamed };
-                  break;
-                }
-              }
-              return next;
-            });
+            patchLastAssistant({ content: streamed });
           },
           onPayload: (res) => {
             stateRef.current = { ...stateRef.current, ...res.stateUpdates } as ConversationState;
-            const actions = [...(res.suggestedActions ?? [])];
+            const actions: Action[] = [];
             if (res.handoff?.url) {
-              actions.unshift({ id: "handoff", label: handoffLabel(res.handoff.channel, lang), type: res.handoff.channel === "webhook" ? "custom" : res.handoff.channel, url: res.handoff.url } as Action);
+              actions.push({
+                id: "handoff",
+                label: handoffLabel(res.handoff.channel, lang),
+                type: res.handoff.channel === "webhook" ? "custom" : res.handoff.channel,
+                url: res.handoff.url,
+              } as Action);
             }
-            finish({ content: res.answer || streamed, evidence: res.evidence, actions });
+            for (const a of res.suggestedActions ?? []) if (a.id !== "handoff") actions.push(a);
+            patchLastAssistant({
+              content: res.answer || streamed,
+              evidence: res.evidence,
+              actions,
+              complexity: res.qualification?.complexity ?? null,
+              time: now(),
+              pending: false,
+            });
           },
-          onError: () => finish({ content: streamed || t(lang, "error") }),
+          onError: () => patchLastAssistant({ content: streamed, pending: false, failed: !streamed }),
         },
       );
       setBusy(false);
@@ -124,40 +151,59 @@ export function App({ apiUrl, configUrl, config, pageContext, startOpen }: AppPr
     [messages, busy, lang, pageContext],
   );
 
+  const retry = () => {
+    const last = lastUserRef.current;
+    if (!last) return;
+    setMessages((prev) => {
+      // drop the failed assistant turn
+      const next = [...prev];
+      if (next.at(-1)?.role === "assistant") next.pop();
+      return next;
+    });
+    void send(last.text, last.seed);
+  };
+
   if (!open) {
     return (
       <button class="launcher" aria-label={t(lang, "openLabel")} onClick={() => setOpen(true)}>
-        <span aria-hidden="true">💬</span>
+        <span class="badge"><LogoMark size={20} /></span>
         {config.assistant.launcherLabel}
       </button>
     );
   }
 
+  const showQuick = messages.filter((m) => !m.pending).length <= 1 && config.quickActions.length > 0;
+
   return (
     <div class="panel" role="dialog" aria-label={config.assistant.name}>
       <div class="header">
-        <div>
-          <div class="title">{config.assistant.name}</div>
-          <div class="role">{config.owner.preferredName ?? config.owner.name} · {config.owner.role}</div>
+        <span class="avatar"><LogoMark size={26} /></span>
+        <div class="meta">
+          <span class="name">{config.assistant.name}</span>
+          <span class="sub">{config.assistant.description ?? `${t(lang, "subtitle")} · ${config.owner.preferredName ?? config.owner.name}`}</span>
         </div>
-        <button class="iconbtn" aria-label={t(lang, "close")} onClick={() => setOpen(false)}>×</button>
+        <span class="hspace" />
+        <button class="iconbtn" aria-label={t(lang, "minimize")} onClick={() => setOpen(false)}><IconMinimize /></button>
+        <button class="iconbtn" aria-label={t(lang, "close")} onClick={() => { setMessages([]); setOpen(false); }}><IconClose /></button>
       </div>
 
       <div class="log" ref={logRef}>
         {messages.map((m, i) => (
-          <MessageView key={i} m={m} lang={lang} />
+          <MessageView key={i} m={m} lang={lang} onRetry={retry} />
         ))}
-      </div>
 
-      {messages.filter((m) => !m.pending).length <= 1 && config.quickActions.length > 0 && (
-        <div class="quick">
-          {config.quickActions.map((q) => (
-            <button class="chip" key={q.id} onClick={() => send(q.label[lang] ?? q.label.en, q.seedIntent)}>
-              {q.label[lang] ?? q.label.en}
-            </button>
-          ))}
-        </div>
-      )}
+        {showQuick && (
+          <div class="qgrid">
+            {config.quickActions.map((q) => (
+              <button class="qcard" key={q.id} onClick={() => send(q.label[lang] ?? q.label.en, q.seedIntent)}>
+                <div class="qtop">{quickActionIcon(q.id)}<IconChevron size={16} /></div>
+                <div class="qtitle">{q.label[lang] ?? q.label.en}</div>
+                <div class="qsub">{quickSub(lang, q.id)}</div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       <form
         class="composer"
@@ -166,22 +212,34 @@ export function App({ apiUrl, configUrl, config, pageContext, startOpen }: AppPr
           void send(input);
         }}
       >
-        <input
-          value={input}
-          placeholder={t(lang, "placeholder")}
-          onInput={(e: JSX.TargetedEvent<HTMLInputElement>) => setInput(e.currentTarget.value)}
-          aria-label={t(lang, "placeholder")}
-        />
-        <button type="submit" disabled={busy || !input.trim()}>{t(lang, "send")}</button>
+        <div class="field">
+          <input
+            value={input}
+            placeholder={t(lang, "placeholder")}
+            onInput={(e: JSX.TargetedEvent<HTMLInputElement>) => setInput(e.currentTarget.value)}
+            aria-label={t(lang, "placeholder")}
+          />
+        </div>
+        <button class="send" type="submit" disabled={busy || !input.trim()} aria-label={t(lang, "send")}><IconSend /></button>
       </form>
-      <div class="foot">{t(lang, "poweredBy")}</div>
+      <div class="foot">Powered by <b>Kenalin</b></div>
     </div>
   );
 }
 
-function MessageView({ m, lang }: { m: UiMessage; lang: Lang }): JSX.Element {
+function MessageView({ m, lang, onRetry }: { m: UiMessage; lang: Lang; onRetry: () => void }): JSX.Element {
+  if (m.failed) {
+    return (
+      <div class="row assistant">
+        <div class="fallback">
+          <div class="fmsg">{t(lang, "error")}</div>
+          <button class="retry" onClick={onRetry}><IconRefresh /> {t(lang, "retry")}</button>
+        </div>
+      </div>
+    );
+  }
   return (
-    <div class={`msg ${m.role}`}>
+    <div class={`row ${m.role}`}>
       <div class="bubble">
         {m.pending && !m.content ? (
           <span class="dots" aria-label={t(lang, "thinking")}><span /><span /><span /></span>
@@ -189,46 +247,61 @@ function MessageView({ m, lang }: { m: UiMessage; lang: Lang }): JSX.Element {
           m.content
         )}
       </div>
-      {m.evidence && m.evidence.length > 0 && (
-        <div class="evidence">
-          {m.evidence.map((e) => (
-            <EvidenceCard key={e.id} e={e} lang={lang} />
-          ))}
+
+      {m.complexity && (
+        <div class="complex">
+          <div class="eyebrow">{t(lang, "complexityEyebrow")}</div>
+          <div class="clevel"><span class="cval">{m.complexity}</span><IconChart /></div>
+          <div class="cdisc">{t(lang, "complexityDisclaimer")}</div>
         </div>
       )}
+
+      {m.evidence && m.evidence.length > 0 && (
+        <div class="evlist">
+          {m.evidence.map((e) => <EvidenceCard key={e.id} e={e} />)}
+        </div>
+      )}
+
       {m.actions && m.actions.length > 0 && (
         <div class="actions">
-          {m.actions.map((a, i) => (
-            <ActionButton key={a.id} a={a} primary={i === 0 && a.id === "handoff"} />
-          ))}
+          {m.actions.map((a) => <ActionButton key={a.id} a={a} primary={a.id === "handoff"} />)}
         </div>
+      )}
+
+      {m.time && !m.pending && (
+        <div class="time">{m.time}{m.role === "user" && <span class="tick">✓✓</span>}</div>
       )}
     </div>
   );
 }
 
-function EvidenceCard({ e, lang }: { e: Evidence; lang: Lang }): JSX.Element {
+function EvidenceCard({ e }: { e: Evidence }): JSX.Element {
   const target = e.url && isExternal(e.url) ? "_blank" : "_self";
   const body = (
     <>
-      <span class="evtype">{e.type}</span>
+      <div class="evhead"><IconEvidence /> <span>{e.type.replace(/_/g, " ")}</span></div>
       <div class="evtitle">{e.title}</div>
-      {e.snippet && <div>{e.snippet.slice(0, 140)}</div>}
+      {e.snippet && <div class="evsnippet">{e.snippet.slice(0, 130)}</div>}
+      {e.tags && e.tags.length > 0 && (
+        <div class="evtags">{e.tags.map((tg) => <span class="evtag" key={tg}>{tg}</span>)}</div>
+      )}
+      {e.url && <span class="evmore">View <IconChevron size={14} /></span>}
     </>
   );
   return e.url ? (
     <a class="evcard" href={e.url} target={target} rel="noopener">{body}</a>
   ) : (
-    <div class="evcard" aria-label={t(lang, "evidence")}>{body}</div>
+    <div class="evcard">{body}</div>
   );
 }
 
 function ActionButton({ a, primary }: { a: Action; primary: boolean }): JSX.Element {
   const href = a.url ?? "#";
   const target = a.url && isExternal(a.url) ? "_blank" : "_self";
+  const icon = actionIcon(a.type);
   return (
-    <a class={`action ${primary ? "primary" : ""}`} href={href} target={target} rel="noopener">
-      {a.label}
+    <a class={`btn ${primary ? "btn-primary" : "btn-secondary"}`} href={href} target={target} rel="noopener">
+      {icon}{a.label}
     </a>
   );
 }

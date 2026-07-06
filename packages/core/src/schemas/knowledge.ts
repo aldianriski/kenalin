@@ -41,6 +41,8 @@ export const EvidenceSchema = z.object({
   url: z.string().url().optional(),
   type: ContentTypeSchema,
   snippet: z.string().optional(),
+  /** Optional topic tags surfaced on the evidence card (from the chunk). */
+  tags: z.array(z.string()).optional(),
 });
 export type Evidence = z.infer<typeof EvidenceSchema>;
 

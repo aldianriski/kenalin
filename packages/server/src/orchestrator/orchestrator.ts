@@ -84,6 +84,7 @@ export class Orchestrator {
         url: c.url,
         type: c.type,
         snippet: c.content.slice(0, SNIPPET_LEN),
+        tags: c.topics.slice(0, 3),
       });
     }
 
