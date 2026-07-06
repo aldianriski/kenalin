@@ -31,8 +31,10 @@ export async function buildAppDeps(
   const store = await LocalKnowledgeStore.load(indexDir);
   const embedder = selectEmbedder({ kind: opts.embedderKind });
   const chat = selectChatProvider();
-  // The lexical hash embedder needs a lower cosine floor than Gemini's 768-dim.
-  const retrievalThreshold = embedder.name === "hash-local" ? 0.08 : undefined;
+  // Cosine floor calibrated per embedder. 0.45 keeps real matches while the
+  // prompt's "only cite evidence that names the thing asked about" rule handles
+  // unknown-entity queries; the lexical hash embedder needs a much lower floor.
+  const retrievalThreshold = embedder.name === "hash-local" ? 0.08 : 0.45;
 
   const webhookSecret = resolveWebhookSecret();
   const leadStore = await selectLeadStore(config, { webhookSecret, dataDir: rootDir, log: opts.log });

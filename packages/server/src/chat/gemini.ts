@@ -45,7 +45,9 @@ export class GeminiChatProvider implements ChatProvider {
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: req.responseSchema,
-        maxOutputTokens: req.maxTokens ?? 1024,
+        // Generous budget so a thinking model's reasoning tokens don't truncate
+        // the structured JSON payload (a truncated payload → repair → fallback).
+        maxOutputTokens: req.maxTokens ?? 2048,
         temperature: 0.4,
       },
     };

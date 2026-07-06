@@ -5,15 +5,15 @@
 
 ## Current phase
 
-**We are in Phase 6 — Quality & Release** (Phase 5 — reference deferred to last,
-per owner decision: integrate into the real portfolio at `D:\Project\portofolio`).
+**We are in Phase 5 — Reference deployment** (last, per owner decision:
+integrate into the real portfolio at `D:\Project\portofolio` as a Next.js API
+route + the embedded widget).
 
-Phases 0–4 are complete and green: Foundation, Knowledge, AI Core, Widget, and
-Modules (registry/routing, adaptive qualification + caps, contact handoff, signed
-webhook emit, lead-store modes none|webhook|database|both, calendar link-out,
-page context, module-toggle verification). Full pipeline verified LIVE against
-Gemini. Only implement the current phase's scope (PRD Part G4). Update this marker
-as each phase's DoD is verified.
+Phases 0–4 and 6 are complete and green. Quality gates: `pnpm verify` (owner-string
+grep gate + typecheck + build + 57 tests) passes; eval harness built (Safety +
+Grounding 100% live; full matrix pending non-free-tier quota). Only implement the
+current phase's scope (PRD Part G4 / Part F). Zero owner-specific strings in
+`packages/*` — the CI grep gate enforces it.
 
 Phase order and dependencies: `0 → 1 → 2 → (3 ∥ 4) → 5 → 6`.
 

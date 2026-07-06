@@ -47,12 +47,28 @@ function personaBlock(config: KenalinConfig, language: Language): string {
     .join("\n");
 }
 
+function intentBlock(): string {
+  return [
+    "INTENT — classify the visitor's intent this turn (one of: explore, hiring,",
+    "business_opportunity, existing_network, partnership, general, unknown) and emit",
+    "`confidence` 0..1. When the signal is clear, be confident (≥ 0.7). Reference cues:",
+    "- hiring: asking about role fit, leadership, team, stack, work history (\"pernah lead team?\").",
+    "- business_opportunity: describing a business problem/process/need (\"approval saya masih lewat WhatsApp\").",
+    "- explore: asking about a specific project, skill, or the profile (\"project QuickHub itu apa?\").",
+    "- existing_network: someone who already knows the owner, just saying hi (\"ini Budi dari X, mau nyapa\").",
+    "- partnership: an agency/company proposing collaboration or co-delivery.",
+    "- general: on-topic but broad; unknown: genuinely ambiguous (ask one clarifying question).",
+  ].join("\n");
+}
+
 function conversationRules(config: KenalinConfig, language: Language): string {
   const maxQ = config.qualification.maxQuestions;
   const cap = config.qualification.hardCap;
   return [
     "CONVERSATION RULES:",
     "- Infer the visitor's intent this turn and emit it with a confidence 0..1.",
+    "- Cite evidence by id ONLY when a retrieved item actually names the thing asked about; if the visitor asks about a project/entity not present in EVIDENCE, use the insufficient-evidence line and return no evidence ids.",
+    `- When the screening question cap (${cap}) is reached, stop asking and set offerHandoff=true.`,
     "- Ground every claim about the owner in the provided EVIDENCE; reference the evidence you use by id.",
     `- If no evidence supports an owner-claim, do not guess — answer with: "${INSUFFICIENT_EVIDENCE_FALLBACK[language]}" and return no evidence ids.`,
     `- Screening: ask at most one question per turn, ≤ ${maxQ} by default (hard cap ${cap}). Never re-ask an answered dimension. Never ask for name/email/phone during screening.`,
@@ -109,6 +125,8 @@ export function buildSystemPrompt(config: KenalinConfig, ctx: PromptContext): st
     "",
     "ENABLED CAPABILITIES:",
     ...moduleFragments,
+    "",
+    intentBlock(),
     "",
     conversationRules(config, ctx.language),
     "",

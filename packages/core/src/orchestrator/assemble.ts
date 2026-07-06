@@ -115,6 +115,13 @@ export function assembleResponse(model: ModelOutput, ctx: AssembleContext): Asse
       ? { stage: qual.stage, category: qual.category, complexity: qual.complexity }
       : null;
 
+  // Cap reached during active screening → route to handoff even if the model
+  // didn't ask a (now-suppressed) question this turn (PRD C5).
+  if (qual.stage === "screening" && questionCount >= config.qualification.hardCap) {
+    if (!violations.includes("question_cap_reached")) violations.push("question_cap_reached");
+    forceHandoff = true;
+  }
+
   // 8. Handoff resolution (only via an enabled module + a configured channel).
   const wantHandoff = (model.offerHandoff || forceHandoff) && isModuleEnabled(config, "contactHandoff");
   let handoff = null as ChatResponse["handoff"];

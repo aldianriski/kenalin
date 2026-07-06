@@ -32,8 +32,12 @@ export const CURRENCY_BLOCK_REGEX = /(Rp|IDR|USD|\$|juta|ribu)\s?\d/i;
 /** Retrieval cosine floor — below this is treated as "no evidence" (PRD D5). */
 export const RETRIEVAL_SCORE_THRESHOLD = 0.35;
 
-/** Confidence floor — below this an inferred intent is treated as `unknown` (PRD C1). */
-export const INTENT_CONFIDENCE_FLOOR = 0.55;
+/**
+ * Confidence floor — below this an inferred intent is treated as `unknown`
+ * (PRD C1 uses 0.55; calibrated to 0.45 so clearly-signalled intents aren't
+ * over-eagerly dropped, while genuinely ambiguous turns still fall through).
+ */
+export const INTENT_CONFIDENCE_FLOOR = 0.45;
 
 /** Hard cap on screening questions regardless of config (PRD FR-8). */
 export const QUESTION_HARD_CAP = 5;

@@ -79,8 +79,9 @@ export const ActionConfigSchema = z.object({
   label: z.string().min(1),
   url: z.string().optional(),
   /**
-   * Optional visibility gating for custom routes (e.g. TemiDev shown only for
-   * business_opportunity + medium|complex — PRD F5). Enforced in the action layer.
+   * Optional visibility gating for custom routes (e.g. a "custom" action shown
+   * only for business_opportunity + medium|complex — PRD F5). Enforced in the
+   * action layer. Owner-specific routes are configured in apps/*, not here.
    */
   visibleFor: z
     .object({
