@@ -167,6 +167,9 @@ Decomposed from owner notes (position, custom design, persistence, home button, 
 ### 2026-07-07 | T1 done | Configurable position + safe-area
 Position wired core→server→widget. The `branding.icons` **config surface** (schema + public-config + widget types + `iconOverride` helper) rides along in this commit since it shares schema.ts/public-config.ts/types.ts/branding.ts with T1 (D5); the icon *rendering* is T2. Live mobile-docked check batched to the consolidated Chrome-MCP pass. verify green, 105 tests.
 
+### 2026-07-07 | scope-refine (T1) | Add offsetYMobile — safe-area ≠ app nav
+T9 recon found the portfolio's mobile dock is a **68px app nav bar** (`magnetic-dock.tsx`), which `env(safe-area-inset-*)` does NOT clear — so T1's shipped safe-area-only approach didn't genuinely meet its DoD ("clears a host bottom nav") for a real app bar. Added a generic `branding.position.offsetYMobile` knob (schema + public-config + widget types + `positionCssVars` + a `≤768px` launcher lift + docked-panel bottom). No G2 re-confirm needed — this completes T1's own acceptance rather than changing scope. widget branding test 8; typechecks green; 117 tests.
+
 ### 2026-07-07 | verify | Answer-quality slice confirmed live + demo re-ingest
 Headless orchestrator probe (3 topics) confirmed **T3**: openings are distinct and evidence-led — "QuickHub is a project where Sari replaced…", "Sari has experience as a tech lead…", "Sari is strongest in workflow automation…" — none the old bio. Caught that the gitignored demo `content/index` was stale (built pre-T4/T5) so **re-ingested** it (gemini, 17 chunks): profile chunk url now `/about` (0 root-only urls) → **T4** confirmed end-to-end; case-study links specific. Eval re-ran GREEN 49/49 against the fresh index.
 

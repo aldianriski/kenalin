@@ -32,6 +32,7 @@ export interface PublicConfig {
       corner: "bottom-right" | "bottom-left";
       offsetX: string;
       offsetY: string;
+      offsetYMobile?: string;
       zIndex: number;
       mobile: "fullscreen" | "docked";
     };

@@ -56,6 +56,8 @@ export function positionCssVars(position?: Partial<Position>): [string, string][
     out.push(["--kenalin-pos-x", position.offsetX]);
   if (typeof position.offsetY === "string" && position.offsetY.trim())
     out.push(["--kenalin-pos-y", position.offsetY]);
+  if (typeof position.offsetYMobile === "string" && position.offsetYMobile.trim())
+    out.push(["--kenalin-pos-y-mobile", position.offsetYMobile]);
   if (typeof position.zIndex === "number" && Number.isFinite(position.zIndex))
     out.push(["--kenalin-z", String(position.zIndex)]);
   return out;

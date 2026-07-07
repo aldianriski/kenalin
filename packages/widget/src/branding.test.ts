@@ -37,6 +37,13 @@ describe("positionCssVars", () => {
     ]);
   });
 
+  it("maps offsetYMobile to --kenalin-pos-y-mobile when set", () => {
+    expect(positionCssVars({ offsetY: "16px", offsetYMobile: "84px" })).toEqual([
+      ["--kenalin-pos-y", "16px"],
+      ["--kenalin-pos-y-mobile", "84px"],
+    ]);
+  });
+
   it("skips empty offsets and non-finite z-index; corner/mobile are not vars", () => {
     expect(positionCssVars({ offsetX: "  ", offsetY: "1rem" })).toEqual([["--kenalin-pos-y", "1rem"]]);
     expect(positionCssVars(undefined)).toEqual([]);

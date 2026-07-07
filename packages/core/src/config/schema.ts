@@ -174,6 +174,9 @@ export const PositionConfigSchema = z
     corner: z.enum(["bottom-right", "bottom-left"]).default("bottom-right"),
     offsetX: z.string().default("22px"),
     offsetY: z.string().default("22px"),
+    /** Bottom offset on mobile (≤768px). Set this to clear a host app bottom-nav bar,
+     *  which `env(safe-area-inset-*)` does NOT account for. Defaults to `offsetY`. */
+    offsetYMobile: z.string().optional(),
     zIndex: z.number().int().default(2147483000),
     mobile: z.enum(["fullscreen", "docked"]).default("fullscreen"),
   })

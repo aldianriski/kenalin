@@ -27,6 +27,8 @@ export const STYLES = /* css */ `
   /* Placement (TASK-034) — offsets/z-index overridable via config; safe-area added below. */
   --k-pos-x: var(--kenalin-pos-x, 22px);
   --k-pos-y: var(--kenalin-pos-y, 22px);
+  /* Mobile bottom offset — set to clear a host app bottom-nav; falls back to --k-pos-y. */
+  --k-pos-y-mobile: var(--kenalin-pos-y-mobile, var(--k-pos-y));
   --k-z: var(--kenalin-z, 2147483000);
   all: initial;
   font-family: var(--k-font);
@@ -101,6 +103,11 @@ button { font: inherit; cursor: pointer; }
   inset-inline-start: calc(var(--k-pos-x) + env(safe-area-inset-left, 0px));
 }
 
+/* Mobile (≤768px, where a host app bottom-nav typically shows): lift the launcher by
+   the configured mobile offset so it clears the nav (safe-area alone doesn't). */
+@media (max-width: 768px) {
+  .launcher { bottom: calc(var(--k-pos-y-mobile) + env(safe-area-inset-bottom, 0px)); }
+}
 @media (max-width: 480px) {
   /* Full-screen on mobile (default) — but keep clear of the safe-area/notch. */
   :host([data-mobile="fullscreen"]) .panel,
@@ -111,7 +118,7 @@ button { font: inherit; cursor: pointer; }
   :host([data-mobile="docked"]) .panel {
     inset-inline-start: auto;
     inset-inline-end: calc(var(--k-pos-x) + env(safe-area-inset-right, 0px));
-    bottom: calc(var(--k-pos-y) + env(safe-area-inset-bottom, 0px));
+    bottom: calc(var(--k-pos-y-mobile) + env(safe-area-inset-bottom, 0px));
     width: calc(100vw - 24px); max-width: 384px;
     height: 72dvh; max-height: calc(100dvh - 96px);
   }
