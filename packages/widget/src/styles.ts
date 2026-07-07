@@ -24,6 +24,10 @@ export const STYLES = /* css */ `
   --k-user: var(--kenalin-user-bg, #E7F6F2);
   --k-radius: var(--kenalin-radius, 18px);
   --k-font: var(--kenalin-font, "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+  /* Placement (TASK-034) — offsets/z-index overridable via config; safe-area added below. */
+  --k-pos-x: var(--kenalin-pos-x, 22px);
+  --k-pos-y: var(--kenalin-pos-y, 22px);
+  --k-z: var(--kenalin-z, 2147483000);
   all: initial;
   font-family: var(--k-font);
   -webkit-font-smoothing: antialiased;
@@ -50,7 +54,9 @@ button { font: inherit; cursor: pointer; }
 
 /* ── Launcher ─────────────────────────────────────────────────────────── */
 .launcher {
-  position: fixed; bottom: 22px; inset-inline-end: 22px; z-index: 2147483000;
+  position: fixed; z-index: var(--k-z);
+  bottom: calc(var(--k-pos-y) + env(safe-area-inset-bottom, 0px));
+  inset-inline-end: calc(var(--k-pos-x) + env(safe-area-inset-right, 0px));
   display: inline-flex; align-items: center; gap: 9px;
   padding: 10px 18px 10px 12px; border: none;
   background: var(--k-accent); color: #fff; font-weight: 600; font-size: 14.5px;
@@ -66,7 +72,9 @@ button { font: inherit; cursor: pointer; }
 
 /* ── Panel ────────────────────────────────────────────────────────────── */
 .panel {
-  position: fixed; z-index: 2147483000; bottom: 22px; inset-inline-end: 22px;
+  position: fixed; z-index: var(--k-z);
+  bottom: calc(var(--k-pos-y) + env(safe-area-inset-bottom, 0px));
+  inset-inline-end: calc(var(--k-pos-x) + env(safe-area-inset-right, 0px));
   width: 384px; max-width: calc(100vw - 32px);
   height: 600px; max-height: calc(100vh - 44px);
   display: flex; flex-direction: column; overflow: hidden;
@@ -76,8 +84,32 @@ button { font: inherit; cursor: pointer; }
   animation: k-rise .18s ease;
 }
 @keyframes k-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* Corner (TASK-034): default anchors to the inline-end (right in LTR); bottom-left flips it. */
+:host([data-corner="bottom-left"]) .launcher,
+:host([data-corner="bottom-left"]) .panel {
+  inset-inline-end: auto;
+  inset-inline-start: calc(var(--k-pos-x) + env(safe-area-inset-left, 0px));
+}
+
 @media (max-width: 480px) {
-  .panel { inset: 0; width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; }
+  /* Full-screen on mobile (default) — but keep clear of the safe-area/notch. */
+  :host([data-mobile="fullscreen"]) .panel,
+  :host(:not([data-mobile])) .panel {
+    inset: 0; width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0;
+  }
+  /* Docked: stay a floating panel above a host bottom nav instead of full-screen. */
+  :host([data-mobile="docked"]) .panel {
+    inset-inline-start: auto;
+    inset-inline-end: calc(var(--k-pos-x) + env(safe-area-inset-right, 0px));
+    bottom: calc(var(--k-pos-y) + env(safe-area-inset-bottom, 0px));
+    width: calc(100vw - 24px); max-width: 384px;
+    height: 72dvh; max-height: calc(100dvh - 96px);
+  }
+  :host([data-mobile="docked"][data-corner="bottom-left"]) .panel {
+    inset-inline-end: auto;
+    inset-inline-start: calc(var(--k-pos-x) + env(safe-area-inset-left, 0px));
+  }
 }
 
 /* ── Header (always navy — brand) ─────────────────────────────────────── */

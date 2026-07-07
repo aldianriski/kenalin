@@ -41,3 +41,31 @@ export function themeCssVars(theme?: Record<string, string | undefined>): [strin
 export function avatarUrl(config: PublicConfig): string | undefined {
   return config.branding?.avatarUrl ?? config.branding?.logoUrl;
 }
+
+type Position = NonNullable<NonNullable<PublicConfig["branding"]>["position"]>;
+
+/**
+ * Resolve `branding.position` offsets/z-index to `--kenalin-pos-*` CSS custom
+ * properties `styles.ts` consumes (TASK-034). Corner + mobile mode are applied as
+ * host attributes (see element.ts), not vars. Pure — unit-testable in the node env.
+ */
+export function positionCssVars(position?: Partial<Position>): [string, string][] {
+  if (!position) return [];
+  const out: [string, string][] = [];
+  if (typeof position.offsetX === "string" && position.offsetX.trim())
+    out.push(["--kenalin-pos-x", position.offsetX]);
+  if (typeof position.offsetY === "string" && position.offsetY.trim())
+    out.push(["--kenalin-pos-y", position.offsetY]);
+  if (typeof position.zIndex === "number" && Number.isFinite(position.zIndex))
+    out.push(["--kenalin-z", String(position.zIndex)]);
+  return out;
+}
+
+/** Resolve an override image URL for a named icon, if the owner configured one (TASK-035). */
+export function iconOverride(
+  icons: Record<string, string> | undefined,
+  name: string,
+): string | undefined {
+  const url = icons?.[name];
+  return typeof url === "string" && url.trim() ? url : undefined;
+}

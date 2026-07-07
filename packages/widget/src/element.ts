@@ -2,7 +2,7 @@ import { render, h } from "preact";
 import { App } from "./app.js";
 import { STYLES } from "./styles.js";
 import { KenalinClient } from "./api.js";
-import { themeCssVars } from "./branding.js";
+import { themeCssVars, positionCssVars } from "./branding.js";
 import type { PageContext, PublicConfig } from "./types.js";
 
 /**
@@ -52,6 +52,17 @@ export class KenalinElement extends HTMLElement {
       this.style.setProperty(name, value);
     }
 
+    // Apply widget placement (TASK-034): offsets/z-index as CSS vars; corner + mobile
+    // mode as host attributes the `:host([data-*])` selectors read. safe-area insets are
+    // added in styles.ts, but only resolve to non-zero when the host viewport opts in.
+    const position = config.branding?.position;
+    for (const [name, value] of positionCssVars(position)) {
+      this.style.setProperty(name, value);
+    }
+    this.setAttribute("data-corner", position?.corner ?? "bottom-right");
+    this.setAttribute("data-mobile", position?.mobile ?? "fullscreen");
+    ensureViewportFitCover();
+
     render(
       h(App, {
         apiUrl,
@@ -63,6 +74,20 @@ export class KenalinElement extends HTMLElement {
       mount,
     );
   }
+}
+
+/**
+ * `env(safe-area-inset-*)` resolves to 0 unless the host page's viewport meta opts in
+ * with `viewport-fit=cover` (TASK-034). Patch it additively — never create one (that
+ * could disrupt a host that intentionally omits it); if absent, insets just stay 0.
+ */
+function ensureViewportFitCover(): void {
+  if (typeof document === "undefined") return;
+  const meta = document.querySelector('meta[name="viewport"]');
+  if (!meta) return;
+  const content = meta.getAttribute("content") ?? "";
+  if (/viewport-fit/.test(content)) return;
+  meta.setAttribute("content", content ? `${content}, viewport-fit=cover` : "viewport-fit=cover");
 }
 
 /** Register the custom element once. */

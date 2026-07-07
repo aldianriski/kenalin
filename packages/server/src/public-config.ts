@@ -21,6 +21,16 @@ export interface PublicConfig {
     logoUrl?: string;
     avatarUrl?: string;
     theme?: Record<string, string>;
+    /** Widget placement + stacking (TASK-034). */
+    position?: {
+      corner: "bottom-right" | "bottom-left";
+      offsetX: string;
+      offsetY: string;
+      zIndex: number;
+      mobile: "fullscreen" | "docked";
+    };
+    /** Per-icon URL overrides (TASK-035). */
+    icons?: Record<string, string>;
   };
 }
 
@@ -52,6 +62,8 @@ export function toPublicConfig(config: KenalinConfig): PublicConfig {
             logoUrl: config.branding.logoUrl,
             avatarUrl: config.branding.avatarUrl,
             theme: config.branding.theme as Record<string, string> | undefined,
+            position: config.branding.position,
+            icons: config.branding.icons,
           },
         }
       : {}),

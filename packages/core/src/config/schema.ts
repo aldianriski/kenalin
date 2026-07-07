@@ -154,6 +154,26 @@ export const ThemeTokensSchema = z
   .strict();
 export type ThemeTokens = z.infer<typeof ThemeTokensSchema>;
 
+/** Widget placement + stacking (TASK-034). Offsets are CSS lengths; the widget always
+ *  ADDS `env(safe-area-inset-*)` on top so it clears a host's notch / bottom nav.
+ *  `mobile: docked` keeps the panel floating above a bottom nav instead of full-screen. */
+export const PositionConfigSchema = z
+  .object({
+    corner: z.enum(["bottom-right", "bottom-left"]).default("bottom-right"),
+    offsetX: z.string().default("22px"),
+    offsetY: z.string().default("22px"),
+    zIndex: z.number().int().default(2147483000),
+    mobile: z.enum(["fullscreen", "docked"]).default("fullscreen"),
+  })
+  .strict();
+export type PositionConfig = z.infer<typeof PositionConfigSchema>;
+
+/** Optional per-icon overrides (TASK-035): icon-name → image URL (or data-URI). The
+ *  widget renders these as CSS-masked shapes that inherit the theme accent; unset names
+ *  keep the built-in SVG. Values are URLs only — no inline markup (injection-safe). */
+export const IconOverridesSchema = z.record(z.string().min(1), z.string().url());
+export type IconOverrides = z.infer<typeof IconOverridesSchema>;
+
 /** Owner branding (TASK-004): launcher/header imagery + theme tokens, set in config
  *  without code. `.strict()` — and deliberately NO field that can hide or remove the
  *  "Powered by Kenalin" footer (same spirit as the B9 no-weakening rule above). */
@@ -162,6 +182,8 @@ export const BrandingConfigSchema = z
     logoUrl: z.string().url().optional(),
     avatarUrl: z.string().url().optional(),
     theme: ThemeTokensSchema.optional(),
+    position: PositionConfigSchema.optional(),
+    icons: IconOverridesSchema.optional(),
   })
   .strict();
 export type BrandingConfig = z.infer<typeof BrandingConfigSchema>;

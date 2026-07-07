@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { themeCssVars, avatarUrl } from "./branding.js";
+import { themeCssVars, avatarUrl, positionCssVars, iconOverride } from "./branding.js";
 import type { PublicConfig } from "./types.js";
 
 const cfg = (branding?: PublicConfig["branding"]): PublicConfig =>
@@ -23,6 +23,33 @@ describe("themeCssVars", () => {
 
   it("returns nothing when no theme is given", () => {
     expect(themeCssVars(undefined)).toEqual([]);
+  });
+});
+
+describe("positionCssVars", () => {
+  it("maps offsets + z-index to --kenalin-pos-* / --kenalin-z", () => {
+    expect(
+      positionCssVars({ corner: "bottom-left", offsetX: "12px", offsetY: "16px", zIndex: 50, mobile: "docked" }),
+    ).toEqual([
+      ["--kenalin-pos-x", "12px"],
+      ["--kenalin-pos-y", "16px"],
+      ["--kenalin-z", "50"],
+    ]);
+  });
+
+  it("skips empty offsets and non-finite z-index; corner/mobile are not vars", () => {
+    expect(positionCssVars({ offsetX: "  ", offsetY: "1rem" })).toEqual([["--kenalin-pos-y", "1rem"]]);
+    expect(positionCssVars(undefined)).toEqual([]);
+  });
+});
+
+describe("iconOverride", () => {
+  it("returns a configured icon URL, else undefined", () => {
+    const icons = { send: "https://cdn.example.com/send.svg", close: "  " };
+    expect(iconOverride(icons, "send")).toBe("https://cdn.example.com/send.svg");
+    expect(iconOverride(icons, "close")).toBeUndefined();
+    expect(iconOverride(icons, "missing")).toBeUndefined();
+    expect(iconOverride(undefined, "send")).toBeUndefined();
   });
 });
 

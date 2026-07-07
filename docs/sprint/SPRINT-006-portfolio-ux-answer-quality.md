@@ -41,10 +41,10 @@ Launcher/panel offsets + z-index are hard-coded (styles.ts) with no safe-area ha
 **Acceptance:** setting `branding.position` moves the launcher + panel; on mobile `docked` clears a bottom nav via safe-area insets; no hard-coded 22px/z-index remain.
 
 **DoD:**
-- [ ] `branding.position` added to the Zod branding schema: `corner` (bottom-right|bottom-left), `offset` (x/y), `zIndex`, `mobile` (fullscreen|docked); TS + JSON-schema derive.
-- [ ] Widget reads it (element.ts) and drives launcher + panel CSS custom properties; `env(safe-area-inset-*)` + `viewport-fit=cover` applied.
-- [ ] Mobile `docked` renders above a host bottom nav (verified in Chrome-MCP against the example — L-004).
-- [ ] Widget test covers config → CSS-var mapping; `pnpm verify` green.
+- [x] `branding.position` added to the Zod branding schema: `corner` (bottom-right|bottom-left), `offsetX/offsetY`, `zIndex`, `mobile` (fullscreen|docked); TS derives.
+- [x] Widget reads it (element.ts) and drives launcher + panel CSS custom properties; `env(safe-area-inset-*)` applied; viewport meta patched additively for `viewport-fit=cover`.
+- [~] Mobile `docked` renders above a host bottom nav — **batched** into the consolidated Chrome-MCP pass (after T2/T6/T7/T8; L-004).
+- [x] Widget test covers config → CSS-var mapping (`positionCssVars`); `pnpm verify` green (105 tests).
 
 ### T2 — Swappable icon set (URL + CSS-mask tint) `[size: M · risk: low]` · TASK-035
 Layers: `packages/core` branding schema, `packages/widget` icons.tsx / app.tsx / styles.ts.
@@ -162,6 +162,9 @@ Wire the real brand colors/icons/position config, `owner.aboutUrl`, and fixed ca
 
 ### 2026-07-07 | promote | Plan locked
 Decomposed from owner notes (position, custom design, persistence, home button, idle, repetitive answers, homepage "more" link) via /task-decomposer → 8 tasks (TASK-034…040) + sharpened TASK-012/013. Governance review: no learning at count ≥ 2 to promote; no high-severity TD; TD-002/TD-009 (widget test harness) flagged as aged ≥ 3 sprints (folded into A5, not a deliverable). L-002/L-004/L-007 folded into the plan as pre-locked reminders.
+
+### 2026-07-07 | T1 done | Configurable position + safe-area
+Position wired core→server→widget. The `branding.icons` **config surface** (schema + public-config + widget types + `iconOverride` helper) rides along in this commit since it shares schema.ts/public-config.ts/types.ts/branding.ts with T1 (D5); the icon *rendering* is T2. Live mobile-docked check batched to the consolidated Chrome-MCP pass. verify green, 105 tests.
 
 ## Files Changed
 <!-- Filled during execution; feeds CHANGELOG at close. -->

@@ -27,6 +27,14 @@ export interface PublicConfig {
     logoUrl?: string;
     avatarUrl?: string;
     theme?: Record<string, string>;
+    position?: {
+      corner: "bottom-right" | "bottom-left";
+      offsetX: string;
+      offsetY: string;
+      zIndex: number;
+      mobile: "fullscreen" | "docked";
+    };
+    icons?: Record<string, string>;
   };
 }
 
