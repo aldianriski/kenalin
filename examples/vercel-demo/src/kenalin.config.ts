@@ -1,58 +1,42 @@
 import { defineKenalinConfig } from "@kenalin/core";
 
 /**
- * Generic demo config for the hosted playground. The owner ("Alex Rivera") and
- * every project are FICTIONAL — nothing here is anyone's real data. Runs KEYLESS:
- * hash-embedder retrieval + a deterministic grounded responder (responder.ts).
- * `allowedOrigins: []` allows the same-origin demo page on any Vercel URL.
+ * Self-referential demo: the "owner" is Kenalin itself, so the assistant
+ * introduces the product. Knowledge = docs about Kenalin; the responder answers
+ * from them. Runs KEYLESS (hash retrieval + deterministic responder).
  */
 export default defineKenalinConfig({
   owner: {
-    name: "Alex Rivera",
-    preferredName: "Alex",
-    role: "Product engineer & consultant",
-    website: "https://alex.example",
+    name: "Kenalin",
+    preferredName: "Kenalin",
+    role: "Open-source, embeddable AI introduction layer for websites",
+    website: "https://github.com/aldianriski/kenalin",
   },
   assistant: {
-    name: "ARIA",
-    launcherLabel: "Ask about Alex",
-    description: "AI assistant introducing Alex Rivera's work and collaboration paths.",
+    name: "Kai",
+    launcherLabel: "Ask about Kenalin",
+    description: "The Kenalin guide — ask what Kenalin is, what it does, and how to add it.",
     languages: ["en", "id"],
     openingMessage:
-      "Hi — I'm ARIA, a demo AI assistant. Ask me about Alex's projects, background, or how to work together. Where should we start?",
-    tone: "warm-professional, concise",
+      "Hi! I'm Kai, the Kenalin guide. Ask me what Kenalin is, what it can do, or how to add it to your site — tap a suggestion below to start.",
+    tone: "friendly, concise, helpful",
   },
   modules: {
     portfolioDiscovery: true,
-    hiringAssistant: true,
-    leadQualification: true,
+    hiringAssistant: false,
+    leadQualification: false,
     serviceMatching: true,
     contactHandoff: true,
-    calendarBooking: true,
+    calendarBooking: false,
     pageContext: true,
   },
-  services: [
-    {
-      id: "svc-build",
-      name: "Short build engagements",
-      description: "Ship a prototype or a focused product feature end to end.",
-      evidenceIds: ["taskflow"],
-    },
-    {
-      id: "svc-consulting",
-      name: "Product consulting",
-      description: "Shape scope, architecture, and roadmap with a small team.",
-      evidenceIds: ["metricboard"],
-    },
-  ],
-  complexity: { enabled: true, showPricing: false, levels: ["small", "medium", "complex"] },
+  complexity: { enabled: false, showPricing: false, levels: ["small", "medium", "complex"] },
   handoff: {
-    email: { address: "hello@alex.example" },
-    calendar: { url: "https://cal.com/alex-demo/intro" },
+    email: { address: "hello@kenalin.dev" },
   },
   actions: [
-    { id: "contact", type: "link", label: "Contact Alex", url: "https://alex.example/contact" },
-    { id: "book_call", type: "calendar", label: "Schedule a call" },
+    { id: "repo", type: "link", label: "View on GitHub", url: "https://github.com/aldianriski/kenalin" },
+    { id: "docs", type: "link", label: "Read the docs", url: "https://github.com/aldianriski/kenalin#readme" },
   ],
   knowledge: {
     sources: [{ kind: "markdown", path: "content" }],

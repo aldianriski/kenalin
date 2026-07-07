@@ -1,34 +1,29 @@
 /**
- * Deterministic, GROUNDED responder for the keyless demo. It runs inside the real
- * orchestration + policy pipeline (retrieval, evidence-id validation, currency
- * block) via FakeChatProvider — only the "model" is replaced. It reads the
- * evidence the retriever put in the system prompt and answers from it, so the demo
- * shows real evidence cards and handoff without any LLM key.
- *
- * NOTE: this is intentionally simple (template + retrieved snippet), not an LLM.
- * A real deployment swaps in the Gemini provider for genuine conversation.
+ * Deterministic, GROUNDED responder for the self-referential Kenalin demo. Every
+ * knowledge doc is about Kenalin, so any retrieved evidence is relevant. It reads
+ * the evidence the retriever placed in the system prompt, answers from it, and
+ * always offers tappable follow-up topics + the repo/docs actions — so the whole
+ * conversation is button-driven and every button returns real information.
  */
 
-interface EvidenceLine {
-  id: string;
-  type: string;
-  title: string;
-  snippet: string;
-}
-interface ActionLine {
-  id: string;
-  type: string;
-  label: string;
-}
+interface EvidenceLine { id: string; type: string; title: string; snippet: string; }
+interface ActionLine { id: string; type: string; label: string; }
 
-type Intent =
-  | "explore"
-  | "hiring"
-  | "business_opportunity"
-  | "existing_network"
-  | "partnership"
-  | "general"
-  | "unknown";
+/** The four topics, mirrored by the widget's quick actions. */
+const TOPICS = [
+  { key: "what", q: "What is Kenalin?", match: /what is|apa itu|about|overview|kenalin\?/ },
+  { key: "cando", q: "What can it do?", match: /can it do|capabilit|feature|module|fitur|what can/ },
+  { key: "embed", q: "How do I add it?", match: /add|embed|install|integrat|pasang|memasang|script|set ?up/ },
+  { key: "oss", q: "Is it free & self-hosted?", match: /free|open.?source|self.?host|price|cost|gratis|licen/ },
+];
+
+const LEAD: Record<string, string> = {
+  what: "In short —",
+  cando: "Here's what Kenalin can do:",
+  embed: "Adding it is quick:",
+  oss: "Yes —",
+  default: "Here's the short version:",
+};
 
 function parseEvidence(system: string): EvidenceLine[] {
   const out: EvidenceLine[] = [];
@@ -48,104 +43,69 @@ function parseActions(system: string): ActionLine[] {
   return out;
 }
 
-function detectIntent(q: string): Intent {
-  if (/\b(hir|hiring|role|lead|team|stack|work history|recruit|join|senior|candidate|fit)\b/.test(q))
-    return "hiring";
-  if (/\b(partner|partnership|collaborat|agency|co-?deliver)\b/.test(q)) return "partnership";
-  if (
-    /\b(need|build|help|automate|automation|approval|manual|spreadsheet|reconcil|dashboard|internal tool|ops|operations|workflow|integrat|business|company|problem|process)\b/.test(
-      q,
-    )
-  )
-    return "business_opportunity";
-  if (/\b(hi|hello|hey|nice to meet|know (her|sari))\b/.test(q)) return "existing_network";
-  if (q.trim().length === 0) return "general";
-  return "explore";
-}
-
-/** Trim a snippet to a clean, whole-sentence-ish fragment. */
-function clean(snippet: string, max = 320): string {
+function clean(snippet: string, max = 360): string {
   let s = snippet.replace(/\s+/g, " ").trim();
   if (s.length > max) {
     s = s.slice(0, max);
     const cut = Math.max(s.lastIndexOf(". "), s.lastIndexOf("! "), s.lastIndexOf("? "));
-    s = cut > 80 ? s.slice(0, cut + 1) : s.replace(/\s+\S*$/, "") + "…";
+    s = cut > 100 ? s.slice(0, cut + 1) : s.replace(/\s+\S*$/, "") + "…";
   }
   return s;
 }
 
-const CTA: Record<string, string> = {
-  hiring: "Want me to pass your details along, or would a quick intro call help?",
-  business_opportunity: "If you'd like, I can connect you with Alex to talk specifics.",
-  partnership: "Happy to route this to Alex to explore a collaboration.",
-  explore: "Want to go deeper on this, or see another project?",
-  existing_network: "Would you like me to let Alex know you stopped by?",
-  general: "You can ask about a specific project, Alex's background, or how to work together.",
-  unknown: "You can ask about a specific project, Alex's background, or how to work together.",
-};
-
-const HANDOFF_INTENTS = new Set(["hiring", "business_opportunity", "partnership"]);
-
 export function demoResponder(req: { system?: string; messages?: { role: string; content: string }[] }) {
   const system = req.system ?? "";
-  const userMsg =
-    [...(req.messages ?? [])].reverse().find((m) => m.role === "user")?.content ?? "";
+  const userMsg = [...(req.messages ?? [])].reverse().find((m) => m.role === "user")?.content ?? "";
   const q = userMsg.toLowerCase();
 
   const evidence = parseEvidence(system);
   const actions = parseActions(system);
-  const intent = detectIntent(q);
 
-  // Actions to surface, by intent.
-  const actionIds = actions
-    .filter((a) => {
-      if (HANDOFF_INTENTS.has(intent)) return true; // show all contact routes
-      return a.type === "link"; // exploring → just the portfolio/contact link
-    })
-    .map((a) => a.id);
+  // Which topic was asked? (drives the lead + which follow-ups to offer.)
+  const asked = TOPICS.find((t) => t.match.test(q));
+  const askedKey = asked?.key ?? "default";
 
-  const offerHandoff = HANDOFF_INTENTS.has(intent) && actions.length > 0;
+  // Always surface the repo/docs links, and offer the other topics as chips.
+  const suggestedActionIds = actions.map((a) => a.id);
+  const suggestedReplies = TOPICS.filter((t) => t.key !== askedKey).map((t) => t.q).slice(0, 3);
 
   if (evidence.length === 0) {
-    // No supporting evidence retrieved — friendly, honest fallback (no invented facts).
     return {
       answer:
-        "I can only speak to what's in Alex's public profile — projects, background, and how Alex likes to work. " +
-        CTA[intent],
-      intent,
-      confidence: 0.5,
+        "I'm the Kenalin guide — I can explain what Kenalin is, what it can do, how to add it to your site, and how it's licensed. Pick a topic below.",
+      intent: "explore",
+      confidence: 0.6,
       evidenceIds: [],
-      suggestedActionIds: actionIds,
+      suggestedActionIds,
       qualification: null,
       askDimension: null,
-      suggestedReplies: [],
-      offerHandoff,
+      suggestedReplies,
+      offerHandoff: false,
     };
   }
 
-  const top = evidence.slice(0, intent === "explore" ? 1 : 2);
-  const lead =
-    intent === "hiring"
-      ? "Here's the most relevant part of Alex's background:"
-      : intent === "business_opportunity"
-        ? "This looks close to work Alex has done before:"
-        : intent === "partnership"
-          ? "Here's a relevant example of Alex's delivery:"
-          : "Here's what I found:";
+  // Retrieval is ranked; prefer the doc that matches the asked topic if present,
+  // else the top hit. (All docs are about Kenalin, so any is on-topic.)
+  const TITLE_HINT: Record<string, string> = {
+    what: "what is",
+    cando: "can kenalin",
+    embed: "add kenalin",
+    oss: "free",
+  };
+  const hint = asked ? TITLE_HINT[asked.key] : undefined;
+  const top =
+    (hint && evidence.find((e) => e.title.toLowerCase().includes(hint))) || evidence[0];
 
-  const body = top
-    .map((e) => `**${e.title}** — ${clean(e.snippet)}`)
-    .join("\n\n");
-
+  const lead = LEAD[askedKey] ?? LEAD.default;
   return {
-    answer: `${lead}\n\n${body}\n\n${CTA[intent]}`,
-    intent,
-    confidence: 0.82,
-    evidenceIds: top.map((e) => e.id),
-    suggestedActionIds: actionIds,
+    answer: `${lead}\n\n${clean(top.snippet)}\n\nWant to know more? Tap a topic below, or open the repo.`,
+    intent: "explore",
+    confidence: 0.85,
+    evidenceIds: [top.id],
+    suggestedActionIds,
     qualification: null,
     askDimension: null,
-    suggestedReplies: [],
-    offerHandoff,
+    suggestedReplies,
+    offerHandoff: false,
   };
 }
