@@ -20,6 +20,9 @@ export const OwnerConfigSchema = z.object({
   preferredName: z.string().optional(),
   role: z.string().min(1),
   website: z.string().url(),
+  /** Specific "about" page for the profile-summary evidence link (TASK-038). When unset,
+   *  the summary carries NO link rather than defaulting to the bare site root. */
+  aboutUrl: z.string().url().optional(),
 });
 
 export const AssistantConfigSchema = z.object({

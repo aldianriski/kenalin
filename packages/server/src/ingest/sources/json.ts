@@ -13,6 +13,8 @@ interface StructuredProfile {
   owner?: string;
   role?: string;
   website?: string;
+  /** Specific "about" page for the summary evidence link (TASK-038). Unset → no link. */
+  aboutUrl?: string;
   summary?: string;
   experience?: { id?: string; title: string; period?: string; content: string; topics?: string[] }[];
   skills?: { id?: string; name: string; topics?: string[] }[];
@@ -55,7 +57,9 @@ export async function loadJson(path: string, rootDir: string): Promise<SourceLoa
       sourceId: "json:profile",
       type: "profile",
       title: p.role ? `${p.owner ?? "Profile"} — ${p.role}` : "Profile",
-      url: p.website,
+      // TASK-038: link to a specific about page if provided, else NO url — never the
+      // bare site root, which made the always-retrieved summary the "more" link.
+      url: p.aboutUrl,
       topics: ["profile"],
       content: p.summary,
     });

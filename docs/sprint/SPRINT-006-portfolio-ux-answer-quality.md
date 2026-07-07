@@ -77,9 +77,9 @@ The profile-summary chunk's URL is hard-set to `owner.website` (site root) and i
 **Acceptance:** the profile-summary chunk links to `owner.aboutUrl` when set, else has no URL — never the bare site root.
 
 **DoD:**
-- [ ] `owner.aboutUrl` optional field added to the owner schema.
-- [ ] json.ts profile-summary chunk uses `aboutUrl` or omits the URL (drops `url: p.website`).
-- [ ] Test asserts the summary chunk URL is not `owner.website`; `pnpm verify` green.
+- [x] `owner.aboutUrl` optional field added to the owner schema; `aboutUrl` added to the profile-JSON shape (the wired path per G2 refinement #2 — ingest sources have no config access).
+- [x] json.ts profile-summary chunk uses `p.aboutUrl` or omits the URL (dropped `url: p.website`). Demo profile.json sets `aboutUrl` to exercise it.
+- [x] json.test.ts asserts summary url = aboutUrl when present, undefined when absent (never the site root); `pnpm verify` green (107 tests).
 
 ### T5 — MDX frontmatter type/url mapping + re-ingest `[size: M · risk: med]` · TASK-039
 Layers: `packages/server` ingest/frontmatter.ts + sources/markdown.ts. Resolves TD-011; relates TASK-023.
@@ -166,6 +166,9 @@ Decomposed from owner notes (position, custom design, persistence, home button, 
 
 ### 2026-07-07 | T1 done | Configurable position + safe-area
 Position wired core→server→widget. The `branding.icons` **config surface** (schema + public-config + widget types + `iconOverride` helper) rides along in this commit since it shares schema.ts/public-config.ts/types.ts/branding.ts with T1 (D5); the icon *rendering* is T2. Live mobile-docked check batched to the consolidated Chrome-MCP pass. verify green, 105 tests.
+
+### 2026-07-07 | T4 done | Repoint profile "more" link
+Profile-summary chunk now takes `aboutUrl` (profile JSON) or no url — dropped the `url: p.website` homepage default. `owner.aboutUrl` added to core schema for completeness; demo profile.json sets aboutUrl. New json.test.ts covers both branches. verify green, 107 tests.
 
 ### 2026-07-07 | T3 done | Anti-repetition + de-bias bio
 Prompt-only: added one conversationRules bullet (lead with specific evidence, don't restate the bio once introduced, vary openings) with the grounding requirement kept verbatim. Retrieval/LIMITS untouched (respects the load-bearing profile-rank note + L-005). Eval matrix re-ran GREEN 49/49 (100% all dims, safety 100%) — no regression from the high-risk change. Qualitative non-repetition eyeball batched to the live pass.
