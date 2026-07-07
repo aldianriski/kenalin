@@ -4,6 +4,7 @@ import { KenalinClient } from "./api.js";
 import { t, quickSub, detectLang, errorMessage, isRetryable } from "./i18n.js";
 import { avatarUrl } from "./branding.js";
 import {
+  Icon,
   LogoMark,
   IconClose,
   IconMinimize,
@@ -254,8 +255,8 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
           <span class="sub">{config.assistant.description ?? `${t(lang, "subtitle")} · ${config.owner.preferredName ?? config.owner.name}`}</span>
         </div>
         <span class="hspace" />
-        <button class="iconbtn" aria-label={t(lang, "minimize")} onClick={() => setOpen(false)}><IconMinimize /></button>
-        <button class="iconbtn" aria-label={t(lang, "close")} onClick={() => { setMessages([]); setOpen(false); }}><IconClose /></button>
+        <button class="iconbtn" aria-label={t(lang, "minimize")} onClick={() => setOpen(false)}><Icon name="minimize" fallback={<IconMinimize />} /></button>
+        <button class="iconbtn" aria-label={t(lang, "close")} onClick={() => { setMessages([]); setOpen(false); }}><Icon name="close" fallback={<IconClose />} /></button>
       </div>
 
       <div class="log" ref={logRef} role="log" aria-live="polite" aria-relevant="additions text">
@@ -274,7 +275,7 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
           <div class="qgrid">
             {config.quickActions.map((q) => (
               <button class="qcard" key={q.id} onClick={() => send(q.label[lang] ?? q.label.en, q.seedIntent)}>
-                <div class="qtop">{quickActionIcon(q.id)}<IconChevron size={16} /></div>
+                <div class="qtop"><Icon name={`quick:${q.id}`} size={20} fallback={quickActionIcon(q.id)} /><IconChevron size={16} /></div>
                 <div class="qtitle">{q.label[lang] ?? q.label.en}</div>
                 <div class="qsub">{quickSub(lang, q.id)}</div>
               </button>
@@ -298,7 +299,7 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
             aria-label={t(lang, "placeholder")}
           />
         </div>
-        <button class="send" type="submit" disabled={busy || !input.trim()} aria-label={t(lang, "send")}><IconSend /></button>
+        <button class="send" type="submit" disabled={busy || !input.trim()} aria-label={t(lang, "send")}><Icon name="send" fallback={<IconSend />} /></button>
       </form>
       <div class="foot">Powered by <b>Kenalin</b></div>
     </div>
@@ -325,7 +326,7 @@ function MessageView({
         <div class="fallback">
           <div class="fmsg">{errorMessage(lang, code)}</div>
           {isRetryable(code) && (
-            <button class="retry" onClick={onRetry}><IconRefresh /> {t(lang, "retry")}</button>
+            <button class="retry" onClick={onRetry}><Icon name="refresh" size={16} fallback={<IconRefresh />} /> {t(lang, "retry")}</button>
           )}
         </div>
       </div>
@@ -344,7 +345,7 @@ function MessageView({
       {m.complexity && (
         <div class="complex">
           <div class="eyebrow">{t(lang, "complexityEyebrow")}</div>
-          <div class="clevel"><span class="cval">{m.complexity}</span><IconChart /></div>
+          <div class="clevel"><span class="cval">{m.complexity}</span><Icon name="chart" fallback={<IconChart />} /></div>
           <div class="cdisc">{t(lang, "complexityDisclaimer")}</div>
         </div>
       )}
@@ -383,7 +384,7 @@ function EvidenceCard({ e }: { e: Evidence }): JSX.Element {
   const target = e.url && isExternal(e.url) ? "_blank" : "_self";
   const body = (
     <>
-      <div class="evhead"><IconEvidence /> <span>{e.type.replace(/_/g, " ")}</span></div>
+      <div class="evhead"><Icon name="evidence" size={16} fallback={<IconEvidence />} /> <span>{e.type.replace(/_/g, " ")}</span></div>
       <div class="evtitle">{e.title}</div>
       {e.snippet && <div class="evsnippet">{e.snippet.slice(0, 130)}</div>}
       {e.tags && e.tags.length > 0 && (
@@ -405,7 +406,7 @@ function ActionButton({ a, primary }: { a: Action; primary: boolean }): JSX.Elem
   const icon = actionIcon(a.type);
   return (
     <a class={`btn ${primary ? "btn-primary" : "btn-secondary"}`} href={href} target={target} rel="noopener">
-      {icon}{a.label}
+      <Icon name={`action:${a.type}`} fallback={icon ?? <span />} />{a.label}
     </a>
   );
 }

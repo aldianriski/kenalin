@@ -3,6 +3,7 @@ import { App } from "./app.js";
 import { STYLES } from "./styles.js";
 import { KenalinClient } from "./api.js";
 import { themeCssVars, positionCssVars } from "./branding.js";
+import { IconOverrideContext } from "./icons.js";
 import type { PageContext, PublicConfig } from "./types.js";
 
 /**
@@ -64,13 +65,17 @@ export class KenalinElement extends HTMLElement {
     ensureViewportFitCover();
 
     render(
-      h(App, {
-        apiUrl,
-        configUrl,
-        config,
-        pageContext,
-        startOpen: this.hasAttribute("start-open"),
-      }),
+      h(
+        IconOverrideContext.Provider,
+        { value: config.branding?.icons },
+        h(App, {
+          apiUrl,
+          configUrl,
+          config,
+          pageContext,
+          startOpen: this.hasAttribute("start-open"),
+        }),
+      ),
       mount,
     );
   }

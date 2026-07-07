@@ -1,10 +1,50 @@
 import type { JSX } from "preact";
+import { createContext } from "preact";
+import { useContext } from "preact/hooks";
+import { iconOverride } from "./branding.js";
 
 /**
  * Kenalin icon set — the K-mark logo + a line-icon family (1.6px stroke,
  * currentColor) matching the design system. Inlined SVG so the widget has zero
  * asset requests inside the Shadow DOM.
+ *
+ * Icons are overridable per deployment (TASK-035): `branding.icons` maps an icon
+ * NAME → image URL, provided via IconOverrideContext at the tree root. An override
+ * renders as a CSS-masked shape (`.k-icon`) that inherits `currentColor`, so it still
+ * tints with the theme; unset names fall back to the built-in SVG below.
  */
+
+/** Owner icon overrides (name → URL), provided once at the App root (element.ts). */
+export const IconOverrideContext = createContext<Record<string, string> | undefined>(undefined);
+
+/** A single-color icon painted from an image URL via CSS mask (inherits currentColor). */
+function MaskedIcon({ url, size = 18 }: { url: string; size?: number }): JSX.Element {
+  const s = `${size}px`;
+  return (
+    <span
+      class="k-icon"
+      style={`width:${s};height:${s};-webkit-mask-image:url("${url}");mask-image:url("${url}")`}
+      aria-hidden="true"
+    />
+  );
+}
+
+/**
+ * Render icon `name`: the configured override if present, else `fallback`. Use this
+ * at call sites that should honor `branding.icons` (TASK-035).
+ */
+export function Icon({
+  name,
+  size,
+  fallback,
+}: {
+  name: string;
+  size?: number;
+  fallback: JSX.Element;
+}): JSX.Element {
+  const url = iconOverride(useContext(IconOverrideContext), name);
+  return url ? <MaskedIcon url={url} size={size} /> : fallback;
+}
 
 /** The Kenalin K-mark: navy left bracket + teal chevron cradling a chat bubble. */
 export function LogoMark({ size = 28 }: { size?: number }): JSX.Element {

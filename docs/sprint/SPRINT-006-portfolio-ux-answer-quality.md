@@ -53,9 +53,9 @@ Icons are inlined SVGs, not configurable. Add an optional `branding.icons` name�
 **Acceptance:** supplying `branding.icons` swaps the rendered icons and they tint with the theme accent; omitting a key keeps the built-in icon.
 
 **DoD:**
-- [ ] `branding.icons` (name→URL/data-URI) added to schema; owner-agnostic (no icon assets in `packages/*`).
-- [ ] Widget renders overridden icons via CSS mask (currentColor/accent), built-in fallback for missing keys.
-- [ ] Test covers override + fallback; `pnpm verify` green.
+- [x] `branding.icons` (name→URL) added to schema + public-config + widget types; owner-agnostic (no icon assets in `packages/*`).
+- [x] Widget renders overridden icons via CSS mask (inherits currentColor), built-in SVG fallback for missing keys; wired at header/composer/quick-actions/evidence/complexity/retry/actions via `<Icon>` + IconOverrideContext.
+- [x] `iconOverride` resolution unit-tested (override + empty + missing + no-map); render check batched to Chrome-MCP; `pnpm verify` green (105 tests).
 
 ### T3 — Anti-repetition + de-bias profile bio `[size: M · risk: high]` · TASK-037
 Layers: `packages/core` prompt/builder.ts (conversationRules, personaBlock), retrieval constants.
@@ -165,6 +165,9 @@ Decomposed from owner notes (position, custom design, persistence, home button, 
 
 ### 2026-07-07 | T1 done | Configurable position + safe-area
 Position wired core→server→widget. The `branding.icons` **config surface** (schema + public-config + widget types + `iconOverride` helper) rides along in this commit since it shares schema.ts/public-config.ts/types.ts/branding.ts with T1 (D5); the icon *rendering* is T2. Live mobile-docked check batched to the consolidated Chrome-MCP pass. verify green, 105 tests.
+
+### 2026-07-07 | T2 done | Swappable icon set
+Icon rendering: `IconOverrideContext` (provided at the App root in element.ts) + a CSS-masked `<Icon name fallback>` wrapper. Overrode header/composer/quick-action/evidence/complexity/retry/action icons; chevrons left built-in (decorative, not brand identity). currentColor tint keeps overrides themeable. verify green, 105 tests.
 
 ## Files Changed
 <!-- Filled during execution; feeds CHANGELOG at close. -->

@@ -52,6 +52,15 @@ export const STYLES = /* css */ `
 * { box-sizing: border-box; }
 button { font: inherit; cursor: pointer; }
 
+/* Overridable icons (TASK-035): a config icon URL is painted via CSS mask so it still
+   inherits currentColor (theme accent/navy at the call site). Built-in SVGs are the fallback. */
+.k-icon {
+  display: inline-block; flex: none; background-color: currentColor;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-size: contain; mask-size: contain;
+}
+
 /* ── Launcher ─────────────────────────────────────────────────────────── */
 .launcher {
   position: fixed; z-index: var(--k-z);
