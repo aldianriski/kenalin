@@ -81,3 +81,38 @@ export function rankChunks(
   scored.sort((a, b) => b.score - a.score);
   return scored.slice(0, opts.topK);
 }
+
+/**
+ * Collapse localized/duplicate variants of one project to a single evidence chunk
+ * (TASK-017). Chunks sharing a `projectId` are grouped; within a group the chunk whose
+ * url matches the conversation language (`/{language}/`) wins, else the highest-scored
+ * (input is assumed score-sorted). Chunks without a projectId pass through unchanged;
+ * relative order is preserved. Prevents the same case study appearing as two cards
+ * (its id + en chunks) in the evidence list.
+ */
+export function dedupeByProject(scored: ScoredChunk[], language: string): ScoredChunk[] {
+  const byProject = new Map<string, ScoredChunk>();
+  const out: ScoredChunk[] = [];
+  const langSeg = `/${language}/`;
+  for (const s of scored) {
+    const pid = s.chunk.projectId;
+    if (!pid) {
+      out.push(s);
+      continue;
+    }
+    const existing = byProject.get(pid);
+    if (!existing) {
+      byProject.set(pid, s);
+      out.push(s);
+      continue;
+    }
+    const sMatches = s.chunk.url?.includes(langSeg) ?? false;
+    const eMatches = existing.chunk.url?.includes(langSeg) ?? false;
+    if ((sMatches && !eMatches) || (sMatches === eMatches && s.score > existing.score)) {
+      const idx = out.indexOf(existing);
+      if (idx >= 0) out[idx] = s;
+      byProject.set(pid, s);
+    }
+  }
+  return out;
+}

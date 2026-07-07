@@ -13,6 +13,31 @@ import type { PageContext, PublicConfig } from "./types.js";
  */
 export class KenalinElement extends HTMLElement {
   private mounted = false;
+  private themeObserver?: MutationObserver;
+
+  /**
+   * Mirror the host page's light/dark theme onto this element's `data-theme` so the
+   * Shadow-DOM `:host([data-theme])` styles switch with the host's toggle — not just
+   * the OS `prefers-color-scheme`. Supports the Tailwind/next-themes `dark` class on
+   * <html> and a `data-theme` attribute.
+   */
+  private followHostTheme(): void {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    const resolve = (): "dark" | "light" => {
+      const attr = root.getAttribute("data-theme");
+      if (attr === "dark" || attr === "light") return attr;
+      return root.classList.contains("dark") ? "dark" : "light";
+    };
+    const apply = (): void => this.setAttribute("data-theme", resolve());
+    apply();
+    this.themeObserver = new MutationObserver(apply);
+    this.themeObserver.observe(root, { attributes: true, attributeFilter: ["class", "data-theme"] });
+  }
+
+  disconnectedCallback(): void {
+    this.themeObserver?.disconnect();
+  }
 
   async connectedCallback(): Promise<void> {
     if (this.mounted) return;
@@ -63,6 +88,7 @@ export class KenalinElement extends HTMLElement {
     this.setAttribute("data-corner", position?.corner ?? "bottom-right");
     this.setAttribute("data-mobile", position?.mobile ?? "fullscreen");
     ensureViewportFitCover();
+    this.followHostTheme();
 
     render(
       h(

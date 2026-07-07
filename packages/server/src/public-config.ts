@@ -34,6 +34,8 @@ export interface PublicConfig {
     };
     /** Per-icon URL overrides (TASK-035). */
     icons?: Record<string, string>;
+    /** Built-in mark selection for launcher/header (logo|chat|robot). */
+    marks?: { launcher?: "logo" | "chat" | "robot"; header?: "logo" | "chat" | "robot" };
   };
 }
 
@@ -68,6 +70,7 @@ export function toPublicConfig(config: KenalinConfig): PublicConfig {
             theme: config.branding.theme as Record<string, string> | undefined,
             position: config.branding.position,
             icons: config.branding.icons,
+            marks: config.branding.marks,
           },
         }
       : {}),

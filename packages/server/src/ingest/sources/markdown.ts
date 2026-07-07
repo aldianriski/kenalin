@@ -1,5 +1,5 @@
 import { readFile, readdir, stat } from "node:fs/promises";
-import { join, resolve, basename, extname } from "node:path";
+import { join, resolve, basename, extname, relative } from "node:path";
 import type { ContentType } from "@kenalin/core";
 import { parseFrontmatter } from "../frontmatter.js";
 import type { RawDocument, SourceLoadResult } from "../types.js";
@@ -68,15 +68,21 @@ export async function loadMarkdown(path: string, rootDir: string): Promise<Sourc
   for (const file of files) {
     const raw = await readFile(file, "utf8");
     const { data, body } = parseFrontmatter(raw);
-    const id = basename(file, extname(file));
+    const name = basename(file, extname(file));
+    // Use the path relative to the ingest root as the id so same-named files in
+    // different locale dirs (content/en/x.mdx vs content/id/x.mdx) don't COLLIDE on
+    // `md:x` — that collision made the two locales' chunks share an id (TASK-017).
+    const relId = relative(rootDir, file).replace(extname(file), "").replace(/\\/g, "/");
     const type = normalizeType(asString(data.type));
-    const title = asString(data.title) ?? id;
+    const title = asString(data.title) ?? name;
     documents.push({
-      sourceId: `md:${id}`,
+      sourceId: `md:${relId}`,
       type,
       title,
       url: asString(data.url),
-      projectId: asString(data.projectId),
+      // Group localized variants of one project under a shared projectId so evidence
+      // dedup can collapse them to a single card. Falls back to the frontmatter slug.
+      projectId: asString(data.projectId) ?? asString(data.slug),
       topics: asArray(data.topics),
       content: body.trim(),
     });

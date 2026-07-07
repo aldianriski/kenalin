@@ -51,6 +51,17 @@ export const STYLES = /* css */ `
   --k-muted: #9AA6B8; --k-border: #263042; --k-user: #12303A;
   --k-accent-text: var(--kenalin-accent-text, #22B8A7);
 }
+/* Explicit light — re-asserts light tokens so a host in light mode wins even when the
+   OS prefers dark (the widget mirrors the host's data-theme, set in element.ts). */
+:host([data-theme="light"]) {
+  --k-bg: var(--kenalin-bg, #F8F7F3);
+  --k-surface: var(--kenalin-surface, #FFFFFF);
+  --k-text: var(--kenalin-text, #172033);
+  --k-muted: var(--kenalin-muted, #66708B);
+  --k-border: var(--kenalin-border, #E4E7EC);
+  --k-user: var(--kenalin-user-bg, #E7F6F2);
+  --k-accent-text: var(--kenalin-accent-text, #0F766E);
+}
 * { box-sizing: border-box; }
 button { font: inherit; cursor: pointer; }
 
@@ -96,6 +107,13 @@ button { font: inherit; cursor: pointer; }
 }
 @keyframes k-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
+/* Fullscreen (expand) toggle — desktop panel grows to a large centered surface. */
+.panel.full {
+  width: min(920px, 100vw - 32px);
+  height: calc(100dvh - 44px);
+  max-height: calc(100dvh - 44px);
+}
+
 /* Corner (TASK-034): default anchors to the inline-end (right in LTR); bottom-left flips it. */
 :host([data-corner="bottom-left"]) .launcher,
 :host([data-corner="bottom-left"]) .panel {
@@ -114,6 +132,9 @@ button { font: inherit; cursor: pointer; }
   :host(:not([data-mobile])) .panel {
     inset: 0; width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0;
   }
+  /* The expand toggle is redundant on mobile (panel is already full-screen). */
+  .header .kfull { display: none; }
+  .panel.full { width: 100vw; height: 100dvh; }
   /* Docked: stay a floating panel above a host bottom nav instead of full-screen. */
   :host([data-mobile="docked"]) .panel {
     inset-inline-start: auto;
@@ -147,6 +168,16 @@ button { font: inherit; cursor: pointer; }
 .header .hspace { flex: 1; }
 .header .iconbtn { background: none; border: none; color: #B7C4D4; padding: 5px; border-radius: 8px; display: grid; }
 .header .iconbtn:hover { color: #fff; background: rgba(255,255,255,.08); }
+
+/* ── Home chip (relocated from the header) ────────────────────────────── */
+.homerow { display: flex; justify-content: center; }
+.homechip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border: 1px solid var(--k-border); border-radius: 999px;
+  background: var(--k-surface); color: var(--k-muted); font-size: 12px; font-weight: 500;
+}
+.homechip:hover { border-color: var(--k-accent); color: var(--k-accent-text); }
+.homechip svg { color: var(--k-accent-text); }
 
 /* ── Log ──────────────────────────────────────────────────────────────── */
 .log { flex: 1; overflow-y: auto; padding: 16px 14px 8px; display: flex; flex-direction: column; gap: 14px; }

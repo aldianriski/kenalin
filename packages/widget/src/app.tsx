@@ -12,10 +12,12 @@ import {
 import { createIdleTimer, type IdleTimer } from "./idle.js";
 import {
   Icon,
-  LogoMark,
+  BrandMark,
   IconClose,
   IconMinimize,
   IconHome,
+  IconExpand,
+  IconCollapse,
   IconChevron,
   IconSend,
   IconEvidence,
@@ -115,6 +117,8 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
   const [busy, setBusy] = useState(false);
   // TASK-036: "Home" re-surfaces the intro/quick-actions without clearing the chat.
   const [homeView, setHomeView] = useState(false);
+  // Fullscreen (expand) toggle for the panel on desktop.
+  const [full, setFull] = useState(false);
   // TASK-012: after inactivity, nudge then auto-minimize.
   const [nudged, setNudged] = useState(false);
   const stateRef = useRef<ConversationState>((restored?.state as ConversationState) ?? { ...EMPTY_STATE, language: lang });
@@ -312,7 +316,7 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
         }}
       >
         <span class="badge">
-          {brandLogo ? <img class="brandimg" src={brandLogo} alt="" /> : <LogoMark size={20} />}
+          {brandLogo ? <img class="brandimg" src={brandLogo} alt="" /> : <BrandMark mark={config.branding?.marks?.launcher} size={20} />}
         </span>
         {config.assistant.launcherLabel}
       </button>
@@ -338,10 +342,10 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
   );
 
   return (
-    <div class="panel" role="dialog" aria-modal="true" aria-label={config.assistant.name} ref={panelRef}>
+    <div class={`panel${full ? " full" : ""}`} role="dialog" aria-modal="true" aria-label={config.assistant.name} ref={panelRef}>
       <div class="header">
         <span class="avatar">
-          {brandAvatar ? <img class="brandimg" src={brandAvatar} alt="" /> : <LogoMark size={26} />}
+          {brandAvatar ? <img class="brandimg" src={brandAvatar} alt="" /> : <BrandMark mark={config.branding?.marks?.header} size={26} />}
         </span>
         <div class="meta">
           <span class="name">{config.assistant.name}</span>
@@ -349,14 +353,12 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
         </div>
         <span class="hspace" />
         <button
-          class="iconbtn"
-          aria-label={t(lang, "home")}
-          onClick={() => {
-            setHomeView(true);
-            logRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-          }}
+          class="iconbtn kfull"
+          aria-label={t(lang, full ? "restore" : "fullscreen")}
+          aria-pressed={full}
+          onClick={() => setFull((v) => !v)}
         >
-          <Icon name="home" fallback={<IconHome />} />
+          {full ? <IconCollapse /> : <IconExpand />}
         </button>
         <button class="iconbtn" aria-label={t(lang, "minimize")} onClick={() => setOpen(false)}><Icon name="minimize" fallback={<IconMinimize />} /></button>
         <button
@@ -377,6 +379,19 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
       </div>
 
       <div class="log" ref={logRef} role="log" aria-live="polite" aria-relevant="additions text">
+        {!introVisible && !homeView && (
+          <div class="homerow">
+            <button
+              class="homechip"
+              onClick={() => {
+                setHomeView(true);
+                logRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+            >
+              <IconHome size={15} /> {t(lang, "home")}
+            </button>
+          </div>
+        )}
         {showQuickTop && quickGrid}
 
         {messages.map((m, i) => (

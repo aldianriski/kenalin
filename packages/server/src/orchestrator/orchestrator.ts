@@ -22,6 +22,7 @@ import {
   type ChatMessage,
   type TokenUsage,
   LIMITS,
+  dedupeByProject,
 } from "@kenalin/core";
 import { estimateTokens, type TurnUsage } from "../usage.js";
 import { responseCacheKey, type ResponseCache } from "../response-cache.js";
@@ -82,14 +83,15 @@ export class Orchestrator {
 
     // 1. Retrieve evidence for this turn (top-K, then cap what reaches the prompt).
     const [queryVector] = await this.deps.embedder.embed([query.slice(0, LIMITS.llmMessageCharCap) || " "]);
-    const scored = (
-      await this.deps.store.search(queryVector ?? [], {
-        topK: LIMITS.retrievalTopK,
-        filter: { visibility: "public", projectId: request.pageContext?.projectId },
-        intent: state.intent as Intent,
-        threshold: this.deps.retrievalThreshold,
-      })
-    ).slice(0, LIMITS.maxEvidenceInPrompt);
+    const retrieved = await this.deps.store.search(queryVector ?? [], {
+      topK: LIMITS.retrievalTopK,
+      filter: { visibility: "public", projectId: request.pageContext?.projectId },
+      intent: state.intent as Intent,
+      threshold: this.deps.retrievalThreshold,
+    });
+    // Collapse localized duplicates of one project to a single card (TASK-017), then
+    // take the prompt budget — dedup BEFORE the slice so a dropped duplicate frees a slot.
+    const scored = dedupeByProject(retrieved, language).slice(0, LIMITS.maxEvidenceInPrompt);
 
     const evidenceCandidates: EvidenceCandidate[] = [];
     const evidenceById = new Map<string, Evidence>();

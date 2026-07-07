@@ -192,6 +192,15 @@ export type IconOverrides = z.infer<typeof IconOverridesSchema>;
 /** Owner branding (TASK-004): launcher/header imagery + theme tokens, set in config
  *  without code. `.strict()` — and deliberately NO field that can hide or remove the
  *  "Powered by Kenalin" footer (same spirit as the B9 no-weakening rule above). */
+/** Built-in mark selection for the launcher badge + header avatar (TASK-035 round 2).
+ *  `logo` = the brand logo/K-mark (default), `chat` = a chat bubble, `robot` = an AI
+ *  robot. Lets a deployment pick a chat/robot identity without hosting image assets.
+ *  A configured `logoUrl`/`avatarUrl` image still wins over a mark. */
+export const BrandMarkSchema = z.enum(["logo", "chat", "robot"]);
+export const BrandMarksSchema = z
+  .object({ launcher: BrandMarkSchema.optional(), header: BrandMarkSchema.optional() })
+  .strict();
+
 export const BrandingConfigSchema = z
   .object({
     logoUrl: z.string().url().optional(),
@@ -199,6 +208,7 @@ export const BrandingConfigSchema = z
     theme: ThemeTokensSchema.optional(),
     position: PositionConfigSchema.optional(),
     icons: IconOverridesSchema.optional(),
+    marks: BrandMarksSchema.optional(),
   })
   .strict();
 export type BrandingConfig = z.infer<typeof BrandingConfigSchema>;

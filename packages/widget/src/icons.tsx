@@ -72,6 +72,44 @@ export function LogoMark({ size = 28 }: { size?: number }): JSX.Element {
   );
 }
 
+/** A chat bubble mark (AI-chat identity) — accent bubble with three dots. */
+export function IconChat({ size = 22 }: { size?: number }): JSX.Element {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <path
+        d="M8 7h24a4 4 0 0 1 4 4v13a4 4 0 0 1-4 4H19l-7.5 6v-6H8a4 4 0 0 1-4-4V11a4 4 0 0 1 4-4Z"
+        fill="var(--k-accent, #22B8A7)"
+      />
+      <circle cx="14" cy="17.5" r="2" fill="#fff" />
+      <circle cx="20" cy="17.5" r="2" fill="#fff" />
+      <circle cx="26" cy="17.5" r="2" fill="#fff" />
+    </svg>
+  );
+}
+
+/** A robot head mark (AI identity) — navy head, accent eyes + antenna. */
+export function IconRobot({ size = 26 }: { size?: number }): JSX.Element {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <path d="M20 5v5" stroke="var(--k-navy, #0F2742)" stroke-width="2" stroke-linecap="round" />
+      <circle cx="20" cy="4.5" r="2.5" fill="var(--k-accent, #22B8A7)" />
+      <rect x="3.5" y="18" width="3.5" height="8" rx="1.75" fill="var(--k-navy, #0F2742)" />
+      <rect x="33" y="18" width="3.5" height="8" rx="1.75" fill="var(--k-navy, #0F2742)" />
+      <rect x="7" y="11" width="26" height="21" rx="6" fill="var(--k-navy, #0F2742)" />
+      <circle cx="15" cy="21" r="3.1" fill="var(--k-accent, #22B8A7)" />
+      <circle cx="25" cy="21" r="3.1" fill="var(--k-accent, #22B8A7)" />
+      <rect x="15" y="27" width="10" height="2.4" rx="1.2" fill="#fff" />
+    </svg>
+  );
+}
+
+/** Pick a built-in brand mark for the launcher/avatar (TASK-035 round 2). */
+export function BrandMark({ mark, size }: { mark?: "logo" | "chat" | "robot"; size?: number }): JSX.Element {
+  if (mark === "chat") return <IconChat size={size} />;
+  if (mark === "robot") return <IconRobot size={size} />;
+  return <LogoMark size={size} />;
+}
+
 type IconProps = { size?: number; class?: string };
 const base = (size: number): JSX.SVGAttributes<SVGSVGElement> => ({
   width: size,
@@ -193,6 +231,20 @@ export function IconHome({ size = 18 }: IconProps): JSX.Element {
   return (
     <svg {...base(size)}>
       <path d="M4 11 12 4l8 7M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9" />
+    </svg>
+  );
+}
+export function IconExpand({ size = 18 }: IconProps): JSX.Element {
+  return (
+    <svg {...base(size)}>
+      <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5" />
+    </svg>
+  );
+}
+export function IconCollapse({ size = 18 }: IconProps): JSX.Element {
+  return (
+    <svg {...base(size)}>
+      <path d="M3 8h5V3M21 8h-5V3M3 16h5v5M21 16h-5v5" />
     </svg>
   );
 }

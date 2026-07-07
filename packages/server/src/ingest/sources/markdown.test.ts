@@ -32,6 +32,20 @@ describe("loadMarkdown — frontmatter type/url mapping (TASK-039)", () => {
     expect(hyb?.type).toBe("case_study");
   });
 
+  it("gives same-named files in different dirs UNIQUE ids + projectId from slug (TASK-017)", async () => {
+    const { mkdir } = await import("node:fs/promises");
+    await mkdir(join(dir, "en"), { recursive: true });
+    await mkdir(join(dir, "id"), { recursive: true });
+    await writeFile(join(dir, "en", "gbu.mdx"), `---\ntype: hybrid\ntitle: GBU EN\nslug: gbu\nurl: https://x/en/case-studies/gbu\n---\nEnglish body.\n`, "utf8");
+    await writeFile(join(dir, "id", "gbu.mdx"), `---\ntype: hybrid\ntitle: GBU ID\nslug: gbu\nurl: https://x/id/case-studies/gbu\n---\nIndonesian body.\n`, "utf8");
+    const { documents } = await loadMarkdown(dir, dir);
+    const gbus = documents.filter((d) => d.projectId === "gbu");
+    expect(gbus).toHaveLength(2);
+    // ids differ (include the locale dir), projectId is shared for dedup
+    expect(new Set(gbus.map((d) => d.sourceId)).size).toBe(2);
+    expect(gbus.every((d) => d.projectId === "gbu")).toBe(true);
+  });
+
   it("passes canonical types through and falls back to custom for unknown/missing", async () => {
     await md("proj.md", "type: project\ntitle: Proj");
     await md("weird.md", "type: qwerty\ntitle: Weird");

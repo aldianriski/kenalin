@@ -37,6 +37,7 @@ export interface PublicConfig {
       mobile: "fullscreen" | "docked";
     };
     icons?: Record<string, string>;
+    marks?: { launcher?: "logo" | "chat" | "robot"; header?: "logo" | "chat" | "robot" };
   };
 }
 
