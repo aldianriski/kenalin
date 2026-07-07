@@ -17,9 +17,9 @@ status: current
 
 ## Active Sprint
 
-> **→ — none —** · **v0.5.0** (2026-07-07) — SPRINT-008 closed (portfolio polish round 3). SPRINT-001…008 archived → [`docs/sprint/archive/`](docs/sprint/archive/) · [`docs/sprint/INDEX.md`](docs/sprint/INDEX.md).
+> **SPRINT-009 — OSS professionalization (v0.6)** → [`docs/sprint/SPRINT-009-oss-professionalization.md`](docs/sprint/SPRINT-009-oss-professionalization.md) · promoted 2026-07-07. Full 7-task track (TASK-045, 022, 046, 047, 048, 049, 050). SPRINT-001…008 archived → [`docs/sprint/archive/`](docs/sprint/archive/) · [`docs/sprint/INDEX.md`](docs/sprint/INDEX.md).
 
-Status: `pnpm verify` green (**120 tests**) · eval matrix **12/15/12/10 = 49, 100% id+en** · widget < 60 KB. Portfolio branch `sprint/portfolio-ux-answer-quality` now carries SPRINT-006+007+008 (`e761dc5`) — **owner to merge + deploy** (TASK-041). Release close-out (TASK-032/033) still open. Detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
+Status: `pnpm verify` green (**120 tests**) · eval matrix **12/15/12/10 = 49, 100% id+en** · widget < 60 KB · v0.5.0. Portfolio branch `sprint/portfolio-ux-answer-quality` carries SPRINT-006+007+008 (`e761dc5`) — **owner to merge + deploy** (TASK-041, out of this sprint). Release close-out (TASK-032/033) still open. Detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
 ---
 
@@ -71,18 +71,18 @@ Status: `pnpm verify` green (**120 tests**) · eval matrix **12/15/12/10 = 49, 1
 > Goal: fast adoption + a clear implementation flow. Suggested SPRINT-009 order: TASK-045
 > first (README visuals), then the chosen track. All owner-agnostic (demo content, not the portfolio).
 
-- [ ] **TASK-045 — Visual README design showcase** [size: M] · src: you · state: ready
+- [ ] **TASK-045 — Visual README design showcase** [size: M] · src: you · state: in SPRINT-009 (T6)
       done-when: README leads with a hero GIF + screenshots of the widget using the **demo** owner (launcher → chat → evidence cards → handoff; light + dark; mobile full-screen; code/product green-vs-blue mode); badges added (npm version, CI, bundle-size, license); assets committed under `assets/`.
-- [ ] **TASK-022 — `create-kenalin` + publish `@kenalin/*` to npm** [size: L] · src: claude · state: ready — **elevated from P3.** Adopters install instead of vendoring. done-when: `@kenalin/{core,server,widget}` published; `npx create-kenalin <name>` scaffolds a runnable project (config + example + ingest); portfolio can consume the package instead of a vendored bundle. Resolves TD-004.
-- [ ] **TASK-046 — Hosted demo playground + "Deploy to Vercel" button** [size: M] · src: claude · state: ready
+- [ ] **TASK-022 — `create-kenalin` + publish `@kenalin/*` to npm** [size: L] · src: claude · state: in SPRINT-009 (T1) — **elevated from P3.** Adopters install instead of vendoring. done-when: `@kenalin/{core,server,widget}` published; `npx create-kenalin <name>` scaffolds a runnable project (config + example + ingest); portfolio can consume the package instead of a vendored bundle. Resolves TD-004.
+- [ ] **TASK-046 — Hosted demo playground + "Deploy to Vercel" button** [size: M] · src: claude · state: in SPRINT-009 (T5)
       done-when: a public try-it demo (demo owner) is deployed; README has a one-click Deploy-to-Vercel button that provisions a working install (env prompts for the Gemini key).
-- [ ] **TASK-047 — True <5-min Quickstart** [size: S] · src: claude · state: ready
+- [ ] **TASK-047 — True <5-min Quickstart** [size: S] · src: claude · state: in SPRINT-009 (T3)
       done-when: README/SETUP has a copy-paste Quickstart: scaffold → add key → `pnpm ingest` → run/deploy, each step verified from a clean checkout.
-- [ ] **TASK-048 — Config reference doc (from the Zod schema)** [size: M] · src: claude · state: ready
+- [ ] **TASK-048 — Config reference doc (from the Zod schema)** [size: M] · src: claude · state: in SPRINT-009 (T2)
       done-when: one page documents every `kenalin.config.ts` field (owner, assistant, branding {theme, modes, position, marks, icons}, modules, complexity, handoff, actions, knowledge, storage, analytics, qualification, server) with types + defaults; generated from / checked against the Zod schema so it can't drift.
-- [ ] **TASK-049 — Integration guides (Next.js + plain HTML)** [size: S] · src: claude · state: ready
+- [ ] **TASK-049 — Integration guides (Next.js + plain HTML)** [size: S] · src: claude · state: in SPRINT-009 (T4)
       done-when: a Next.js embed guide (API routes + widget mount, mirroring the reference portfolio) and a plain-HTML guide, both runnable from the examples.
-- [ ] **TASK-050 — Community/repo hygiene** [size: S] · src: claude · state: ready
+- [ ] **TASK-050 — Community/repo hygiene** [size: S] · src: claude · state: in SPRINT-009 (T7)
       done-when: CONTRIBUTING.md, issue + PR templates, CODE_OF_CONDUCT, a public roadmap section, and a sharp GitHub description + topics are in place.
 
 ## Tech Debt
