@@ -68,7 +68,7 @@ The profile-summary chunk is retrieved as evidence almost every turn and a groun
 - [x] profile-summary de-prioritized via the prompt (NOT retrieval — LIMITS note + L-005 keep the chunk; the rule reorders emphasis).
 - [x] `owner.role` still identifies the assistant in personaBlock (needed for identity); the repetition driver (re-grounding in the summary) is addressed by the rule instead.
 - [x] `pnpm eval` = 12/15/12/10 = 49, 100% all dims (safety 100%, thinking 0, cache hit); `pnpm verify` green.
-- [~] Qualitative "3 topics don't repeat the bio opening" — **batched** to the consolidated live pass.
+- [x] Qualitative "3 topics don't repeat the bio opening" — **confirmed** via a headless orchestrator probe: 3 topics → 3 distinct topic-specific openings, none reverting to the generic bio.
 
 ### T4 — Repoint profile "more" link off homepage `[size: S · risk: low]` · TASK-038
 Layers: `packages/server` ingest/sources/json.ts, `packages/core` owner schema.
@@ -166,6 +166,11 @@ Decomposed from owner notes (position, custom design, persistence, home button, 
 
 ### 2026-07-07 | T1 done | Configurable position + safe-area
 Position wired core→server→widget. The `branding.icons` **config surface** (schema + public-config + widget types + `iconOverride` helper) rides along in this commit since it shares schema.ts/public-config.ts/types.ts/branding.ts with T1 (D5); the icon *rendering* is T2. Live mobile-docked check batched to the consolidated Chrome-MCP pass. verify green, 105 tests.
+
+### 2026-07-07 | verify | Answer-quality slice confirmed live + demo re-ingest
+Headless orchestrator probe (3 topics) confirmed **T3**: openings are distinct and evidence-led — "QuickHub is a project where Sari replaced…", "Sari has experience as a tech lead…", "Sari is strongest in workflow automation…" — none the old bio. Caught that the gitignored demo `content/index` was stale (built pre-T4/T5) so **re-ingested** it (gemini, 17 chunks): profile chunk url now `/about` (0 root-only urls) → **T4** confirmed end-to-end; case-study links specific. Eval re-ran GREEN 49/49 against the fresh index.
+
+**Env friction:** the `C:` drive is critically full (0.19 GB free; D: has 197 GB). This caused the intermittent `errno -4094` spawn / ENOSPC failures during `pnpm -r` runs and blocked `npx`. Individual package commands + the local jiti work. **The widget DOM live checks (T1 mobile-docked, T2 icon render, T6 Home, T7 reload-survives, T8 idle timing) are deferred to T9's portfolio live smoke** — standing up Chrome-MCP + dev/static servers against a full C: is a rabbit-hole risk; each is already unit-test + typecheck + build covered.
 
 ### 2026-07-07 | T8 done | Idle detection + auto-close
 Config `assistant.idle` (nudge/close seconds, default 60/30) surfaced to the widget. Pure `createIdleTimer` (unit-tested, fake timers) drives a static "still there?" nudge banner then auto-minimize; kicked on open/messages/input. Reduced-motion-safe (no added animation). core 35 + server 63 + widget 18 = 116 tests. **T1–T8 (engine + widget) complete; next: consolidated Chrome-MCP live pass, then T9 portfolio apply.**
