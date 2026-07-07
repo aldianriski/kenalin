@@ -8,6 +8,7 @@ import {
   LogoMark,
   IconClose,
   IconMinimize,
+  IconHome,
   IconChevron,
   IconSend,
   IconEvidence,
@@ -74,6 +75,8 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
   const [messages, setMessages] = useState<UiMessage[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  // TASK-036: "Home" re-surfaces the intro/quick-actions without clearing the chat.
+  const [homeView, setHomeView] = useState(false);
   const stateRef = useRef<ConversationState>({ ...EMPTY_STATE, language: lang });
   const sessionRef = useRef<string>(uuid());
   const clientRef = useRef(new KenalinClient(apiUrl));
@@ -158,6 +161,7 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
       if (!trimmed || busy) return;
       setInput("");
       setBusy(true);
+      setHomeView(false);
       lastUserRef.current = { text: trimmed, seed: seedIntent };
       if (seedIntent) stateRef.current = { ...stateRef.current, intent: seedIntent as ConversationState["intent"] };
 
@@ -242,7 +246,23 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
     );
   }
 
-  const showQuick = messages.filter((m) => !m.pending).length <= 1 && config.quickActions.length > 0;
+  // Quick-actions show at the start of a conversation (below the greeting), or pinned at
+  // the top when "Home" is tapped mid-chat (TASK-036) — history stays intact below.
+  const introVisible = messages.filter((m) => !m.pending).length <= 1;
+  const hasQuick = config.quickActions.length > 0;
+  const showQuickBottom = introVisible && hasQuick;
+  const showQuickTop = homeView && !introVisible && hasQuick;
+  const quickGrid = (
+    <div class="qgrid">
+      {config.quickActions.map((q) => (
+        <button class="qcard" key={q.id} onClick={() => send(q.label[lang] ?? q.label.en, q.seedIntent)}>
+          <div class="qtop"><Icon name={`quick:${q.id}`} size={20} fallback={quickActionIcon(q.id)} /><IconChevron size={16} /></div>
+          <div class="qtitle">{q.label[lang] ?? q.label.en}</div>
+          <div class="qsub">{quickSub(lang, q.id)}</div>
+        </button>
+      ))}
+    </div>
+  );
 
   return (
     <div class="panel" role="dialog" aria-modal="true" aria-label={config.assistant.name} ref={panelRef}>
@@ -255,11 +275,23 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
           <span class="sub">{config.assistant.description ?? `${t(lang, "subtitle")} · ${config.owner.preferredName ?? config.owner.name}`}</span>
         </div>
         <span class="hspace" />
+        <button
+          class="iconbtn"
+          aria-label={t(lang, "home")}
+          onClick={() => {
+            setHomeView(true);
+            logRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        >
+          <Icon name="home" fallback={<IconHome />} />
+        </button>
         <button class="iconbtn" aria-label={t(lang, "minimize")} onClick={() => setOpen(false)}><Icon name="minimize" fallback={<IconMinimize />} /></button>
         <button class="iconbtn" aria-label={t(lang, "close")} onClick={() => { setMessages([]); setOpen(false); }}><Icon name="close" fallback={<IconClose />} /></button>
       </div>
 
       <div class="log" ref={logRef} role="log" aria-live="polite" aria-relevant="additions text">
+        {showQuickTop && quickGrid}
+
         {messages.map((m, i) => (
           <MessageView
             key={i}
@@ -271,17 +303,7 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
           />
         ))}
 
-        {showQuick && (
-          <div class="qgrid">
-            {config.quickActions.map((q) => (
-              <button class="qcard" key={q.id} onClick={() => send(q.label[lang] ?? q.label.en, q.seedIntent)}>
-                <div class="qtop"><Icon name={`quick:${q.id}`} size={20} fallback={quickActionIcon(q.id)} /><IconChevron size={16} /></div>
-                <div class="qtitle">{q.label[lang] ?? q.label.en}</div>
-                <div class="qsub">{quickSub(lang, q.id)}</div>
-              </button>
-            ))}
-          </div>
-        )}
+        {showQuickBottom && quickGrid}
       </div>
 
       <form

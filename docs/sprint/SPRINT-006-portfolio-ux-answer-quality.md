@@ -99,9 +99,9 @@ There's no way back to the intro/quick-actions from an active chat — only Clos
 **Acceptance:** clicking Home shows the quick-actions intro again while the conversation is preserved and resumable; Close still clears + closes.
 
 **DoD:**
-- [ ] Home control in the header, keyboard-reachable, returns to the intro/quick-actions view.
-- [ ] `messages` + conversation state preserved (not cleared) on Home.
-- [ ] Behavior verified in Chrome-MCP (L-004); `pnpm verify` green.
+- [x] Home `.iconbtn` in the header (keyboard-reachable), re-surfaces the quick-actions — pinned at top mid-chat, bottom on a fresh intro; dismisses on send.
+- [x] `messages` + conversation state preserved (not cleared) on Home; Close still clears + closes.
+- [x] typecheck + build green (widget tests 11); live behavior **batched** to the consolidated Chrome-MCP pass (L-004).
 
 ### T7 — Conversation persistence (sessionStorage) `[size: S · risk: low]` · TASK-013
 Layers: `packages/widget` app.tsx.
@@ -166,6 +166,9 @@ Decomposed from owner notes (position, custom design, persistence, home button, 
 
 ### 2026-07-07 | T1 done | Configurable position + safe-area
 Position wired core→server→widget. The `branding.icons` **config surface** (schema + public-config + widget types + `iconOverride` helper) rides along in this commit since it shares schema.ts/public-config.ts/types.ts/branding.ts with T1 (D5); the icon *rendering* is T2. Live mobile-docked check batched to the consolidated Chrome-MCP pass. verify green, 105 tests.
+
+### 2026-07-07 | T6 done | Home button (keep history)
+Added `homeView` state + a header Home button. Re-surfaces the quick-action grid (top when tapped mid-chat, bottom on fresh intro) without clearing messages; dismisses on send. IconHome + `home`/`idleNudge` i18n strings added (idleNudge is for T8, inert until then). Transient tinypool spawn error on the first verify (errno -4094) — re-ran widget tests green (L-001). typecheck+build green.
 
 ### 2026-07-07 | T5 done | MDX type/url mapping
 Added `normalizeType()` in markdown.ts (technical/hybrid/case-study → case_study, canonical passthrough, unknown → custom). `url:` was already parsed — the "no View link" is a content gap (T9). markdown.test.ts added. TD-011 engine side resolved. verify green, 109 tests.

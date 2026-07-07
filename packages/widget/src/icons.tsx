@@ -189,6 +189,13 @@ export function IconChart({ size = 18 }: IconProps): JSX.Element {
     </svg>
   );
 }
+export function IconHome({ size = 18 }: IconProps): JSX.Element {
+  return (
+    <svg {...base(size)}>
+      <path d="M4 11 12 4l8 7M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9" />
+    </svg>
+  );
+}
 
 /** Map a quick-action id (or intent) to an icon. */
 export function quickActionIcon(id: string): JSX.Element {
