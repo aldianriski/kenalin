@@ -3,9 +3,9 @@ sprint: 009
 slug: oss-professionalization
 owner: Tech Lead
 last_updated: 2026-07-07
-status: active
+status: closed
 plan_commit: fbafe3f
-close_commit: [sha — set at close]
+close_commit: b584768
 update_trigger: sprint execute/close events
 ---
 
@@ -214,12 +214,25 @@ Recon (two `Explore` agents) established: packages already `@kenalin/*`/0.5.3/no
 | `examples/vercel-demo/**` | T5 | keyless bundled demo (Fake+Hash) + Vercel deploy | Med | live + bundled-fn smoke |
 
 ## Retro
-<!-- Written at close. Route buckets per DOCS_Guide §10. -->
 
-**Retrieval check** — _pending close._
+**Outcome:** T1–T5 + T7 delivered; T6 badges/wiring done with demo assets deferred (owner-timed capture). v0.6.0 **published to npm** and a keyless demo **live** on Vercel.
 
-**Worked** — _pending._
+**Retrieval check** — no prior `L-NNN`/ADR contradicted. L-007 (verify the shipped artifact) proved its worth: the demo passed every local test yet the widget was dead in production (Vercel 504/routing) — caught only by curling the live URL (→ L-015).
 
-**Friction** — _pending._
+**Worked**
+- Recon-first (two `Explore` agents) mapped publish-readiness + the schema before any code.
+- Field-coverage drift gate (`check-config-doc`) — cheap, robust, non-fragile vs. a full generator.
+- Keyless demo via `FakeChatProvider` + hash index — a real, cost-free, secret-free playground.
+- Committing per-task kept state durable across a very long, multi-turn sprint.
 
-**Pattern candidate** — _pending._
+**Friction**
+- npm publish took 3 token/org iterations (→ L-016).
+- Vercel raw-function quirks (POST-body hang, catch-all, no SSE streaming) — local-green ≠ prod (→ L-015).
+- Headless capture of the streaming widget repeatedly froze (→ L-014).
+- The demo went through 3 reframes (persona → generic persona → Kenalin-about-Kenalin) on owner feedback — clarify the demo's *subject* up front next time.
+
+**Buckets routed**
+- **Shipped** → `docs/CHANGELOG.md` [0.6.0].
+- **Learnings** → **L-015** (Vercel raw function), **L-016** (npm publish token/org). L-014 filed earlier.
+- **Tech debt** → **TD-013** (demo fake responder), **TD-014** (Vercel no-SSE-stream), **TD-015** (manual demo build/deploy). TD-004 unblocked.
+- **Follow-ups** → **TASK-051** (portfolio→`@kenalin/*@0.6.0`, resolves TD-004), **TASK-052** (GitHub description/topics + CoC contact); TASK-045 (demo GIF/screenshots) carried.

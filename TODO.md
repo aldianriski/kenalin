@@ -17,9 +17,9 @@ status: current
 
 ## Active Sprint
 
-> **SPRINT-009 — OSS professionalization (v0.6)** → [`docs/sprint/SPRINT-009-oss-professionalization.md`](docs/sprint/SPRINT-009-oss-professionalization.md) · promoted 2026-07-07. Full 7-task track (TASK-045, 022, 046, 047, 048, 049, 050). SPRINT-001…008 archived → [`docs/sprint/archive/`](docs/sprint/archive/) · [`docs/sprint/INDEX.md`](docs/sprint/INDEX.md).
+> **→ — none —** · **v0.6.0** (2026-07-07) — SPRINT-009 closed (OSS professionalization: published to npm + adoption tooling + live keyless demo). SPRINT-001…009 archived → [`docs/sprint/archive/`](docs/sprint/archive/) · [`docs/sprint/INDEX.md`](docs/sprint/INDEX.md).
 
-Status: `pnpm verify` green (**126 tests** + owner-string & config-doc gates) · widget 18.7 KB gz · **v0.6.0 PUBLISHED to npm** (`@kenalin/{core,server,widget}` + `create-kenalin`). **SPRINT-009:** T1/T2/T3/T4/T7 done; T5 keyless demo built + deployed (Vercel SSO toggle pending); T6 badges/wiring done (demo GIF/screenshots → `assets/CAPTURE.md`). **Remaining owner-gated:** disable Vercel Deployment Protection on `vercel-demo`; GitHub description/topics + CoC contact; portfolio→package migration (TD-004). Detail → the sprint file.
+Status: `pnpm verify` green (**126 tests** + owner-string & config-doc gates) · widget 18.7 KB gz · **v0.6.0 PUBLISHED to npm** (`@kenalin/{core,server,widget}` + `create-kenalin`) · live demo at `https://vercel-demo-mu-seven.vercel.app`. **Open follow-ups:** TASK-045 (demo GIF/screenshots), TASK-051 (portfolio→package, TD-004), TASK-052 (GitHub description/topics + CoC contact).
 
 ---
 
@@ -71,32 +71,27 @@ Status: `pnpm verify` green (**126 tests** + owner-string & config-doc gates) ·
 > Goal: fast adoption + a clear implementation flow. Suggested SPRINT-009 order: TASK-045
 > first (README visuals), then the chosen track. All owner-agnostic (demo content, not the portfolio).
 
-- [ ] **TASK-045 — Visual README design showcase** [size: M] · src: you · state: in SPRINT-009 (T6)
-      done-when: README leads with a hero GIF + screenshots of the widget using the **demo** owner (launcher → chat → evidence cards → handoff; light + dark; mobile full-screen; code/product green-vs-blue mode); badges added (npm version, CI, bundle-size, license); assets committed under `assets/`.
-- [ ] **TASK-022 — `create-kenalin` + publish `@kenalin/*` to npm** [size: L] · src: claude · state: in SPRINT-009 (T1) — **elevated from P3.** Adopters install instead of vendoring. done-when: `@kenalin/{core,server,widget}` published; `npx create-kenalin <name>` scaffolds a runnable project (config + example + ingest); portfolio can consume the package instead of a vendored bundle. Resolves TD-004.
-- [ ] **TASK-046 — Hosted demo playground + "Deploy to Vercel" button** [size: M] · src: claude · state: in SPRINT-009 (T5)
-      done-when: a public try-it demo (demo owner) is deployed; README has a one-click Deploy-to-Vercel button that provisions a working install (env prompts for the Gemini key).
-- [ ] **TASK-047 — True <5-min Quickstart** [size: S] · src: claude · state: in SPRINT-009 (T3)
-      done-when: README/SETUP has a copy-paste Quickstart: scaffold → add key → `pnpm ingest` → run/deploy, each step verified from a clean checkout.
-- [ ] **TASK-048 — Config reference doc (from the Zod schema)** [size: M] · src: claude · state: in SPRINT-009 (T2)
-      done-when: one page documents every `kenalin.config.ts` field (owner, assistant, branding {theme, modes, position, marks, icons}, modules, complexity, handoff, actions, knowledge, storage, analytics, qualification, server) with types + defaults; generated from / checked against the Zod schema so it can't drift.
-- [ ] **TASK-049 — Integration guides (Next.js + plain HTML)** [size: S] · src: claude · state: in SPRINT-009 (T4)
-      done-when: a Next.js embed guide (API routes + widget mount, mirroring the reference portfolio) and a plain-HTML guide, both runnable from the examples.
-- [ ] **TASK-050 — Community/repo hygiene** [size: S] · src: claude · state: in SPRINT-009 (T7)
-      done-when: CONTRIBUTING.md, issue + PR templates, CODE_OF_CONDUCT, a public roadmap section, and a sharp GitHub description + topics are in place.
+> **SPRINT-009 closed** — done: TASK-022 (published `@kenalin/*@0.6.0` + `create-kenalin`), TASK-046 (live keyless demo — Deploy button deferred, see below), TASK-047 (Quickstart), TASK-048 (config ref + drift gate), TASK-049 (integration guides), TASK-050 (repo hygiene). Detail → [`docs/sprint/archive/SPRINT-009-oss-professionalization.md`](docs/sprint/archive/SPRINT-009-oss-professionalization.md).
+
+- [ ] **TASK-045 — Visual README design showcase** [size: M] · src: you · state: **owner-action (carried)** — badges done in SPRINT-009; **remaining**: capture the demo hero GIF + light/dark/mobile screenshots and commit under `assets/img/` (human-timed, runbook `assets/CAPTURE.md`; headless capture freezes — L-014). The public demo now lives at `https://vercel-demo-mu-seven.vercel.app`.
+- [ ] **TASK-051 — Migrate the portfolio to `@kenalin/*@0.6.0`** [size: M] · src: claude · state: ready — replace the vendored `kenalin-engine.js`/`kenalin.js` in the portfolio with `npm install @kenalin/{server,widget}@^0.6.0`. **Resolves TD-004.**
+- [ ] **TASK-052 — Finish repo/community publishing** [size: S] · src: you · state: needs-owner — set the GitHub repo description + topics (repo-admin) and the CoC maintainer contact in `CODE_OF_CONDUCT.md`. Optionally: a `create-kenalin`-based "Deploy to Vercel" button once the scaffold path is confirmed on a fresh clone (the keyless demo can't be a git-clone Deploy target — artifacts are prebuilt).
 
 ## Tech Debt
 
 - **TD-001** severity: medium | status: resolved → TASK-005 (Sprint-002) | created: Sprint-000 — Eval counts were 5/5/8/3. Expanded to 12/15/12/10 (49), 100% green id+en.
 - **TD-002** severity: medium | status: open | created: Sprint-000 — Widget test coverage thin (only the SSE parser). done-when: component tests for app/message/evidence/chips render + click.
 - **TD-003** severity: minor | status: open | created: Sprint-000 — Answer is pseudo-streamed word-by-word, not real token streaming. done-when: TASK-014.
-- **TD-004** severity: minor | status: open | created: Sprint-000 — Portfolio consumes a vendored bundle; must re-vendor on each release. done-when: TASK-022.
+- **TD-004** severity: minor | status: open → TASK-051 (unblocked: `@kenalin/*@0.6.0` published Sprint-009) | created: Sprint-000 — Portfolio still consumes a vendored bundle; migrate to `npm install @kenalin/*`. done-when: TASK-051.
 - **TD-005** severity: medium | status: resolved → TASK-007 (Sprint-002) | created: Sprint-000 — Rate limiter is in-memory (per serverless instance). Redis-backed via Upstash; in-memory kept as fallback.
 - **TD-006** severity: medium | status: resolved → TASK-007 (Sprint-002) | created: Sprint-001 — UsageTracker + per-session token budget were in-memory. Redis-backed via Upstash; cap holds cross-instance (verified w/ shared-FakeRedis test).
 - **TD-007** severity: minor | status: resolved → TASK-005 (Sprint-002) | created: Sprint-001 — Gemini thinking-token overhead. Now config-controlled (`server.model.thinkingBudget`); disabled in demo — cost/turn −37%, quality green.
 - **TD-008** severity: minor | status: open | created: Sprint-002 — The embedded `KenalinEngine` (`embed.ts`, vendored by the portfolio) stays in-memory/sync for limiter+usage — only the Hono `/api` path is Redis-backed (D4), so the vendored engine's counters remain per-instance. Also the Redis limiter is fixed-window (not the in-memory token bucket). done-when: move the embed engine to the shared Redis store (needs an async `KenalinEngine` API rev) if per-instance counting there becomes a problem.
 - **TD-009** severity: minor | status: open | created: Sprint-003 — Widget has no render/behavior test harness (`environment: node`, no jsdom) — a11y behavior (focus trap, Escape, live region) can't be unit-tested, only browser-verified (L-004). done-when: add jsdom/happy-dom (or preact-render-to-string for static render) so widget behavior gets regression coverage; also covers TD-002.
 - **TD-010** severity: minor | status: open | created: 2026-07-07 (release) — Portfolio prod runs cache + rate-limiter **in-memory per-instance**: only `REDIS_URL` is set, not the `UPSTASH_REDIS_REST_URL`/`_TOKEN` REST pair my `resolveRedisConfig` reads. Fine at low traffic; cross-instance needs the REST vars. done-when: TASK-033.
+- **TD-013** severity: minor | status: open | created: Sprint-009 — The hosted demo (`examples/vercel-demo`) answers via a **deterministic responder** (`FakeChatProvider`), not a real LLM — by design (keyless, cost/secret-free). Retrieval is real (hash embedder) but answers are templated from the top chunk. done-when: if a live-LLM demo is wanted, add an env-gated Gemini path (`buildAppDeps` with a key) alongside the fake one.
+- **TD-014** severity: minor | status: open | created: Sprint-009 — Vercel functions time out (504) on held-open **SSE streaming**, so the demo returns the whole SSE body at once (no word-by-word). Fine for the demo; if real streaming is needed on Vercel, use the Edge runtime or fluid/streaming responses. Related: TD-003 (widget pseudo-stream). (L-015.)
+- **TD-015** severity: minor | status: open | created: Sprint-009 — The demo build is **manual**: `pnpm --filter @kenalin/widget build` + a hash `ingest` + `node build.mjs` (locally, needs the workspace) then `vercel deploy`. Artifacts are gitignored + prebuilt (Vercel doesn't build it). done-when: a small script or CI step chains ingest→bundle→deploy if the demo needs frequent redeploys.
 - **TD-012** severity: minor | status: open | created: Sprint-006 — Widget theme tokens are single-valued but the widget has light+dark modes. So mode-sensitive brand tokens (`accentText`, `bg`, `surface`, `text`, `border`, `userBg`) can't be set to a brand color without breaking one mode (e.g. a dark-blue accentText fails contrast on the dark surface). The portfolio config therefore overrides only the mode-invariant brand tokens (accent/navy/amber/soft), leaving neutrals + accentText at the widget's adaptive defaults (minor teal residual on small links). done-when: TASK-043 (per-mode theme tokens).
 - **TD-011** severity: resolved (engine) → TASK-039 (SPRINT-006); content re-ingest → TASK-040 | created: 2026-07-07 (release) — Portfolio case-study MDX frontmatter used non-standard `type: technical`/`hybrid` → generic cards. `normalizeType()` (markdown.ts) now maps `technical`/`hybrid` → `case_study`; typed cards land once the portfolio re-ingests (TASK-040).
 

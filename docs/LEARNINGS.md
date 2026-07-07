@@ -13,6 +13,39 @@ rule, or a skill red-flag — and marked below. Reviewed at every **Sprint Promo
 
 ---
 
+## L-016 [tags: release, npm, ops] [status: active]: Publishing a scoped OSS package needs an org + a bypass-2FA, no-IP-allowlist token
+- seen: Sprint-009
+- count: 1
+- promoted: no
+
+Publishing `@kenalin/*` blocked three times in a row, each a different token/account gap:
+(1) a plain token → `E403 "…bypass 2fa enabled is required"` (2FA-for-writes is on); (2) a
+granular token *with* bypass-2FA but an **IP allowlist** → couldn't even `whoami` (403) and
+publish `E404` — the allowlisted IP ≠ this environment's egress IP; (3) publish `E404` until
+the **`@kenalin` npm org was created** (a scoped package can't be published to a non-existent
+org; your personal scope is `@<username>`, not `@<brand>`). What finally worked: a token with
+**bypass-2FA AND no IP allowlist**, plus the org. Lesson: for CI/agent npm publishes use an
+**Automation** (or granular bypass-2FA) token with **no IP restriction**, and create the org
+first. Diagnose by the error: `E403 2fa` = token type; `whoami` 403 = IP/scope; `E404` on PUT
+= org/scope missing or no write access.
+
+## L-015 [tags: deploy, vercel, serverless] [status: active]: A Hono app on a raw Vercel function needs a plain (req,res) handler + non-streaming response
+- seen: Sprint-009
+- count: 1
+- related: L-007 (both: the deployed artifact behaves differently than local)
+
+The keyless demo worked perfectly locally but the widget never appeared in production because
+`/api/*` failed on Vercel two ways: (1) `hono/vercel`'s `handle` + `export default` → the POST
+body never arrived (Vercel pre-parses `req.body`, so the Web-Request body stream hung) →
+`FUNCTION_INVOCATION_TIMEOUT` (504); (2) an `api/[...path].mjs` catch-all only matched
+**single-segment** paths → 404 on `/api/config/public`. Fix: a **plain Vercel Node
+`(req,res)` handler** reading Vercel's parsed `req.body`, returning the **entire SSE body at
+once** (Vercel functions time out on held-open streams; the widget's reader parses a complete
+body identically), plus a `vercel.json` rewrite `"/api/:path*" → "/api/index"`. Lesson: on a
+raw Vercel function, don't use the Next.js `hono/vercel` adapter or SSE streaming — use native
+`(req,res)` + `req.body`, and **verify the deployed URL**, not just local (curl `/api/*`; a
+mounted launcher proves the config fetch succeeded).
+
 ## L-014 [tags: widget, verification, capture] [status: active]: The widget's word-by-word SSE pseudo-stream freezes headless CDP capture — human-time the demo assets
 - seen: Sprint-009
 - count: 1

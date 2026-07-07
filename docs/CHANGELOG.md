@@ -13,6 +13,35 @@ All notable changes to Kenalin. Format loosely follows Keep a Changelog.
 
 _Nothing yet._
 
+## [0.6.0] — 2026-07-07 · SPRINT-009 (OSS professionalization)
+
+First public npm release + adoption tooling.
+
+### Added
+- **Published to npm**: `@kenalin/core`, `@kenalin/server`, `@kenalin/widget`, and
+  `create-kenalin` at 0.6.0 (public, MIT). Adopters `npm install` / `npx create-kenalin`
+  instead of vendoring a bundle (ADR-006).
+- **`create-kenalin`** scaffold CLI — `npx create-kenalin <name>` generates a runnable
+  project (config + content + `@kenalin/server` host + widget demo page).
+- **`docs/CONFIG.md`** — reference for all 79 config fields, drift-checked against the Zod
+  schema by `scripts/check-config-doc.mjs` (wired into `pnpm verify`).
+- **Integration guides** — Next.js + plain-HTML (`docs/integration/`).
+- **Community/hygiene** — `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `ROADMAP.md`,
+  `.github/` issue + PR templates.
+- **Hosted keyless demo** (`examples/vercel-demo/`) — a self-referential playground
+  (Kenalin introducing Kenalin) deployed to Vercel, running with no API key via a hash
+  embedder + a deterministic grounded responder; fully button-driven.
+- **README** — npm/CI/bundle-size badges, `create-kenalin` Quickstart, doc wiring.
+
+### Changed
+- Packages publishable: `publishConfig.access:public`, widget `.d.ts` emit + exports/CDN
+  entries, precise `sideEffects`, per-package READMEs; all bumped to 0.6.0.
+- Owner-string gate now covers `packages/create-kenalin/src`.
+
+### Notes
+- ADR-006 records the vendor → published-package decision.
+- Demo GIF/screenshots deferred to a human-timed capture (`assets/CAPTURE.md`, L-014).
+
 ## [0.5.3] — 2026-07-07
 
 ### Fixed
