@@ -101,7 +101,7 @@ provisions a working install and prompts for the Gemini key.
 **Acceptance:** the hosted demo answers a real grounded chat turn; the README button deploys a working install prompting only for the Gemini key.
 
 **DoD:** — **Built keyless + deployed** (`examples/vercel-demo/`). Owner supplied the Vercel connection + wanted it keyless, so instead of needing published packages + a Gemini key, the demo bundles everything and runs offline (hash retrieval + a grounded deterministic responder).
-- [x] Demo app (demo owner, populated index) deployed; a real `/api/chat` turn answers grounded — *(deployed to Vercel prod, READY; grounded answers + evidence + intent + handoff verified live-locally and via the bundled function). **Public URL pending: Deployment Protection (Vercel SSO) is on — owner toggle.***
+- [x] Demo app deployed + **LIVE and interactive** at `https://vercel-demo-mu-seven.vercel.app` — self-referential (owner=Kenalin, assistant "Kai"), knowledge = docs about Kenalin; every quick action + follow-up chip returns grounded info with an evidence card. Verified live: `/api/config/public` 200, `/api/chat` 200 (~0.6s) grounded, launcher mounts in-browser. *(Reframed from a persona demo per owner feedback; fixed the Vercel 504/routing bugs — see the T5 fix log.)*
 - [ ] Deploy-to-Vercel button in the README — **deferred**: a git-clone Deploy button can't build the keyless-vendored demo (artifacts are prebuilt locally; Vercel doesn't build it) and there's no Gemini env to prompt for. Revisit as the `create-kenalin` clone path once packages publish.
 - [x] A test deploy reaches a working chat turn — *(bundled function verified end-to-end: config/public 200, grounded chat with evidence cards)*
 - [x] Demo uses the demo owner only; no portfolio/owner content — *(fictional Sari Wibowo; `content/demo`)*
@@ -160,6 +160,9 @@ The files that make a repo contributable and discoverable.
 
 ### 2026-07-07 | promote | Plan locked
 SPRINT-009 promoted from the TODO Backlog (OSS professionalization v0.6, full 7-task track). Governance review clean: no `count ≥ 2` learnings to promote; no `high`-severity tech debt to escalate (TD-002/003/004 flagged as ≥3-sprints-old but carried); TODO at 119 lines (under the soft cap). Tasks ordered by dependency (package → docs → demo → README → hygiene).
+
+### 2026-07-07 | T5 | Demo LIVE + interactive; reframed to Kenalin-about-Kenalin — b82602e
+Owner disabled Deployment Protection. Reframed the demo per feedback: introduces **Kenalin itself** (owner=Kenalin, assistant "Kai", knowledge = Kenalin docs), custom Kenalin-topic quick actions, and follow-up chips after every answer → fully button-driven. **Fixed the reason the widget never showed**: on Vercel, `hono/vercel` `handle` + streaming SSE → `FUNCTION_INVOCATION_TIMEOUT` (504), and the `[...path]` catch-all only matched single-segment paths (404 on `/api/config/public`). Rewrote as a plain Node `(req,res)` handler over Vercel's parsed `req.body`, SSE returned in one shot; `vercel.json` rewrite funnels `/api/*` → `api/index`. Verified live (config 200, chat 200 grounded, launcher mounts). Headline set to "Meet Kenalin AI Assistant".
 
 ### 2026-07-07 | T1 | PUBLISHED to npm ✅
 `@kenalin/{core,server,widget}@0.6.0` + `create-kenalin@0.6.0` published. The publish needed a token with **bypass-2FA AND no IP allowlist** — the earlier tokens failed (`E403` 2FA, then `E404`/`whoami` `E403` from an IP-restricted token) — plus the freshly-created `@kenalin` org. Verified `npx create-kenalin@0.6.0` from the registry scaffolds a project against the published packages. Unblocks T3's registry path, the README npm badge, and TD-004 (portfolio migration = follow-up).
