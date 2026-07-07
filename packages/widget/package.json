@@ -4,12 +4,48 @@
   "description": "Kenalin widget — embeddable Preact Web Component + <script> embed. Talks only to /api/chat.",
   "license": "MIT",
   "type": "module",
-  "main": "./dist/kenalin.js",
-  "files": [
-    "dist"
+  "sideEffects": [
+    "./dist/kenalin.js"
   ],
+  "homepage": "https://github.com/aldianriski/kenalin#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aldianriski/kenalin.git",
+    "directory": "packages/widget"
+  },
+  "bugs": "https://github.com/aldianriski/kenalin/issues",
+  "keywords": [
+    "kenalin",
+    "ai",
+    "assistant",
+    "widget",
+    "web-component",
+    "preact",
+    "embed"
+  ],
+  "main": "./dist/kenalin.esm.js",
+  "module": "./dist/kenalin.esm.js",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/kenalin.js",
+  "jsdelivr": "./dist/kenalin.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/kenalin.esm.js"
+    },
+    "./embed": "./dist/kenalin.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "node build.mjs",
+    "build": "node build.mjs && tsc --emitDeclarationOnly",
+    "build:types": "tsc --emitDeclarationOnly",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "size": "node build.mjs --size"

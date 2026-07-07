@@ -4,7 +4,26 @@
   "description": "Kenalin server — Hono API, Gemini provider, local knowledge index, ingest CLI. The only package with I/O.",
   "license": "MIT",
   "type": "module",
+  "sideEffects": false,
+  "homepage": "https://github.com/aldianriski/kenalin#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aldianriski/kenalin.git",
+    "directory": "packages/server"
+  },
+  "bugs": "https://github.com/aldianriski/kenalin/issues",
+  "keywords": [
+    "kenalin",
+    "ai",
+    "assistant",
+    "hono",
+    "gemini",
+    "rag",
+    "sse",
+    "server"
+  ],
   "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
     "kenalin": "./dist/cli.js"
@@ -13,11 +32,16 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "build:embed": "tsup --config tsup.embed.config.ts",

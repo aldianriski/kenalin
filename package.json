@@ -16,7 +16,9 @@
     "eval": "jiti evals/runner.ts",
     "ingest": "pnpm --filter @kenalin/server run ingest",
     "check:owner-strings": "node scripts/check-owner-strings.mjs",
-    "verify": "pnpm run check:owner-strings && pnpm -r run typecheck && pnpm build && pnpm test"
+    "verify": "pnpm run check:owner-strings && pnpm -r run typecheck && pnpm build && pnpm test",
+    "release:dry": "pnpm build && pnpm -r publish --dry-run --no-git-checks",
+    "release": "pnpm run verify && pnpm -r publish --access public"
   },
   "dependencies": {
     "@kenalin/core": "workspace:*"

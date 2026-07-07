@@ -4,6 +4,24 @@
   "description": "Kenalin core — pure TS schemas, config, orchestration, policies and interfaces. Zero I/O.",
   "license": "MIT",
   "type": "module",
+  "sideEffects": false,
+  "homepage": "https://github.com/aldianriski/kenalin#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aldianriski/kenalin.git",
+    "directory": "packages/core"
+  },
+  "bugs": "https://github.com/aldianriski/kenalin/issues",
+  "keywords": [
+    "kenalin",
+    "ai",
+    "assistant",
+    "portfolio",
+    "chatbot",
+    "rag",
+    "typescript",
+    "zod"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -11,11 +29,16 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
