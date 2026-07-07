@@ -132,17 +132,19 @@ Wire the real brand colors/icons/position config, `owner.aboutUrl`, and fixed ca
 **Acceptance:** on the portfolio, grounded answers vary (no repeated bio opening), "more" links land on specific pages, the widget fits the mobile layout; Next build green; committed.
 
 **DoD:**
-- [ ] Portfolio config sets `branding.position` + `branding.icons` + brand theme + `owner.aboutUrl`.
-- [ ] Case-study MDX frontmatter fixed to canonical `type`/`url`; re-ingest → 117 chunks, typed cards with specific links.
-- [ ] Re-vendored bundle smoked (the **vendored** engine, not repo source — L-007); portfolio `.env` checked before declaring anything env-blocked (L-002).
-- [ ] Next build green; committed in the portfolio repo (owner-driven).
+- [x] Portfolio config sets `branding.position` (offsetYMobile 84px, docked) + brand `theme` (blue #2563EB/amber #E9A50D) + `owner.aboutUrl`; `profile.json` gets `aboutUrl` (the wired path). `branding.icons` left unset — mechanism ships (T2), owner supplies icon URLs later.
+- [x] 10 case-study MDX got `url:` frontmatter; `type: technical|hybrid` auto-maps via T5; re-ingest → 117 chunks, **verified**: profile→/en/about, 110 case-study chunks with specific page urls, 0 root urls, 0 stale `custom`.
+- [x] **Vendored-bundle smoke green** (L-007): publicConfig carries theme+position; answers are evidence-led with specific links, no bio repeat; `.env`/key confirmed (L-002). Portfolio `tsc --noEmit` clean (skipLibCheck).
+- [ ] **owner-action**: full `next build` + deploy + browser-visual pass, then **commit** in the portfolio repo (owner-owned).
 
 ## Owner-action checklist
 <!-- Non-dev actions a human must do. -->
-- [ ] Provide/confirm the portfolio's icon URLs + brand palette (README brand: navy `#0F2742` · teal `#22B8A7` · soft teal `#8DE2D4` · amber `#D99A2B`).
-- [ ] Confirm the `owner.aboutUrl` target page on aldianrizki.com (e.g. `/about`).
-- [ ] Confirm the MDX mapping `technical`/`hybrid` → `case_study` is acceptable for the case studies.
-- [ ] Own the T9 commit/push in the external portfolio repo.
+- [x] Brand palette applied from the portfolio's own tokens (blue #2563EB / amber #E9A50D / deep-blue #19366B); icon URLs deferred (mechanism ready).
+- [x] `owner.aboutUrl` = `https://aldianrizki.com/en/about` (localePrefix always → no bare /about).
+- [x] MDX mapping `technical`/`hybrid` → `case_study` applied via T5 (auto).
+- [ ] **Review + commit** the portfolio changes (17 files: vendored bundles, config, profile.json, 10 MDX, re-ingested index) in `D:\Project\portofolio`.
+- [ ] Run the full `next build` + deploy; browser-visual pass (launcher clears the 68px dock on mobile; Home keeps history; reload persists; idle nudge→minimize).
+- [ ] (later) Supply single-color icon URLs for `branding.icons` if a custom icon set is wanted; add Upstash REST env (TASK-033).
 
 ## Decisions (pre-locked)
 - **D1** — Icons supplied as URL/data-URI (not inline SVG), rendered via CSS-mask tint. Injection-safe inside the Shadow DOM + still themeable via the accent. *(config-contract choice; not ADR-worthy)*
@@ -166,6 +168,9 @@ Decomposed from owner notes (position, custom design, persistence, home button, 
 
 ### 2026-07-07 | T1 done | Configurable position + safe-area
 Position wired core→server→widget. The `branding.icons` **config surface** (schema + public-config + widget types + `iconOverride` helper) rides along in this commit since it shares schema.ts/public-config.ts/types.ts/branding.ts with T1 (D5); the icon *rendering* is T2. Live mobile-docked check batched to the consolidated Chrome-MCP pass. verify green, 105 tests.
+
+### 2026-07-07 | T9 dev-complete | Portfolio applied + vendored smoke green
+Re-vendored engine (`kenalin-engine.mjs`/`.d.mts`) + widget (`public/kenalin.js`) into D:\Project\portofolio. Config: `owner.aboutUrl` + `profile.json` aboutUrl (→ /en/about), `branding.theme` (portfolio blue/amber, mode-invariant tokens only so dark mode stays legible), `branding.position` (offsetYMobile 84px for the 68px magnetic-dock, mobile docked). Added `url:` to all 10 case-study MDX (they had slug but no url). Re-ingested 117 chunks — verified: profile→/en/about, 110 case_study chunks w/ specific urls, 0 root, 0 stale custom. **Vendored-bundle smoke** (the real artifact, L-007): publicConfig carries theme+position; "case study" Q → QuickHub answer w/ /en/case-studies/ links; "leadership" Q → /en/about + specific pages; no bio repeat. Portfolio tsc clean (skipLibCheck). Remaining: owner review+commit, full next build + deploy + browser-visual pass. Note: accentText/neutral tokens left at widget defaults (single value can't satisfy AA in both light+dark) — minor teal residual on small links; candidate for a future mode-aware widget theme (TD).
 
 ### 2026-07-07 | scope-refine (T1) | Add offsetYMobile — safe-area ≠ app nav
 T9 recon found the portfolio's mobile dock is a **68px app nav bar** (`magnetic-dock.tsx`), which `env(safe-area-inset-*)` does NOT clear — so T1's shipped safe-area-only approach didn't genuinely meet its DoD ("clears a host bottom nav") for a real app bar. Added a generic `branding.position.offsetYMobile` knob (schema + public-config + widget types + `positionCssVars` + a `≤768px` launcher lift + docked-panel bottom). No G2 re-confirm needed — this completes T1's own acceptance rather than changing scope. widget branding test 8; typechecks green; 117 tests.
