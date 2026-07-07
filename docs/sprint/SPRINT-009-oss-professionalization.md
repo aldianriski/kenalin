@@ -100,11 +100,13 @@ provisions a working install and prompts for the Gemini key.
 
 **Acceptance:** the hosted demo answers a real grounded chat turn; the README button deploys a working install prompting only for the Gemini key.
 
-**DoD:**
-- [ ] Demo app (demo owner, populated index) deployed to a public URL; a real `/api/chat` turn answers grounded
-- [ ] Deploy-to-Vercel button in the README provisions the server with an env prompt for `KENALIN_LLM_API_KEY`
-- [ ] A test deploy from the button reaches a working chat turn (owner-gated — see checklist)
-- [ ] Demo uses the demo owner only; no portfolio/owner content
+**DoD:** — **T5 is owner-gated/deferred: triple-blocked on (a) published `@kenalin/*`, (b) a Vercel project, (c) a demo Gemini key.** None are providable or verifiable this session; shipping an untested deployable app or a Deploy button pointing at a non-existent target would be a broken artifact (against L-007/L-010). Recommended approach recorded below + in the owner-action checklist.
+- [ ] Demo app (demo owner, populated index) deployed to a public URL; a real `/api/chat` turn answers grounded — **blocked on publish + Vercel**
+- [ ] Deploy-to-Vercel button in the README provisions the server with an env prompt for `KENALIN_LLM_API_KEY` — **add once the deploy target exists** (button to a missing target is broken)
+- [ ] A test deploy from the button reaches a working chat turn — **owner-gated**
+- [ ] Demo uses the demo owner only; no portfolio/owner content — *(will reuse `content/demo`)*
+
+**Recommended build (post-publish):** a self-contained `examples/vercel-demo/` — a Hono handler via `hono/vercel` `handle(createApp(deps))` in `api/[[...route]].ts`, `public/index.html` embedding `@kenalin/widget`, `vercel.json` with `functions.includeFiles: "content/index/**"` + a `build` running `kenalin ingest`, its own copy of `content/demo`. Then the README button: `https://vercel.com/new/clone?repository-url=…/tree/main/examples/vercel-demo&env=KENALIN_LLM_API_KEY`. Verify the deployed `/api/config/public` + a real turn (L-002).
 
 ### T6 — Visual README showcase `[size: M · risk: low]`
 Layers: `README.md` + committed `assets/`.
@@ -137,7 +139,7 @@ The files that make a repo contributable and discoverable.
 <!-- Non-dev, human-only. -->
 - [ ] npm: create/own the `@kenalin` scope + provide an `NPM_TOKEN` (publish auth) — blocks T1 publish (`pnpm run release`)
 - [ ] After publish: verify `npx create-kenalin` from the registry runs a real chat turn; migrate the portfolio to the package (resolves TD-004)
-- [ ] Vercel: a project + a demo Gemini key for the hosted demo — blocks T5 deploy
+- [ ] Vercel: a project + a demo Gemini key for the hosted demo — blocks T5 deploy (build `examples/vercel-demo/` per the T5 recommended-build note, then add the Deploy button to the README)
 - [ ] GitHub: set the repo description + topics (repo-admin only) — T7
 - [ ] Set the CoC maintainer contact in `CODE_OF_CONDUCT.md` — T7
 - [ ] Capture + commit the demo hero GIF + light/dark/mobile screenshots to `assets/img/` (human-timed) — T6, runbook: `assets/CAPTURE.md`
@@ -157,6 +159,9 @@ The files that make a repo contributable and discoverable.
 
 ### 2026-07-07 | promote | Plan locked
 SPRINT-009 promoted from the TODO Backlog (OSS professionalization v0.6, full 7-task track). Governance review clean: no `count ≥ 2` learnings to promote; no `high`-severity tech debt to escalate (TD-002/003/004 flagged as ≥3-sprints-old but carried); TODO at 119 lines (under the soft cap). Tasks ordered by dependency (package → docs → demo → README → hygiene).
+
+### 2026-07-07 | T5 | Owner-gated/deferred — recorded plan, no unverified artifact
+T5 (hosted demo + Deploy button) is triple-blocked (published packages + Vercel project + demo key) and unverifiable this session. Chose NOT to ship an untested deployable app or a Deploy button to a non-existent target (would be a broken artifact — L-007/L-010). Recorded the concrete build recipe (`hono/vercel` handler + `vercel.json` includeFiles + button URL) in the Plan + owner-action for the post-publish pass.
 
 ### 2026-07-07 | T6(assets) | Live demo verified; capture blocked headless → runbook + L-014
 Drove the demo widget live via Chrome-MCP (demo API :8787 + static :5173, both from the demo owner). **Verified working:** widget mounts, opening message + 4 quick-action cards render, light theme, and **dark theme correctly follows the host `data-theme`** (L-012/L-013) — captured both visually. **Blocked:** the hero GIF + a live "answer + evidence" shot repeatedly froze the renderer (SSE word-by-word pseudo-stream, TD-003 → 30–45s CDP timeouts); mobile-fullscreen needs device emulation the tool doesn't expose; and `save_to_disk` captures didn't land in a shell-reachable path, so none are committable. Filed **L-014**, wrote `assets/CAPTURE.md` (human-timed runbook), moved GIF+screenshots to owner-action. README keeps its existing logo hero (renders fine).
