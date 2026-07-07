@@ -3,154 +3,136 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Kenalin — live demo</title>
-    <meta
-      name="description"
-      content="A live demo of Kenalin — the open-source, embeddable AI introduction layer for portfolio and professional websites."
-    />
+    <title>Alex Rivera — Product Engineer</title>
+    <meta name="description" content="Alex Rivera — product engineer & consultant. A demo portfolio with a Kenalin AI assistant embedded." />
     <style>
-      :root {
-        --teal: #22b8a7;
-        --navy: #0f2742;
-        --soft: #8de2d4;
-      }
-      :root[data-theme="light"] {
-        --bg1: #eef6f5; --bg2: #f7fafb; --ink: #0f2742; --dim: #46617a; --card: #ffffff; --line: #dfeae8; --chipbg: #ffffff;
-      }
-      :root[data-theme="dark"] {
-        --bg1: #0b1220; --bg2: #0e1a2b; --ink: #e8eef5; --dim: #9fb0c2; --card: rgba(255,255,255,0.04); --line: rgba(255,255,255,0.1); --chipbg: rgba(255,255,255,0.06);
-      }
-      * { box-sizing: border-box; }
-      html, body { margin: 0; min-height: 100%; }
-      body {
-        font-family: "Inter", system-ui, -apple-system, sans-serif;
-        color: var(--ink);
-        background:
-          radial-gradient(1100px 560px at 78% -12%, color-mix(in srgb, var(--teal) 22%, transparent), transparent 60%),
-          radial-gradient(820px 460px at 6% 112%, color-mix(in srgb, var(--soft) 18%, transparent), transparent 60%),
-          linear-gradient(180deg, var(--bg1), var(--bg2));
-        min-height: 100vh; line-height: 1.6;
-        transition: color .2s, background .3s;
-      }
-      .topbar { display: flex; align-items: center; justify-content: space-between; max-width: 960px; margin: 0 auto; padding: 1.4rem 1.5rem 0; }
-      .brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; letter-spacing: -0.01em; }
-      .brand img { height: 30px; width: auto; display: block; }
-      .toggle {
-        display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer;
-        background: var(--chipbg); border: 1px solid var(--line); color: var(--ink);
-        border-radius: 999px; padding: 0.45rem 0.8rem; font-size: 0.9rem;
-      }
-      .wrap { max-width: 960px; margin: 0 auto; padding: 4vh 1.5rem 14vh; }
-      .badge {
-        display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.8rem;
-        background: color-mix(in srgb, var(--teal) 14%, transparent); color: var(--navy);
-        border: 1px solid color-mix(in srgb, var(--teal) 34%, transparent);
-        padding: 0.35rem 0.75rem; border-radius: 999px;
-      }
-      :root[data-theme="dark"] .badge { color: var(--soft); }
-      .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 4px color-mix(in srgb, var(--teal) 22%, transparent); }
-      h1 { font-size: clamp(2.1rem, 6vw, 3.5rem); line-height: 1.08; margin: 1.4rem 0 0.5rem; letter-spacing: -0.02em; }
-      .lede { font-size: clamp(1.05rem, 2.3vw, 1.28rem); color: var(--dim); max-width: 44ch; }
-      .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 2.5rem 0; }
-      .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 1.1rem 1.25rem; }
-      .card h3 { margin: 0 0 0.35rem; font-size: 1rem; }
-      .card p { margin: 0; color: var(--dim); font-size: 0.92rem; }
-      .prompts p { color: var(--dim); font-size: 0.9rem; margin: 2rem 0 0.75rem; }
-      .chips { display: flex; flex-wrap: wrap; gap: 0.6rem; }
-      .chip {
-        background: var(--chipbg); border: 1px solid var(--line); color: var(--ink);
-        border-radius: 999px; padding: 0.5rem 0.95rem; font-size: 0.9rem; cursor: pointer;
-        transition: border-color .15s, background .15s;
-      }
-      .chip:hover { border-color: var(--teal); background: color-mix(in srgb, var(--teal) 12%, transparent); }
-      .hint { color: var(--dim); font-size: 0.85rem; margin-top: 3rem; }
-      a { color: var(--teal); }
-      footer { color: var(--dim); font-size: 0.82rem; margin-top: 2.5rem; border-top: 1px solid var(--line); padding-top: 1.25rem; }
+      :root { --teal:#22b8a7; --navy:#0f2742; --soft:#8de2d4; }
+      :root[data-theme="light"]{ --bg:#f6f9f9; --panel:#ffffff; --ink:#0f2742; --dim:#51677c; --line:#e3edeb; --tag:#eef6f5; }
+      :root[data-theme="dark"]{ --bg:#0b1220; --panel:#0f1b2c; --ink:#e8eef5; --dim:#9fb0c2; --line:rgba(255,255,255,.09); --tag:rgba(255,255,255,.06); }
+      *{ box-sizing:border-box; }
+      html,body{ margin:0; }
+      body{ font-family:"Inter",system-ui,-apple-system,sans-serif; color:var(--ink); background:var(--bg); line-height:1.65; transition:background .3s,color .2s; }
+      .container{ max-width:920px; margin:0 auto; padding:0 1.5rem; }
+      nav{ position:sticky; top:0; z-index:10; backdrop-filter:blur(8px); background:color-mix(in srgb,var(--bg) 82%,transparent); border-bottom:1px solid var(--line); }
+      .nav-in{ max-width:920px; margin:0 auto; padding:.9rem 1.5rem; display:flex; align-items:center; justify-content:space-between; }
+      .logo{ font-weight:800; letter-spacing:-.02em; }
+      .logo b{ color:var(--teal); }
+      .nav-links{ display:flex; gap:1.3rem; align-items:center; font-size:.92rem; }
+      .nav-links a{ color:var(--dim); text-decoration:none; }
+      .nav-links a:hover{ color:var(--ink); }
+      .toggle{ cursor:pointer; background:var(--tag); border:1px solid var(--line); color:var(--ink); border-radius:999px; width:34px; height:34px; font-size:1rem; line-height:1; }
+      header.hero{ padding:5.5rem 0 3rem; }
+      .eyebrow{ color:var(--teal); font-weight:600; font-size:.9rem; letter-spacing:.04em; text-transform:uppercase; }
+      h1{ font-size:clamp(2.4rem,7vw,4rem); line-height:1.05; letter-spacing:-.03em; margin:.6rem 0 .5rem; }
+      .hero p{ font-size:clamp(1.1rem,2.4vw,1.35rem); color:var(--dim); max-width:46ch; }
+      .cta{ display:inline-flex; align-items:center; gap:.5rem; margin-top:1.6rem; padding:.7rem 1.1rem; border-radius:12px; background:var(--navy); color:#fff; text-decoration:none; font-weight:600; border:0; cursor:pointer; }
+      :root[data-theme="dark"] .cta{ background:var(--teal); color:#04211d; }
+      section{ padding:2.5rem 0; border-top:1px solid var(--line); }
+      h2{ font-size:1.5rem; letter-spacing:-.01em; margin:0 0 1.3rem; }
+      .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1.1rem; }
+      .proj{ background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:1.3rem 1.4rem; }
+      .proj h3{ margin:0 0 .4rem; font-size:1.1rem; }
+      .proj p{ margin:0 0 .9rem; color:var(--dim); font-size:.95rem; }
+      .tags{ display:flex; flex-wrap:wrap; gap:.4rem; }
+      .tag{ font-size:.78rem; color:var(--teal); background:var(--tag); border:1px solid var(--line); border-radius:999px; padding:.2rem .6rem; }
+      .about p{ color:var(--dim); max-width:62ch; }
+      .contact a{ color:var(--teal); }
+      footer{ padding:2.5rem 0 8rem; color:var(--dim); font-size:.85rem; border-top:1px solid var(--line); }
+      .pill{ display:inline-flex; align-items:center; gap:.45rem; font-size:.78rem; color:var(--dim); background:var(--tag); border:1px solid var(--line); border-radius:999px; padding:.3rem .7rem; }
+      .dot{ width:7px; height:7px; border-radius:50%; background:var(--teal); }
     </style>
   </head>
   <body>
-    <div class="topbar">
-      <span class="brand"><img src="/logo.png" alt="Kenalin" /></span>
-      <button class="toggle" id="theme-toggle" aria-label="Toggle theme">
-        <span id="theme-icon">🌙</span><span id="theme-label">Dark</span>
-      </button>
-    </div>
-
-    <div class="wrap">
-      <span class="badge"><span class="dot"></span> Live demo · no API key · runs on Vercel</span>
-
-      <h1>Meet Alex's AI assistant</h1>
-      <p class="lede">
-        This page embeds <strong>Kenalin</strong> — an open-source, embeddable AI
-        introduction layer for portfolio and professional sites. Click the launcher
-        and ask about Alex's work. (Alex is a fictional demo persona.)
-      </p>
-
-      <div class="cards">
-        <div class="card"><h3>Evidence-first</h3><p>Every claim is grounded in the profile and cited with a source card.</p></div>
-        <div class="card"><h3>Guided, not open-ended</h3><p>It reads intent — hiring, a project question, a business need — and routes accordingly.</p></div>
-        <div class="card"><h3>One script tag</h3><p>Configured in one file, embedded with one <code>&lt;script&gt;</code>. Themeable to your brand.</p></div>
+    <nav>
+      <div class="nav-in">
+        <span class="logo">Alex <b>Rivera</b></span>
+        <span class="nav-links">
+          <a href="#work">Work</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+          <button class="toggle" id="theme-toggle" aria-label="Toggle theme">🌙</button>
+        </span>
       </div>
+    </nav>
 
-      <div class="prompts">
-        <p>Try asking (click to open the assistant):</p>
-        <div class="chips">
-          <button class="chip">Tell me about the TaskFlow project</button>
-          <button class="chip">What's Alex's background?</button>
-          <button class="chip">I'm hiring a frontend engineer — is Alex a fit?</button>
-          <button class="chip">Can Alex build us an internal dashboard?</button>
+    <div class="container">
+      <header class="hero">
+        <span class="pill"><span class="dot"></span> Demo portfolio · AI assistant embedded with Kenalin</span>
+        <p class="eyebrow" style="margin-top:1rem;">Product Engineer &amp; Consultant</p>
+        <h1>Alex Rivera</h1>
+        <p>I help small teams turn rough ideas into shipped, maintainable software — prototype to product.</p>
+        <button class="cta" id="ask-cta">💬 Ask my AI assistant</button>
+      </header>
+
+      <section id="work">
+        <h2>Selected work</h2>
+        <div class="grid">
+          <div class="proj">
+            <h3>TaskFlow</h3>
+            <p>A lightweight task manager for small teams — real-time boards a five-person team adopts in an afternoon.</p>
+            <div class="tags"><span class="tag">React</span><span class="tag">Node</span><span class="tag">Postgres</span><span class="tag">WebSockets</span></div>
+          </div>
+          <div class="proj">
+            <h3>ShopKit</h3>
+            <p>An open-source e-commerce starter — catalog, cart, and checkout behind a themeable, SSR storefront.</p>
+            <div class="tags"><span class="tag">Next.js</span><span class="tag">TypeScript</span><span class="tag">Payments</span></div>
+          </div>
+          <div class="proj">
+            <h3>MetricBoard</h3>
+            <p>A self-hosted analytics dashboard — product metrics without shipping your data to a third party.</p>
+            <div class="tags"><span class="tag">Node</span><span class="tag">Columnar store</span><span class="tag">React charts</span></div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <p class="hint">
-        This is a <strong>keyless</strong> demo: retrieval is real, but answers come from a
-        deterministic responder instead of an LLM. Swap in a Gemini key for genuine
-        conversation. Toggle the theme above — the assistant follows it.
-      </p>
+      <section id="about" class="about">
+        <h2>About</h2>
+        <p>
+          Alex works across the stack — TypeScript and React on the front end, Node and Postgres on the back,
+          pragmatic infrastructure on top. Available for fractional engineering, product consulting, and short
+          build engagements. <em>(Alex is a fictional persona for this Kenalin demo.)</em>
+        </p>
+      </section>
+
+      <section id="contact" class="contact">
+        <h2>Contact</h2>
+        <p>Prefer to just ask? Use the assistant in the corner — it can introduce Alex's work and route you to a human. Or reach out at <a href="#">hello@alex.example</a>.</p>
+      </section>
 
       <footer>
-        Built with <a href="https://github.com/aldianriski/kenalin">Kenalin</a> ·
-        fictional demo persona · <a href="https://github.com/aldianriski/kenalin#readme">docs &amp; source</a>
+        Built with <a href="https://github.com/aldianriski/kenalin" style="color:var(--teal)">Kenalin</a> — an open-source, embeddable AI introduction layer.
+        This whole page is a demo; the assistant runs keyless (no API key).
       </footer>
     </div>
 
     <script>
       (function () {
         var root = document.documentElement;
-
-        // Theme: start from OS preference, then let the toggle drive it.
         var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
         setTheme(prefersDark ? "dark" : "light");
-
-        function setTheme(t) {
+        function setTheme(t){
           root.setAttribute("data-theme", t);
-          root.classList.toggle("dark", t === "dark"); // the widget follows .dark / data-theme
-          var icon = document.getElementById("theme-icon");
-          var label = document.getElementById("theme-label");
-          if (icon) icon.textContent = t === "dark" ? "☀️" : "🌙";
-          if (label) label.textContent = t === "dark" ? "Light" : "Dark";
+          root.classList.toggle("dark", t === "dark");
+          var b = document.getElementById("theme-toggle");
+          if (b) b.textContent = t === "dark" ? "☀️" : "🌙";
         }
-        document.getElementById("theme-toggle").addEventListener("click", function () {
+        document.getElementById("theme-toggle").addEventListener("click", function(){
           setTheme(root.getAttribute("data-theme") === "dark" ? "light" : "dark");
         });
 
-        // Mount the widget against this same origin.
+        // Embed the Kenalin widget against this same origin (like a real portfolio would).
         var s = document.createElement("script");
         s.src = "/kenalin.js";
         s.defer = true;
         s.setAttribute("data-api-url", location.origin);
         document.body.appendChild(s);
 
-        // Suggestion chips open the assistant.
-        document.addEventListener("click", function (e) {
-          var chip = e.target.closest && e.target.closest(".chip");
-          if (!chip) return;
+        function openAssistant(){
           var el = document.querySelector("kenalin-ai");
-          if (el && el.shadowRoot) {
-            var btn = el.shadowRoot.querySelector("button");
-            if (btn) btn.click();
-          }
-        });
+          var btn = el && el.shadowRoot && el.shadowRoot.querySelector("button");
+          if (btn) btn.click();
+        }
+        document.getElementById("ask-cta").addEventListener("click", openAssistant);
       })();
     </script>
   </body>
