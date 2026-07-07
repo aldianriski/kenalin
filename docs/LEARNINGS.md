@@ -13,6 +13,30 @@ rule, or a skill red-flag — and marked below. Reviewed at every **Sprint Promo
 
 ---
 
+## L-010 [tags: ingest, verification] [status: active]: A built index goes stale after an ingest-logic change — re-ingest and re-verify the real index, not just the code
+- seen: Sprint-006
+- count: 1
+- promoted: no
+- related: L-007 (both: verify the artifact that actually ships, not the source)
+
+T4/T5 changed how the profile url and MDX types are ingested, but a headless probe still showed the profile "more" link pointing at the site root — because the demo `content/index` (gitignored build artifact) was built *before* the change. Unit tests were green (they test the ingest function); the stale index wasn't. Fix: after changing any ingest logic, **re-ingest** the demo/host index and grep the actual `chunks.jsonl` (urls, types) before declaring the behavior fixed. The eval also runs against that index, so a stale one silently hides ingest regressions.
+
+## L-009 [tags: widget, theming] [status: active]: Single-valued theme tokens can't brand-match a light+dark widget — override only mode-invariant tokens
+- seen: Sprint-006
+- count: 1
+- promoted: no
+- related: L-004 (both: the widget's real rendering constrains the config surface)
+
+The widget exposes one value per `--kenalin-*` token, but renders in both light and dark. A mode-sensitive token (accentText, bg, surface, text, border) set to a brand color breaks the other mode (e.g. a dark-blue accentText fails contrast on the dark surface). So a host can only safely override the **mode-invariant** brand tokens (accent, navy, amber, soft); neutrals must stay adaptive. Real fix is per-mode theme values (TD-012). When theming a dual-mode component, check both modes before promising a full brand match.
+
+## L-008 [tags: widget, css, mobile] [status: active]: `env(safe-area-inset-*)` clears OS insets, NOT a host app bottom-nav — those need an explicit offset
+- seen: Sprint-006
+- count: 1
+- promoted: no
+- related: L-004 (both: verify against the real host layout)
+
+T1 shipped safe-area insets to "clear a host bottom nav", but `env(safe-area-inset-bottom)` only accounts for the OS home-indicator/notch — it's 0 for an in-page 68px app dock. The portfolio's launcher still collided until an explicit `offsetYMobile` knob was added. Lesson: safe-area ≠ app chrome; clearing a host's own fixed nav needs a configurable offset, and the acceptance must be checked against the *host's* actual nav height, not assumed from safe-area alone.
+
 ## L-007 [tags: deploy, architecture] [status: active]: The portfolio vendors the `embed` engine, not the Hono app — wire production features into `embed.ts` too
 - seen: Sprint-005
 - count: 1

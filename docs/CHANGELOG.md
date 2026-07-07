@@ -13,6 +13,49 @@ All notable changes to Kenalin. Format loosely follows Keep a Changelog.
 
 _Nothing yet._
 
+## [0.3.0] — 2026-07-07
+
+SPRINT-006 (portfolio UX + answer quality). Widget UX + answer-quality upgrade,
+applied to the reference portfolio. `pnpm verify` green (117 tests); eval matrix
+100% (12/15/12/10, safety 100%) against a re-ingested index.
+
+### Added
+- **Configurable widget position (TASK-034)**: `branding.position` — `corner`
+  (bottom-right/left), `offsetX/Y`, `zIndex`, `mobile` (fullscreen/docked), and
+  `offsetYMobile` to clear a host app bottom-nav (safe-area alone doesn't — L-008).
+  Launcher/panel add `env(safe-area-inset-*)`; the widget patches the host viewport
+  meta for `viewport-fit=cover`.
+- **Swappable icon set (TASK-035)**: `branding.icons` (name→URL) rendered via CSS
+  mask so overrides inherit the theme accent; built-in SVG fallback per icon.
+- **Header "Home" button (TASK-036)**: returns to the intro/quick-actions while
+  **keeping** the conversation; Close still clears + closes.
+- **Conversation persistence (TASK-013)**: `sessionStorage` of messages + state +
+  session id — survives reload, clears on tab close. Pure serialize/deserialize with
+  version+shape validation.
+- **Idle detection + auto-close (TASK-012)**: after inactivity, a "still there?"
+  nudge then auto-minimize; thresholds config-driven (`assistant.idle`, default
+  60s/30s); `prefers-reduced-motion` respected.
+
+### Changed / Fixed — answer quality
+- **De-biased the profile bio (TASK-037)**: the profile summary was retrieved as
+  evidence nearly every turn and re-grounded into every answer's opening ("… is a
+  Founding CTO …"). A conversation rule now leads with the specific evidence and
+  varies the opening, keeping the grounding-by-id requirement verbatim (retrieval +
+  LIMITS untouched — L-005). Eval unchanged at 100%.
+- **Profile "more" link off the homepage (TASK-038)**: the profile-summary chunk
+  linked to the site root; it now uses `owner.aboutUrl` / profile-JSON `aboutUrl`,
+  or carries no url — never the bare root.
+- **MDX frontmatter type mapping (TASK-039, TD-011)**: `normalizeType()` maps
+  non-canonical `type: technical|hybrid` → `case_study` so evidence cards render
+  typed instead of generic; `url:` is carried through.
+
+### Reference portfolio (TASK-040)
+- Re-vendored engine + widget into aldianrizki.com; config gets brand theme (blue
+  #2563EB / amber #E9A50D), mobile-docked position clearing the 68px dock, and
+  `aboutUrl` → /en/about; 10 case-study MDX get `url:`; re-ingested 117 chunks
+  (profile→/en/about, 110 typed case_study chunks with specific links, 0 root urls).
+  Verified against the **vendored bundle** (L-007). Owner owns the merge + deploy.
+
 ## [0.2.0] — 2026-07-07
 
 First tagged release beyond the MVP foundation (0.1.0). Bundles SPRINT-001…005:

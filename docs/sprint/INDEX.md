@@ -9,6 +9,7 @@ status: current
 
 Closed sprints, newest first. The active sprint (if any) is pointed to from `TODO.md § Active Sprint`.
 
+- [SPRINT-006](archive/SPRINT-006-portfolio-ux-answer-quality.md) — portfolio UX + answer quality (configurable position/safe-area + offsetYMobile, swappable icons, anti-repetition bio de-bias, "more" link off homepage, MDX type mapping, Home button, sessionStorage persistence, idle auto-close; applied + smoked in the portfolio) — closed 2026-07-07 · v0.3.0
 - [SPRINT-005](archive/SPRINT-005-cut-cost-to-scale.md) — cut cost to scale (production cost fix re-vendored: thinking-off + cache, ~31→~11 IDR/turn; context-trim + lite-swap evaluated not-viable) — closed 2026-07-07
 - [SPRINT-004](archive/SPRINT-004-cost-optimal-flow.md) — cost-optimal chat flow (grounding-safe response cache; T1 caching deferred via spike, T3 intake cut via ADR-005) — closed 2026-07-06
 - [SPRINT-003](archive/SPRINT-003-launch-polish.md) — launch polish (config branding + accessibility, a11y verified live in Chrome) — closed 2026-07-06

@@ -1,6 +1,6 @@
 {
   "name": "@kenalin/server",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Kenalin server — Hono API, Gemini provider, local knowledge index, ingest CLI. The only package with I/O.",
   "license": "MIT",
   "type": "module",
@@ -15,7 +15,9 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "build:embed": "tsup --config tsup.embed.config.ts",

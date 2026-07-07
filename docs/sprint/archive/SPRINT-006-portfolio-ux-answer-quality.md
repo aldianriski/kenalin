@@ -3,9 +3,9 @@ sprint: 006
 slug: portfolio-ux-answer-quality
 owner: Tech Lead
 last_updated: 2026-07-07
-status: active
+status: closed
 plan_commit: be4de33
-close_commit: [sha — set at close]
+close_commit: [set post-commit]
 update_trigger: sprint execute/close events
 ---
 
@@ -202,19 +202,38 @@ Prompt-only: added one conversationRules bullet (lead with specific evidence, do
 Icon rendering: `IconOverrideContext` (provided at the App root in element.ts) + a CSS-masked `<Icon name fallback>` wrapper. Overrode header/composer/quick-action/evidence/complexity/retry/action icons; chevrons left built-in (decorative, not brand identity). currentColor tint keeps overrides themeable. verify green, 105 tests.
 
 ## Files Changed
-<!-- Filled during execution; feeds CHANGELOG at close. -->
+<!-- Feeds CHANGELOG at close. -->
 
-| File | Task | Change (WHY) | Risk | Test |
-|------|------|--------------|------|------|
-| _(pending execution)_ | | | | |
+| Area | Tasks | Change (WHY) |
+|------|-------|--------------|
+| `core/config/schema.ts` | T1,T2,T4,T8 | `branding.position` (+offsetYMobile), `branding.icons`, `owner.aboutUrl`, `assistant.idle` |
+| `server/public-config.ts` | T1,T2,T8 | surface position/icons/idle to the widget bootstrap |
+| `server/ingest/sources/{json,markdown,frontmatter}.ts` | T4,T5 | profile url from aboutUrl; `normalizeType()` (technical/hybrid→case_study) |
+| `core/prompt/builder.ts` | T3 | anti-repetition rule (grounding kept verbatim) |
+| `widget/{styles,element,branding,icons,app}.ts(x)` | T1,T2,T6 | position CSS + safe-area; masked-icon overrides; Home button |
+| `widget/{session-store,idle}.ts` (+tests) | T7,T8 | sessionStorage persistence; pure idle timer |
+| portfolio `D:\Project\portofolio` | T9 | re-vendored bundles + config + profile.json + 10 MDX + re-ingest (commit `4ef9334`) |
+
+New tests: `session-store` (4), `idle` (3), `json`/`markdown` ingest (4), position/icon branding (3) → **117 total** (was 102).
 
 ## Retro
 <!-- Written at close. Route buckets per DOCS_Guide §10. -->
 
-**Retrieval check** — did we fail to find, or contradict, a prior `L-NNN`/ADR this sprint? _(answer at close)_
+**Retrieval check** — No miss/contradiction. Prior learnings were actively applied: L-002 (checked key/env before declaring env-blocked), L-004 (batched widget DOM verification vs. forcing a browser mid-loop), L-005 (kept retrieval/LIMITS untouched for T3 — de-biased via prompt only), L-007 (smoked the vendored bundle, not repo source). No ADR contradicted; none newly warranted (all config-contract/impl choices).
 
-**Worked** — _(at close)_
+**Worked**
+- Per-task Implement→verify→commit cadence kept every step green + reversible (11 clean commits); when `pnpm -r` flaked, per-package runs gave a clean signal.
+- Headless verification beat a browser for the answer-quality slice: an orchestrator probe (3 topics) + the vendored-bundle smoke (L-007) proved T3/T4/T5 end-to-end without Chrome — cheaper and reliable under disk pressure.
+- Re-ingesting caught a real gap (L-010): unit tests were green but the stale demo index still showed the root link; grepping the actual `chunks.jsonl` confirmed the fix.
 
-**Friction** — _(at close)_
+**Friction**
+- Full `C:` drive → intermittent `errno -4094`/ENOSPC `pnpm -r` child-spawn failures + blocked `npx`; worked around with per-package runs + the local jiti bin.
+- `.env` with no trailing newline broke anchored `grep`/inline env extraction; a non-anchored node read worked.
+- Single-valued theme tokens can't brand-match a light+dark widget → only mode-invariant tokens overridden (TD-012 / L-009).
 
-**Pattern candidate** — _(at close)_
+**Pattern candidate** (→ `docs/LEARNINGS.md`, all count 1)
+- **L-008** — `env(safe-area-inset-*)` ≠ a host app nav bar; clearing it needs an explicit offset.
+- **L-009** — a dual-mode widget can only safely take mode-invariant brand tokens from a single-valued theme.
+- **L-010** — re-ingest + re-verify the real index after any ingest-logic change; a stale build artifact hides regressions from green unit tests.
+
+**Buckets routed** — Shipped → `docs/CHANGELOG.md` [0.3.0]; Tech debt → TD-011 resolved, **TD-012** added (TD-009 still open); Follow-ups → **TASK-041/042/043**; Learnings → **L-008/L-009/L-010**.
