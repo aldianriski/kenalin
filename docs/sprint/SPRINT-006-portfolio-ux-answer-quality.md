@@ -88,9 +88,9 @@ The portfolio's case-study MDX uses non-canonical `type: technical|hybrid` (coer
 **Acceptance:** re-ingested case-study chunks render **typed** cards with **specific** page links, not generic/homepage.
 
 **DoD:**
-- [ ] Frontmatter parser maps `technical`/`hybrid` → `case_study` and reads `url:` into the chunk.
-- [ ] Ingest test covers the mapping + URL parse over a non-canonical fixture.
-- [ ] TD-011 marked resolved → TASK-039; `pnpm verify` green.
+- [x] `normalizeType()` in markdown.ts maps `technical`/`hybrid`/`case-study` → `case_study`, passes canonical through, unknown → `custom`; `url:` already parsed (markdown.ts:45) carries through.
+- [x] markdown.test.ts covers alias mapping + url parse + canonical passthrough + unknown/missing fallback.
+- [x] TD-011 engine side resolved → TASK-039 (content re-ingest completes it in T9); `pnpm verify` green (109 tests).
 
 ### T6 — Header "Home" button (keep history) `[size: S · risk: low]` · TASK-036
 Layers: `packages/widget` app.tsx (header, icons).
@@ -166,6 +166,9 @@ Decomposed from owner notes (position, custom design, persistence, home button, 
 
 ### 2026-07-07 | T1 done | Configurable position + safe-area
 Position wired core→server→widget. The `branding.icons` **config surface** (schema + public-config + widget types + `iconOverride` helper) rides along in this commit since it shares schema.ts/public-config.ts/types.ts/branding.ts with T1 (D5); the icon *rendering* is T2. Live mobile-docked check batched to the consolidated Chrome-MCP pass. verify green, 105 tests.
+
+### 2026-07-07 | T5 done | MDX type/url mapping
+Added `normalizeType()` in markdown.ts (technical/hybrid/case-study → case_study, canonical passthrough, unknown → custom). `url:` was already parsed — the "no View link" is a content gap (T9). markdown.test.ts added. TD-011 engine side resolved. verify green, 109 tests.
 
 ### 2026-07-07 | T4 done | Repoint profile "more" link
 Profile-summary chunk now takes `aboutUrl` (profile JSON) or no url — dropped the `url: p.website` homepage default. `owner.aboutUrl` added to core schema for completeness; demo profile.json sets aboutUrl. New json.test.ts covers both branches. verify green, 107 tests.
