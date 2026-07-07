@@ -64,10 +64,11 @@ The profile-summary chunk is retrieved as evidence almost every turn and a groun
 **Acceptance:** answers across 3 different topics don't repeat the bio opening; the eval matrix stays 100% id+en.
 
 **DoD:**
-- [ ] conversationRules gains an anti-repetition / vary-opening / don't-restate-the-bio rule.
-- [ ] profile-summary de-prioritized as mandatory grounding once established in-session (retrieval/prompt).
-- [ ] `owner.role` no longer stamped verbatim into every persona turn in a way that forces the framing (or is de-emphasized).
-- [ ] `pnpm eval` stays 12/15/12/10 = 49, 100% id+en across a run; `pnpm verify` green.
+- [x] conversationRules gains an anti-repetition / vary-opening / don't-restate-the-bio rule (grounding requirement kept verbatim — emphasis/ordering only, per G2 refinement #1).
+- [x] profile-summary de-prioritized via the prompt (NOT retrieval — LIMITS note + L-005 keep the chunk; the rule reorders emphasis).
+- [x] `owner.role` still identifies the assistant in personaBlock (needed for identity); the repetition driver (re-grounding in the summary) is addressed by the rule instead.
+- [x] `pnpm eval` = 12/15/12/10 = 49, 100% all dims (safety 100%, thinking 0, cache hit); `pnpm verify` green.
+- [~] Qualitative "3 topics don't repeat the bio opening" — **batched** to the consolidated live pass.
 
 ### T4 — Repoint profile "more" link off homepage `[size: S · risk: low]` · TASK-038
 Layers: `packages/server` ingest/sources/json.ts, `packages/core` owner schema.
@@ -165,6 +166,9 @@ Decomposed from owner notes (position, custom design, persistence, home button, 
 
 ### 2026-07-07 | T1 done | Configurable position + safe-area
 Position wired core→server→widget. The `branding.icons` **config surface** (schema + public-config + widget types + `iconOverride` helper) rides along in this commit since it shares schema.ts/public-config.ts/types.ts/branding.ts with T1 (D5); the icon *rendering* is T2. Live mobile-docked check batched to the consolidated Chrome-MCP pass. verify green, 105 tests.
+
+### 2026-07-07 | T3 done | Anti-repetition + de-bias bio
+Prompt-only: added one conversationRules bullet (lead with specific evidence, don't restate the bio once introduced, vary openings) with the grounding requirement kept verbatim. Retrieval/LIMITS untouched (respects the load-bearing profile-rank note + L-005). Eval matrix re-ran GREEN 49/49 (100% all dims, safety 100%) — no regression from the high-risk change. Qualitative non-repetition eyeball batched to the live pass.
 
 ### 2026-07-07 | T2 done | Swappable icon set
 Icon rendering: `IconOverrideContext` (provided at the App root in element.ts) + a CSS-masked `<Icon name fallback>` wrapper. Overrode header/composer/quick-action/evidence/complexity/retry/action icons; chevrons left built-in (decorative, not brand identity). currentColor tint keeps overrides themeable. verify green, 105 tests.

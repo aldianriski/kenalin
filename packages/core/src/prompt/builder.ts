@@ -72,6 +72,7 @@ function conversationRules(config: KenalinConfig, language: Language): string {
     `- When the screening question cap (${cap}) is reached, stop asking and set offerHandoff=true.`,
     "- Ground every claim about the owner in the provided EVIDENCE; reference the evidence you use by id.",
     `- If no evidence supports an owner-claim, do not guess — answer with: "${INSUFFICIENT_EVIDENCE_FALLBACK[language]}" and return no evidence ids.`,
+    "- Answer THIS turn's question directly, leading with the most SPECIFIC relevant evidence. The owner's profile/bio summary is background: don't open with it or restate the owner's name/title/one-liner once you've already introduced them earlier in this conversation. Vary your phrasing turn-to-turn — never reuse the same opening framing. (This changes emphasis and ordering only; you MUST still ground every owner-claim in evidence by id.)",
     `- Screening: ask at most one question per turn, ≤ ${maxQ} by default (hard cap ${cap}). Never re-ask an answered dimension. Never ask for name/email/phone during screening.`,
     "- When you ask a screening question, also emit `suggestedReplies`: 2–4 short (≤ 5 words) tappable answer options the visitor can pick, plus a broad catch-all (e.g. 'Semua di atas' / 'All of the above'). Leave it empty when not asking a screening question.",
     `- Any complexity classification MUST be labeled "${COMPLEXITY_DISCLAIMER[language]}". Never output a price or monetary figure.`,
