@@ -62,10 +62,10 @@ or checked against the Zod schema** so it cannot silently drift from the code.
 **Acceptance:** `docs/CONFIG.md` lists every config field with type + default; a check step fails if the doc and the Zod schema diverge.
 
 **DoD:**
-- [ ] Every top-level group covered: owner, assistant, branding {theme, modes, position, marks, icons}, modules, complexity, handoff, actions, knowledge, storage, analytics, qualification, server
-- [ ] Each field shows type + default + one-line purpose (WHAT/WHY, never HOW)
-- [ ] A generator or drift-check ties the doc to the schema (added to `pnpm verify` or a doc-lint)
-- [ ] No owner-specific values in examples (demo owner only)
+- [x] Every top-level group covered: owner, assistant, branding {theme, modes, position, marks, icons}, modules, complexity, handoff, actions, knowledge, storage, analytics, qualification, server — *(79 fields; `docs/CONFIG.md`)*
+- [x] Each field shows type + default + one-line purpose (WHAT/WHY, never HOW)
+- [x] A generator or drift-check ties the doc to the schema — *(`scripts/check-config-doc.mjs` introspects `KenalinConfigSchema`, wired into `pnpm verify` after build)*
+- [x] No owner-specific values in examples (demo owner only) — *(placeholder examples; owner-string gate green)*
 
 ### T3 — True <5-min Quickstart `[size: S · risk: low]`
 Layers: `README.md` and/or `docs/SETUP.md`.
@@ -155,6 +155,9 @@ The files that make a repo contributable and discoverable.
 ### 2026-07-07 | promote | Plan locked
 SPRINT-009 promoted from the TODO Backlog (OSS professionalization v0.6, full 7-task track). Governance review clean: no `count ≥ 2` learnings to promote; no `high`-severity tech debt to escalate (TD-002/003/004 flagged as ≥3-sprints-old but carried); TODO at 119 lines (under the soft cap). Tasks ordered by dependency (package → docs → demo → README → hygiene).
 
+### 2026-07-07 | T2 | Config reference + drift gate — 740c2c6
+`docs/CONFIG.md` documents all **79** schema fields (type + default + purpose), including the branding sub-groups, `server.model` tuning knobs, and the three `superRefine` cross-field rules. `scripts/check-config-doc.mjs` walks `KenalinConfigSchema` (built `@kenalin/core`, unwrapping ZodDefault/Optional/Effects/Array/Record) and fails `pnpm verify` if any field path is undocumented → the doc can't drift on field coverage. Decided a field-coverage gate over a fragile full-render generator (types/defaults stay hand-maintained). Verify green.
+
 ### 2026-07-07 | T1 | Dev-complete (publish-prep + create-kenalin) — cfcb089, d5c2f34
 **T1a** (`cfcb089`): all three packages made publishable — `publishConfig.access:public`, widget `.d.ts` emit + `types`/`exports`/`module`/CDN entries + precise `sideEffects`, repo metadata, per-package READMEs, root `release`/`release:dry`. Verified `pnpm -r publish --dry-run` green and that pnpm rewrites `workspace:*`→`@kenalin/core 0.6.0` in the packed tarball; owner-string gate clean on tarballs; `pnpm verify` green.
 **T1b** (`d5c2f34`): new `create-kenalin` package (`npx create-kenalin <name>` → runnable template: config + case-studies + `@kenalin/server` host + `@kenalin/widget` demo page). Pure `scaffold()` + thin CLI; 6 vitest smokes + a real built-bin scaffold (9 files, name-substituted, dotfiles renamed, invalid-name rejected). Bumped everything to 0.6.0; gate extended to `create-kenalin/src`. **126 tests green.** Owner-gated tail: real `npm publish` + registry-install runtime smoke + TD-004 portfolio migration.
@@ -173,6 +176,8 @@ Recon (two `Explore` agents) established: packages already `@kenalin/*`/0.5.3/no
 | `package.json` (root) | T1a | `release`/`release:dry` scripts; 0.6.0 | Low | dry-run |
 | `packages/create-kenalin/**` | T1b | new scaffold CLI + `templates/default/` | Med | 6 vitest + built-bin scaffold |
 | `scripts/check-owner-strings.mjs` | T1b | gate now covers `create-kenalin/src` | Low | gate green |
+| `docs/CONFIG.md` | T2 | config reference (79 fields, type+default+purpose) | Low | check-config-doc |
+| `scripts/check-config-doc.mjs` + `package.json` | T2 | schema→doc drift gate wired into verify | Low | verify green |
 
 ## Retro
 <!-- Written at close. Route buckets per DOCS_Guide §10. -->
