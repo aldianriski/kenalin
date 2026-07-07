@@ -107,10 +107,13 @@ button { font: inherit; cursor: pointer; }
 }
 @keyframes k-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-/* Fullscreen (expand) toggle — panel covers the whole viewport. */
+/* Fullscreen (expand) toggle — panel fills the whole viewport, corner to corner.
+   inset-inline:0 + max-width override the base .panel's inline-end anchor + 32px cap,
+   so there's no right-side gap and it's not stuck in the corner (like a browser maximize). */
 .panel.full {
-  inset: 0;
-  width: 100vw; height: 100dvh; max-height: 100dvh;
+  inset: 0; inset-inline: 0;
+  width: 100vw; max-width: 100vw;
+  height: 100dvh; max-height: 100dvh;
   border: 0; border-radius: 0;
 }
 
@@ -131,7 +134,8 @@ button { font: inherit; cursor: pointer; }
      "mobile" where the dock shows). 100dvh handles the mobile browser chrome. */
   :host([data-mobile="fullscreen"]) .panel,
   :host(:not([data-mobile])) .panel {
-    inset: 0; width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0;
+    inset: 0; inset-inline: 0; width: 100vw; max-width: 100vw;
+    height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0;
   }
   /* The expand toggle is redundant on mobile (panel is already full-screen). */
   .header .kfull { display: none; }

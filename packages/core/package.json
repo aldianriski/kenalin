@@ -1,6 +1,6 @@
 {
   "name": "@kenalin/core",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Kenalin core — pure TS schemas, config, orchestration, policies and interfaces. Zero I/O.",
   "license": "MIT",
   "type": "module",

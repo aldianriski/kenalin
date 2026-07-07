@@ -13,6 +13,15 @@ All notable changes to Kenalin. Format loosely follows Keep a Changelog.
 
 _Nothing yet._
 
+## [0.5.1] — 2026-07-07
+
+### Fixed
+- **Fullscreen/maximize coverage**: the maximized (and mobile full-screen) panel left a
+  ~32px gap on the inline-end edge and stayed corner-anchored — the base `.panel`
+  `max-width: calc(100vw - 32px)` + logical `inset-inline-end` were never overridden.
+  `.panel.full` and the mobile full-screen rule now set `inset-inline: 0` + `max-width:
+  100vw`, so the panel fills the viewport corner-to-corner (like a browser maximize).
+
 ## [0.5.0] — 2026-07-07
 
 SPRINT-008 (portfolio polish round 3). `pnpm verify` green (120 tests).
