@@ -1,0 +1,8 @@
+node_modules
+src
+build.mjs
+.build
+.gitignore
+README.md
+package.json
+pnpm-lock.yaml

@@ -1,0 +1,8 @@
+node_modules/
+.build/
+.vercel/
+src/chunks.json
+/api/
+public/kenalin.js
+
+.vercel

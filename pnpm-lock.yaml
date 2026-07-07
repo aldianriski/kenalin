@@ -31,6 +31,24 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.20.0)
 
+  examples/vercel-demo:
+    devDependencies:
+      '@kenalin/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@kenalin/server':
+        specifier: workspace:*
+        version: link:../../packages/server
+      esbuild:
+        specifier: ~0.27.7
+        version: 0.27.7
+      hono:
+        specifier: ^4.6.14
+        version: 4.12.27
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
+
   packages/core:
     dependencies:
       zod:
