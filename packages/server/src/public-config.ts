@@ -11,6 +11,8 @@ export interface PublicConfig {
     description?: string;
     languages: string[];
     openingMessage?: string;
+    /** Idle nudge/auto-minimize thresholds (TASK-012). */
+    idle?: { nudgeSeconds: number; closeSeconds: number };
   };
   owner: { name: string; preferredName?: string; role: string };
   modules: string[];
@@ -42,6 +44,7 @@ export function toPublicConfig(config: KenalinConfig): PublicConfig {
       description: config.assistant.description,
       languages: config.assistant.languages,
       openingMessage: config.assistant.openingMessage,
+      idle: config.assistant.idle,
     },
     owner: {
       name: config.owner.name,

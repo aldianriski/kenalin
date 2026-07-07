@@ -9,6 +9,7 @@ import {
   sessionKey,
   type PersistedSession,
 } from "./session-store.js";
+import { createIdleTimer, type IdleTimer } from "./idle.js";
 import {
   Icon,
   LogoMark,
@@ -114,6 +115,8 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
   const [busy, setBusy] = useState(false);
   // TASK-036: "Home" re-surfaces the intro/quick-actions without clearing the chat.
   const [homeView, setHomeView] = useState(false);
+  // TASK-012: after inactivity, nudge then auto-minimize.
+  const [nudged, setNudged] = useState(false);
   const stateRef = useRef<ConversationState>((restored?.state as ConversationState) ?? { ...EMPTY_STATE, language: lang });
   const sessionRef = useRef<string>(restored?.sessionId ?? uuid());
   const clientRef = useRef(new KenalinClient(apiUrl));
@@ -136,6 +139,34 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
     const settled = messages.filter((m) => !m.pending && !m.failed);
     saveSession(persistKeyRef.current, sessionRef.current, stateRef.current, settled);
   }, [messages]);
+
+  // Idle nudge → auto-minimize (TASK-012). Thresholds are config-driven (default 60s/30s).
+  const idleRef = useRef<IdleTimer | null>(null);
+  if (!idleRef.current) {
+    const idle = config.assistant.idle;
+    idleRef.current = createIdleTimer({
+      nudgeMs: (idle?.nudgeSeconds ?? 60) * 1000,
+      closeMs: (idle?.closeSeconds ?? 30) * 1000,
+      onNudge: () => setNudged(true),
+      onClose: () => setOpen(false),
+    });
+  }
+  useEffect(() => {
+    const timer = idleRef.current!;
+    if (!open) {
+      timer.stop();
+      return;
+    }
+    timer.kick();
+    setNudged(false);
+    return () => timer.stop();
+  }, [open]);
+  // Any activity (a new message, typing) resets the idle countdown.
+  useEffect(() => {
+    if (!open) return;
+    idleRef.current!.kick();
+    setNudged(false);
+  }, [messages, input]);
 
   // A11y (TASK-006): move focus into the open panel, trap Tab within it, close on
   // Escape, and restore focus to the launcher on close. Shadow-DOM aware.
@@ -361,6 +392,10 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
 
         {showQuickBottom && quickGrid}
       </div>
+
+      {nudged && (
+        <div class="idle-nudge" role="status">{t(lang, "idleNudge")}</div>
+      )}
 
       <form
         class="composer"

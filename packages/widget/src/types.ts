@@ -18,6 +18,7 @@ export interface PublicConfig {
     description?: string;
     languages: string[];
     openingMessage?: string;
+    idle?: { nudgeSeconds: number; closeSeconds: number };
   };
   owner: { name: string; preferredName?: string; role: string };
   modules: string[];

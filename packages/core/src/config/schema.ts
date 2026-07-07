@@ -34,6 +34,15 @@ export const AssistantConfigSchema = z.object({
   tone: z.string().optional(),
   /** Extra persona guidance — additive only, cannot remove B9 policies. */
   boundaries: z.string().optional(),
+  /** Idle behavior (TASK-012): after `nudgeSeconds` of inactivity the widget shows a
+   *  gentle "still there?" nudge, then auto-minimizes after a further `closeSeconds`.
+   *  Optional — the widget falls back to 60s / 30s. */
+  idle: z
+    .object({
+      nudgeSeconds: z.number().int().positive().default(60),
+      closeSeconds: z.number().int().positive().default(30),
+    })
+    .optional(),
 });
 
 /** The seven modules (PRD B6). Each toggles independently (FR-2). */

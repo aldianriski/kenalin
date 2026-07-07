@@ -121,9 +121,9 @@ No inactivity handling. Add a timer: 60s idle → gentle "still there?" nudge, +
 **Acceptance:** after inactivity the nudge then auto-minimize fire at the thresholds; activity resets the timer; reduced-motion honored.
 
 **DoD:**
-- [ ] Idle nudge at 60s, auto-minimize at +30s; timer resets on user activity.
-- [ ] Thresholds configurable (defaults 60/30); `prefers-reduced-motion` respected.
-- [ ] Behavior verified in Chrome-MCP (L-004); `pnpm verify` green.
+- [x] Idle nudge (banner, role=status) at `nudgeSeconds`, auto-minimize at +`closeSeconds`; timer resets on open/message/typing activity.
+- [x] Thresholds configurable via `assistant.idle` (schema + public-config + widget types), default 60/30; nudge banner is static (no motion) + auto-minimize uses the existing reduced-motion-safe CSS.
+- [x] Pure `createIdleTimer` unit-tested with fake timers (nudge→close, kick-reset, stop-cancel); typecheck+build+tests green (116). Live timing check **batched** to Chrome-MCP (driven with a short config).
 
 ### T9 — Apply to portfolio repo + verify + commit `[size: M · risk: med]` · TASK-040 · depends-on: T1–T8
 Layers: external `D:\Project\portofolio` (config + content only) + re-vendored engine.
@@ -166,6 +166,9 @@ Decomposed from owner notes (position, custom design, persistence, home button, 
 
 ### 2026-07-07 | T1 done | Configurable position + safe-area
 Position wired core→server→widget. The `branding.icons` **config surface** (schema + public-config + widget types + `iconOverride` helper) rides along in this commit since it shares schema.ts/public-config.ts/types.ts/branding.ts with T1 (D5); the icon *rendering* is T2. Live mobile-docked check batched to the consolidated Chrome-MCP pass. verify green, 105 tests.
+
+### 2026-07-07 | T8 done | Idle detection + auto-close
+Config `assistant.idle` (nudge/close seconds, default 60/30) surfaced to the widget. Pure `createIdleTimer` (unit-tested, fake timers) drives a static "still there?" nudge banner then auto-minimize; kicked on open/messages/input. Reduced-motion-safe (no added animation). core 35 + server 63 + widget 18 = 116 tests. **T1–T8 (engine + widget) complete; next: consolidated Chrome-MCP live pass, then T9 portfolio apply.**
 
 ### 2026-07-07 | T7 done | Conversation persistence
 New pure `session-store.ts` (serialize/deserialize + version/shape validation) with sessionStorage I/O guarded in app.tsx. Restore-once on mount seeds messages/state/session id; persist effect writes settled turns on change; Close now fully resets + clears the key. `pnpm verify` hit repeated transient Windows `pnpm -r` child-spawn errors (errno -4094; core build, then core typecheck) — each passed when run directly (L-001); ran the gate piecewise green: owner-strings ✓, all typechecks ✓, builds ✓, tests 35+63+15 = 113.

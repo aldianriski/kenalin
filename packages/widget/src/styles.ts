@@ -216,6 +216,12 @@ button { font: inherit; cursor: pointer; }
 .btn-secondary { background: transparent; color: var(--k-text); border-color: var(--k-border); }
 .btn-secondary:hover { border-color: var(--k-accent); }
 
+/* ── Idle nudge (TASK-012) — static (no motion → reduced-motion-safe) ─────── */
+.idle-nudge {
+  text-align: center; font-size: 12px; color: var(--k-muted);
+  padding: 7px 12px; background: var(--k-surface); border-top: 1px solid var(--k-border);
+}
+
 /* ── Composer ─────────────────────────────────────────────────────────── */
 .composer { display: flex; align-items: center; gap: 8px; padding: 11px 12px; border-top: 1px solid var(--k-border); background: var(--k-surface); }
 .composer .field { flex: 1; display: flex; align-items: center; gap: 8px; background: var(--k-bg); border: 1px solid var(--k-border); border-radius: 12px; padding: 8px 12px; }
