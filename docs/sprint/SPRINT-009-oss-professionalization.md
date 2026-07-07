@@ -128,16 +128,18 @@ The files that make a repo contributable and discoverable.
 **Acceptance:** a new contributor finds CONTRIBUTING, templates, a CoC, a roadmap, and a clear repo description/topics.
 
 **DoD:**
-- [ ] `CONTRIBUTING.md` (setup → `pnpm verify` → PR flow) + `CODE_OF_CONDUCT.md`
-- [ ] `.github/` issue templates + PR template
-- [ ] A public roadmap section (link the v0.4 scale track + this v0.6 track)
+- [x] `CONTRIBUTING.md` (setup → `pnpm verify` → PR flow) + `CODE_OF_CONDUCT.md` — *(CoC maintainer contact is an owner placeholder)*
+- [x] `.github/` issue templates + PR template — *(bug/feature YAML forms + config + PR template)*
+- [x] A public roadmap section (link the v0.4 scale track + this v0.6 track) — *(`ROADMAP.md`; README link lands in T6)*
 - [ ] Sharp GitHub repo description + topics set (owner-gated for the GitHub settings)
 
 ## Owner-action checklist
 <!-- Non-dev, human-only. -->
-- [ ] npm: create/own the `@kenalin` scope + provide an `NPM_TOKEN` (publish auth) — blocks T1 publish
+- [ ] npm: create/own the `@kenalin` scope + provide an `NPM_TOKEN` (publish auth) — blocks T1 publish (`pnpm run release`)
+- [ ] After publish: verify `npx create-kenalin` from the registry runs a real chat turn; migrate the portfolio to the package (resolves TD-004)
 - [ ] Vercel: a project + a demo Gemini key for the hosted demo — blocks T5 deploy
 - [ ] GitHub: set the repo description + topics (repo-admin only) — T7
+- [ ] Set the CoC maintainer contact in `CODE_OF_CONDUCT.md` — T7
 
 ## Decisions (pre-locked)
 - **D1** — Adopters consume published `@kenalin/*` packages; the portfolio migrates off the vendored bundle (resolves TD-004). Trade-off: adds a semver/release step vs. copy-vendoring. **→ [ADR-006](../adr/ADR-006-publish-packages-over-vendoring.md)** (accepted 2026-07-07).
@@ -154,6 +156,10 @@ The files that make a repo contributable and discoverable.
 
 ### 2026-07-07 | promote | Plan locked
 SPRINT-009 promoted from the TODO Backlog (OSS professionalization v0.6, full 7-task track). Governance review clean: no `count ≥ 2` learnings to promote; no `high`-severity tech debt to escalate (TD-002/003/004 flagged as ≥3-sprints-old but carried); TODO at 119 lines (under the soft cap). Tasks ordered by dependency (package → docs → demo → README → hygiene).
+
+### 2026-07-07 | T4, T7 | Integration guides + repo hygiene — 06e68ff, ff2ccfe
+**T4** (`06e68ff`): `docs/integration/plain-html.md` (backed by the runnable `examples/plain-html`) + `docs/integration/nextjs.md` (mount `createApp` in an App Router catch-all route via `app.fetch`, widget in layout, mirroring the reference portfolio). Confirmed `loadConfig`/`createApp`/`buildAppDeps` are surfaced by the published packages. Next.js runtime proof is the reference portfolio (external); plain-HTML is locally runnable.
+**T7** (`ff2ccfe`): CONTRIBUTING (hard rules + PR gate), CODE_OF_CONDUCT (Covenant 2.1), `.github` issue forms + PR template, public ROADMAP. Owner-gated: GitHub description/topics + CoC contact.
 
 ### 2026-07-07 | T2 | Config reference + drift gate — 740c2c6
 `docs/CONFIG.md` documents all **79** schema fields (type + default + purpose), including the branding sub-groups, `server.model` tuning knobs, and the three `superRefine` cross-field rules. `scripts/check-config-doc.mjs` walks `KenalinConfigSchema` (built `@kenalin/core`, unwrapping ZodDefault/Optional/Effects/Array/Record) and fails `pnpm verify` if any field path is undocumented → the doc can't drift on field coverage. Decided a field-coverage gate over a fragile full-render generator (types/defaults stay hand-maintained). Verify green.
@@ -178,6 +184,8 @@ Recon (two `Explore` agents) established: packages already `@kenalin/*`/0.5.3/no
 | `scripts/check-owner-strings.mjs` | T1b | gate now covers `create-kenalin/src` | Low | gate green |
 | `docs/CONFIG.md` | T2 | config reference (79 fields, type+default+purpose) | Low | check-config-doc |
 | `scripts/check-config-doc.mjs` + `package.json` | T2 | schema→doc drift gate wired into verify | Low | verify green |
+| `docs/integration/{plain-html,nextjs}.md` | T4 | two embed guides (published packages) | Low | plain-html backed by example |
+| `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `ROADMAP.md`, `.github/**` | T7 | community + hygiene | Low | links resolve |
 
 ## Retro
 <!-- Written at close. Route buckets per DOCS_Guide §10. -->
