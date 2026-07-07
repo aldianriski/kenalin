@@ -32,17 +32,22 @@ not built here); per-mode theme tokens (TASK-043).
 
 ## Plan
 
-### T1 — Fix CI: pin Node 22 `[size: S · risk: low]`
-Layers: `.github/workflows/ci.yml`, `.github/workflows/eval.yml`
-CI dies at `pnpm install` in ~15s on every push: pnpm 11.9.0 needs Node ≥ 22.13 (`node:sqlite`),
-but the workflows pin Node 20. Bump both to 22.
+### T1 — Fix CI: pin Node 22 + build-before-typecheck `[size: S · risk: low]`
+Layers: `.github/workflows/ci.yml`, `.github/workflows/eval.yml`, `package.json`
+Two stacked failures: (1) CI died at `pnpm install` in ~15s — pnpm 11.9.0 needs Node ≥ 22.13
+(`node:sqlite`), but the workflows pinned Node 20. (2) Once install worked, `verify` failed at
+typecheck: it ran `typecheck` **before** `build`, so in a clean checkout `@kenalin/core`'s
+`dist`/types were absent when `packages/widget` typechecked (passed locally only because `dist`
+already existed — the L-003 anti-pattern). Fix: bump Node to 22 **and** reorder `verify` to
+`build` before `typecheck`.
 
-**Acceptance:** a push to `main` runs `pnpm verify` to completion and CI is green.
+**Acceptance:** a PR/commit runs `pnpm verify` to completion and CI is green.
 
 **DoD:**
 - [x] `ci.yml` + `eval.yml` pin `node-version: 22`
-- [x] `pnpm verify` green locally on Node 22 (126 tests, verified 2026-07-07)
-- [ ] pushed; CI run for the commit is green
+- [x] `verify` reorders `pnpm build` before `pnpm -r run typecheck`
+- [x] `pnpm verify` green locally **from a clean `dist/`** (removed all `packages/*/dist`, re-ran → exit 0)
+- [ ] pushed; CI run for the PR is green
 
 ### T2 — Widget resilience: never silently vanish `[size: S · risk: med]`
 Layers: `packages/widget/src/element.ts` (+ a safe-default config)
@@ -123,12 +128,16 @@ Formed from the "continue improve" push. T1 already implemented + verified green
 ### 2026-07-07 | execute | T2–T4 built + T3/T5 rebuilt & smoked
 T4 (strengths + Now/Next/Later roadmap) and T3 landing chips done — verified light/dark in-browser. T2 (fallback launcher + 1 retry) added to `element.ts`; T3 icons added to the demo `branding.icons` (data-URI SVGs, D1). Rebuilt widget + `node build.mjs` (re-vendored `kenalin.js`, rebundled api). Local smoke of the vendored bundle: 4 distinct quick-action icons render (match the chips); with config forced to 500 the fallback "Chat" launcher still mounts. `pnpm verify` green after all changes. **Gotcha:** the browser HTTP-cached the old `kenalin.js` (no query on the embed src) — needed a cache-busted URL + fresh tab to load the rebuilt widget; relevant to verifying the *deployed* widget (hard-reload, L-015). Remaining: T1 push + T5 commit/deploy/rename (owner-gated).
 
+### 2026-07-07 | execute | CI green on branch, not main (owner request) — surfaced a 2nd hidden failure
+Committed T1–T5 to `sprint/010-demo-v2-ci-green`, opened PR #1 (not pushing `main`). The Node-22 bump worked — CI got *past* install — and immediately exposed a pre-existing `verify` ordering bug (typecheck before build → `@kenalin/core` types missing in a clean checkout; L-003). Reordered `verify` to build-first; proved it by deleting all `packages/*/dist` and re-running `verify` → exit 0. Pushed the fix to re-run CI.
+
 ## Files Changed
 
 | File | Task | Change (WHY) | Risk | Test |
 |------|------|--------------|------|------|
-| `.github/workflows/ci.yml` | T1 | Node 20→22 (pnpm needs ≥22.13) | Low | `pnpm verify` green on Node 22 |
+| `.github/workflows/ci.yml` | T1 | Node 20→22 (pnpm needs ≥22.13) | Low | CI reaches verify |
 | `.github/workflows/eval.yml` | T1 | Node 20→22 (same) | Low | — |
+| `package.json` | T1 | `verify`: build before typecheck (clean-checkout cross-package types) | Low | verify green after `rm -rf packages/*/dist` |
 | `packages/widget/src/element.ts` | T2 | Fallback launcher + 1 retry on config-fetch failure (TD-016) | Med | browser smoke (config 500 → launcher mounts) + verify green |
 | `packages/widget/dist/kenalin.js` | T2 | Rebuilt widget bundle | Low | 18.9 KB gz within budget |
 | `examples/vercel-demo/src/kenalin.config.ts` | T3 | `branding.icons` — 4 data-URI glyphs (match chips) | Low | api serves 4 icon keys; widget renders 4 masks |

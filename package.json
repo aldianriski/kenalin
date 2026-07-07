@@ -17,7 +17,7 @@
     "ingest": "pnpm --filter @kenalin/server run ingest",
     "check:owner-strings": "node scripts/check-owner-strings.mjs",
     "check:config-doc": "node scripts/check-config-doc.mjs",
-    "verify": "pnpm run check:owner-strings && pnpm -r run typecheck && pnpm build && pnpm run check:config-doc && pnpm test",
+    "verify": "pnpm run check:owner-strings && pnpm build && pnpm -r run typecheck && pnpm run check:config-doc && pnpm test",
     "release:dry": "pnpm build && pnpm -r publish --dry-run --no-git-checks",
     "release": "pnpm run verify && pnpm -r publish --access public"
   },
