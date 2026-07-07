@@ -1,6 +1,6 @@
 {
   "name": "@kenalin/widget",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Kenalin widget — embeddable Preact Web Component + <script> embed. Talks only to /api/chat.",
   "license": "MIT",
   "type": "module",

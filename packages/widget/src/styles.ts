@@ -111,10 +111,14 @@ button { font: inherit; cursor: pointer; }
    inset-inline:0 + max-width override the base .panel's inline-end anchor + 32px cap,
    so there's no right-side gap and it's not stuck in the corner (like a browser maximize). */
 .panel.full {
-  inset: 0; inset-inline: 0;
-  width: 100vw; max-width: 100vw;
-  height: 100dvh; max-height: 100dvh;
-  border: 0; border-radius: 0;
+  /* inset:0 with auto dimensions fills the viewport EXACTLY (respects the scrollbar —
+     100vw would overflow by the scrollbar width, leaving a gap). !important beats the
+     base .panel width/height/offsets. */
+  inset: 0 !important;
+  width: auto !important; max-width: none !important;
+  height: auto !important; max-height: none !important;
+  border: 0 !important; border-radius: 0 !important;
+  animation: none !important; transform: none !important;
 }
 
 /* Corner (TASK-034): default anchors to the inline-end (right in LTR); bottom-left flips it. */
@@ -134,8 +138,8 @@ button { font: inherit; cursor: pointer; }
      "mobile" where the dock shows). 100dvh handles the mobile browser chrome. */
   :host([data-mobile="fullscreen"]) .panel,
   :host(:not([data-mobile])) .panel {
-    inset: 0; inset-inline: 0; width: 100vw; max-width: 100vw;
-    height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0;
+    inset: 0; width: auto; max-width: none;
+    height: auto; max-height: none; border: 0; border-radius: 0;
   }
   /* The expand toggle is redundant on mobile (panel is already full-screen). */
   .header .kfull { display: none; }

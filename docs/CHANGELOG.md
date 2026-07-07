@@ -13,6 +13,23 @@ All notable changes to Kenalin. Format loosely follows Keep a Changelog.
 
 _Nothing yet._
 
+## [0.5.2] — 2026-07-07
+
+### Fixed
+- **Maximize truly fills the viewport**: `.panel.full` wasn't overriding the base
+  `.panel` size at all on desktop (stayed 384px in the corner). Now forced with
+  `!important` + `inset:0` / `width:auto` / `height:auto` (not `100vw`, which overflowed
+  by the scrollbar width) + `animation:none` (the slide-in left a 10px offset). Covers
+  the viewport corner-to-corner, zero gaps. Mobile full-screen uses the same `inset:0` +
+  auto sizing.
+- **Header control order**: maximize now sits **between** minimize and close (Minimize ·
+  Maximize · Close), matching browser window controls.
+
+### Added
+- **Modal scroll-lock**: while the panel is full-screen (desktop maximize or mobile
+  full-screen) the host page's scroll is locked (`body { overflow: hidden }`) so the
+  background can't scroll behind it; released on restore/close.
+
 ## [0.5.1] — 2026-07-07
 
 ### Fixed

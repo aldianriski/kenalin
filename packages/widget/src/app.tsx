@@ -144,6 +144,22 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
     saveSession(persistKeyRef.current, sessionRef.current, stateRef.current, settled);
   }, [messages]);
 
+  // Lock the host page scroll when the panel is full-screen (modal-like) so the page
+  // behind can't scroll — desktop maximize (`full`) or mobile full-screen.
+  useEffect(() => {
+    const mobileFs =
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 768px)").matches &&
+      (config.branding?.position?.mobile ?? "fullscreen") !== "docked";
+    if (!open || !(full || mobileFs)) return;
+    document.body.style.overflow = "hidden";
+    // Clear the inline override on unlock (revert to the page's own overflow) rather than
+    // restoring a captured value — avoids getting stuck "hidden" if a prior lock polluted it.
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open, full]);
+
   // Idle nudge → auto-minimize (TASK-012). Thresholds are config-driven (default 60s/30s).
   const idleRef = useRef<IdleTimer | null>(null);
   if (!idleRef.current) {
@@ -352,6 +368,7 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
           <span class="sub">{config.assistant.description ?? `${t(lang, "subtitle")} · ${config.owner.preferredName ?? config.owner.name}`}</span>
         </div>
         <span class="hspace" />
+        <button class="iconbtn" aria-label={t(lang, "minimize")} onClick={() => setOpen(false)}><Icon name="minimize" fallback={<IconMinimize />} /></button>
         <button
           class="iconbtn kfull"
           aria-label={t(lang, full ? "restore" : "fullscreen")}
@@ -360,7 +377,6 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
         >
           {full ? <IconCollapse /> : <IconExpand />}
         </button>
-        <button class="iconbtn" aria-label={t(lang, "minimize")} onClick={() => setOpen(false)}><Icon name="minimize" fallback={<IconMinimize />} /></button>
         <button
           class="iconbtn"
           aria-label={t(lang, "close")}
