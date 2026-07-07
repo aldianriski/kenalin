@@ -4,5 +4,6 @@ node_modules/
 src/chunks.json
 /api/
 public/kenalin.js
+public/logo.png
 
 .vercel

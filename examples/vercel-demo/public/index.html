@@ -1,127 +1,147 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Kenalin — live demo</title>
     <meta
       name="description"
-      content="A live, keyless demo of Kenalin — the embeddable AI introduction layer for portfolio and professional websites."
+      content="A live demo of Kenalin — the open-source, embeddable AI introduction layer for portfolio and professional websites."
     />
     <style>
       :root {
-        --navy: #0f2742;
         --teal: #22b8a7;
+        --navy: #0f2742;
         --soft: #8de2d4;
-        --ink: #0b1220;
+      }
+      :root[data-theme="light"] {
+        --bg1: #eef6f5; --bg2: #f7fafb; --ink: #0f2742; --dim: #46617a; --card: #ffffff; --line: #dfeae8; --chipbg: #ffffff;
+      }
+      :root[data-theme="dark"] {
+        --bg1: #0b1220; --bg2: #0e1a2b; --ink: #e8eef5; --dim: #9fb0c2; --card: rgba(255,255,255,0.04); --line: rgba(255,255,255,0.1); --chipbg: rgba(255,255,255,0.06);
       }
       * { box-sizing: border-box; }
-      html, body { margin: 0; height: 100%; }
+      html, body { margin: 0; min-height: 100%; }
       body {
         font-family: "Inter", system-ui, -apple-system, sans-serif;
-        color: #e8eef5;
+        color: var(--ink);
         background:
-          radial-gradient(1200px 600px at 70% -10%, rgba(34, 184, 167, 0.25), transparent 60%),
-          radial-gradient(900px 500px at 10% 110%, rgba(141, 226, 212, 0.12), transparent 60%),
-          var(--ink);
-        min-height: 100%;
-        line-height: 1.6;
+          radial-gradient(1100px 560px at 78% -12%, color-mix(in srgb, var(--teal) 22%, transparent), transparent 60%),
+          radial-gradient(820px 460px at 6% 112%, color-mix(in srgb, var(--soft) 18%, transparent), transparent 60%),
+          linear-gradient(180deg, var(--bg1), var(--bg2));
+        min-height: 100vh; line-height: 1.6;
+        transition: color .2s, background .3s;
       }
-      .wrap { max-width: 940px; margin: 0 auto; padding: 6vh 1.5rem 12vh; }
+      .topbar { display: flex; align-items: center; justify-content: space-between; max-width: 960px; margin: 0 auto; padding: 1.4rem 1.5rem 0; }
+      .brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; letter-spacing: -0.01em; }
+      .brand img { height: 30px; width: auto; display: block; }
+      .toggle {
+        display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer;
+        background: var(--chipbg); border: 1px solid var(--line); color: var(--ink);
+        border-radius: 999px; padding: 0.45rem 0.8rem; font-size: 0.9rem;
+      }
+      .wrap { max-width: 960px; margin: 0 auto; padding: 4vh 1.5rem 14vh; }
       .badge {
-        display: inline-flex; align-items: center; gap: 0.5rem;
-        font-size: 0.8rem; letter-spacing: 0.02em;
-        background: rgba(34, 184, 167, 0.12); color: var(--soft);
-        border: 1px solid rgba(34, 184, 167, 0.3);
+        display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.8rem;
+        background: color-mix(in srgb, var(--teal) 14%, transparent); color: var(--navy);
+        border: 1px solid color-mix(in srgb, var(--teal) 34%, transparent);
         padding: 0.35rem 0.75rem; border-radius: 999px;
       }
-      .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 4px rgba(34,184,167,0.2); }
-      h1 {
-        font-size: clamp(2.2rem, 6vw, 3.6rem); line-height: 1.1; margin: 1.5rem 0 0.5rem;
-        letter-spacing: -0.02em;
-        background: linear-gradient(180deg, #fff, #b9d9d3);
-        -webkit-background-clip: text; background-clip: text; color: transparent;
-      }
-      .lede { font-size: clamp(1.05rem, 2.4vw, 1.3rem); color: #b6c4d4; max-width: 40ch; }
+      :root[data-theme="dark"] .badge { color: var(--soft); }
+      .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 4px color-mix(in srgb, var(--teal) 22%, transparent); }
+      h1 { font-size: clamp(2.1rem, 6vw, 3.5rem); line-height: 1.08; margin: 1.4rem 0 0.5rem; letter-spacing: -0.02em; }
+      .lede { font-size: clamp(1.05rem, 2.3vw, 1.28rem); color: var(--dim); max-width: 44ch; }
       .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 2.5rem 0; }
-      .card {
-        background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 14px; padding: 1.1rem 1.25rem;
-      }
-      .card h3 { margin: 0 0 0.35rem; font-size: 1rem; color: #fff; }
-      .card p { margin: 0; color: #9fb0c2; font-size: 0.92rem; }
-      .prompts { margin: 2rem 0; }
-      .prompts p { color: #8ba0b4; font-size: 0.9rem; margin: 0 0 0.75rem; }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 1.1rem 1.25rem; }
+      .card h3 { margin: 0 0 0.35rem; font-size: 1rem; }
+      .card p { margin: 0; color: var(--dim); font-size: 0.92rem; }
+      .prompts p { color: var(--dim); font-size: 0.9rem; margin: 2rem 0 0.75rem; }
       .chips { display: flex; flex-wrap: wrap; gap: 0.6rem; }
       .chip {
-        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-        color: #dbe6f0; border-radius: 999px; padding: 0.5rem 0.9rem; font-size: 0.9rem;
-        cursor: pointer; transition: border-color 0.15s, background 0.15s;
+        background: var(--chipbg); border: 1px solid var(--line); color: var(--ink);
+        border-radius: 999px; padding: 0.5rem 0.95rem; font-size: 0.9rem; cursor: pointer;
+        transition: border-color .15s, background .15s;
       }
-      .chip:hover { border-color: var(--teal); background: rgba(34,184,167,0.12); }
-      .hint { color: #6f8296; font-size: 0.85rem; margin-top: 3rem; }
-      a { color: var(--soft); }
-      footer { color: #6f8296; font-size: 0.82rem; margin-top: 2.5rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.25rem; }
+      .chip:hover { border-color: var(--teal); background: color-mix(in srgb, var(--teal) 12%, transparent); }
+      .hint { color: var(--dim); font-size: 0.85rem; margin-top: 3rem; }
+      a { color: var(--teal); }
+      footer { color: var(--dim); font-size: 0.82rem; margin-top: 2.5rem; border-top: 1px solid var(--line); padding-top: 1.25rem; }
     </style>
   </head>
   <body>
+    <div class="topbar">
+      <span class="brand"><img src="/logo.png" alt="Kenalin" /></span>
+      <button class="toggle" id="theme-toggle" aria-label="Toggle theme">
+        <span id="theme-icon">🌙</span><span id="theme-label">Dark</span>
+      </button>
+    </div>
+
     <div class="wrap">
       <span class="badge"><span class="dot"></span> Live demo · no API key · runs on Vercel</span>
 
-      <h1>Meet Sari's AI assistant</h1>
+      <h1>Meet Alex's AI assistant</h1>
       <p class="lede">
         This page embeds <strong>Kenalin</strong> — an open-source, embeddable AI
         introduction layer for portfolio and professional sites. Click the launcher
-        in the corner and ask about Sari's work.
+        and ask about Alex's work. (Alex is a fictional demo persona.)
       </p>
 
       <div class="cards">
-        <div class="card">
-          <h3>Evidence-first</h3>
-          <p>Every claim is grounded in Sari's public profile and cited with a source card.</p>
-        </div>
-        <div class="card">
-          <h3>Guided, not open-ended</h3>
-          <p>It reads intent — hiring, a project question, a business need — and routes accordingly.</p>
-        </div>
-        <div class="card">
-          <h3>One script tag</h3>
-          <p>Configured in one file, embedded with one <code>&lt;script&gt;</code>. No backend team.</p>
-        </div>
+        <div class="card"><h3>Evidence-first</h3><p>Every claim is grounded in the profile and cited with a source card.</p></div>
+        <div class="card"><h3>Guided, not open-ended</h3><p>It reads intent — hiring, a project question, a business need — and routes accordingly.</p></div>
+        <div class="card"><h3>One script tag</h3><p>Configured in one file, embedded with one <code>&lt;script&gt;</code>. Themeable to your brand.</p></div>
       </div>
 
       <div class="prompts">
         <p>Try asking (click to open the assistant):</p>
         <div class="chips">
-          <button class="chip" data-q="Tell me about the QuickHub project">Tell me about the QuickHub project</button>
-          <button class="chip" data-q="What's Sari's background?">What's Sari's background?</button>
-          <button class="chip" data-q="I'm hiring for a senior engineer — is Sari a fit?">I'm hiring — is Sari a fit?</button>
-          <button class="chip" data-q="Our approvals still run over WhatsApp. Can Sari help?">Can Sari help automate our approvals?</button>
+          <button class="chip">Tell me about the TaskFlow project</button>
+          <button class="chip">What's Alex's background?</button>
+          <button class="chip">I'm hiring a frontend engineer — is Alex a fit?</button>
+          <button class="chip">Can Alex build us an internal dashboard?</button>
         </div>
       </div>
 
       <p class="hint">
         This is a <strong>keyless</strong> demo: retrieval is real, but answers come from a
-        deterministic responder instead of an LLM (no Gemini key). A real deployment swaps in
-        the model for genuine conversation.
+        deterministic responder instead of an LLM. Swap in a Gemini key for genuine
+        conversation. Toggle the theme above — the assistant follows it.
       </p>
 
       <footer>
         Built with <a href="https://github.com/aldianriski/kenalin">Kenalin</a> ·
-        fictional demo owner · <a href="https://github.com/aldianriski/kenalin#readme">docs &amp; source</a>
+        fictional demo persona · <a href="https://github.com/aldianriski/kenalin#readme">docs &amp; source</a>
       </footer>
     </div>
 
-    <!-- Mount the widget against this same origin. -->
     <script>
       (function () {
+        var root = document.documentElement;
+
+        // Theme: start from OS preference, then let the toggle drive it.
+        var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        setTheme(prefersDark ? "dark" : "light");
+
+        function setTheme(t) {
+          root.setAttribute("data-theme", t);
+          root.classList.toggle("dark", t === "dark"); // the widget follows .dark / data-theme
+          var icon = document.getElementById("theme-icon");
+          var label = document.getElementById("theme-label");
+          if (icon) icon.textContent = t === "dark" ? "☀️" : "🌙";
+          if (label) label.textContent = t === "dark" ? "Light" : "Dark";
+        }
+        document.getElementById("theme-toggle").addEventListener("click", function () {
+          setTheme(root.getAttribute("data-theme") === "dark" ? "light" : "dark");
+        });
+
+        // Mount the widget against this same origin.
         var s = document.createElement("script");
         s.src = "/kenalin.js";
         s.defer = true;
         s.setAttribute("data-api-url", location.origin);
         document.body.appendChild(s);
 
-        // Let the suggestion chips open the assistant.
+        // Suggestion chips open the assistant.
         document.addEventListener("click", function (e) {
           var chip = e.target.closest && e.target.closest(".chip");
           if (!chip) return;

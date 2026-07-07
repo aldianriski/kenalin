@@ -1,25 +1,25 @@
 import { defineKenalinConfig } from "@kenalin/core";
 
 /**
- * Demo config for the hosted playground (fictional owner Sari Wibowo). Runs
- * KEYLESS — no Gemini key: retrieval uses the hash embedder and answers come from
- * a deterministic grounded responder (see responder.ts). `allowedOrigins: []`
- * allows any origin so the same-origin demo page works on any Vercel URL.
+ * Generic demo config for the hosted playground. The owner ("Alex Rivera") and
+ * every project are FICTIONAL — nothing here is anyone's real data. Runs KEYLESS:
+ * hash-embedder retrieval + a deterministic grounded responder (responder.ts).
+ * `allowedOrigins: []` allows the same-origin demo page on any Vercel URL.
  */
 export default defineKenalinConfig({
   owner: {
-    name: "Sari Wibowo",
-    preferredName: "Sari",
-    role: "Full-stack engineer & product consultant",
-    website: "https://demo.kenalin.dev",
+    name: "Alex Rivera",
+    preferredName: "Alex",
+    role: "Product engineer & consultant",
+    website: "https://alex.example",
   },
   assistant: {
-    name: "NARA",
-    launcherLabel: "Ask about Sari",
-    description: "AI assistant introducing Sari Wibowo's work and collaboration paths.",
-    languages: ["id", "en"],
+    name: "ARIA",
+    launcherLabel: "Ask about Alex",
+    description: "AI assistant introducing Alex Rivera's work and collaboration paths.",
+    languages: ["en", "id"],
     openingMessage:
-      "Hi — I'm NARA, the AI assistant on Sari's site. Ask me about her projects, background, or how to work together. Where would you like to start?",
+      "Hi — I'm ARIA, a demo AI assistant. Ask me about Alex's projects, background, or how to work together. Where should we start?",
     tone: "warm-professional, concise",
   },
   modules: {
@@ -33,35 +33,29 @@ export default defineKenalinConfig({
   },
   services: [
     {
-      id: "svc-process-automation",
-      name: "Process automation",
-      description: "Replace manual, chat-based approval flows with auditable internal tools.",
-      evidenceIds: ["quickhub"],
+      id: "svc-build",
+      name: "Short build engagements",
+      description: "Ship a prototype or a focused product feature end to end.",
+      evidenceIds: ["taskflow"],
     },
     {
-      id: "svc-data-visibility",
-      name: "Operational dashboards",
-      description: "Turn scattered exports into real-time operational visibility.",
-      evidenceIds: ["ledgerlens"],
+      id: "svc-consulting",
+      name: "Product consulting",
+      description: "Shape scope, architecture, and roadmap with a small team.",
+      evidenceIds: ["metricboard"],
     },
   ],
   complexity: { enabled: true, showPricing: false, levels: ["small", "medium", "complex"] },
   handoff: {
-    whatsapp: { number: "+620000000000" },
-    email: { address: "hello@demo.kenalin.dev" },
-    calendar: { url: "https://cal.com/demo-sari/intro" },
+    email: { address: "hello@alex.example" },
+    calendar: { url: "https://cal.com/alex-demo/intro" },
   },
   actions: [
-    { id: "contact", type: "link", label: "Contact Sari", url: "https://demo.kenalin.dev/contact" },
-    { id: "whatsapp", type: "whatsapp", label: "Chat on WhatsApp" },
+    { id: "contact", type: "link", label: "Contact Alex", url: "https://alex.example/contact" },
     { id: "book_call", type: "calendar", label: "Schedule a call" },
   ],
   knowledge: {
-    // Unused at runtime — the demo loads a prebuilt hash index (bundled). Kept for parity.
-    sources: [
-      { kind: "json", path: "content/demo/profile.json" },
-      { kind: "markdown", path: "content/demo/case-studies" },
-    ],
+    sources: [{ kind: "markdown", path: "content" }],
   },
   storage: { lead: "none", retentionDays: 30 },
   analytics: { enabled: false },
@@ -76,7 +70,7 @@ export default defineKenalinConfig({
     marks: { launcher: "chat", header: "robot" },
   },
   server: {
-    allowedOrigins: [], // demo: allow any origin (same-origin page on any Vercel URL)
+    allowedOrigins: [],
     model: { thinkingBudget: 0 },
   },
 });

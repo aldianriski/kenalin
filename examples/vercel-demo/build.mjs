@@ -35,7 +35,8 @@ await esbuild.build({
 });
 console.log("✓ api/[...path].mjs — bundled");
 
-// 3. vendor the widget
+// 3. vendor the widget + the Kenalin logo
 mkdirSync("public", { recursive: true });
 copyFileSync("../../packages/widget/dist/kenalin.js", "public/kenalin.js");
-console.log("✓ public/kenalin.js — vendored widget");
+copyFileSync("../../assets/img/logo_only.png", "public/logo.png");
+console.log("✓ public/kenalin.js + public/logo.png");

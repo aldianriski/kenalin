@@ -76,12 +76,12 @@ function clean(snippet: string, max = 320): string {
 
 const CTA: Record<string, string> = {
   hiring: "Want me to pass your details along, or would a quick intro call help?",
-  business_opportunity: "If you'd like, I can connect you with Sari to talk specifics.",
-  partnership: "Happy to route this to Sari to explore a collaboration.",
+  business_opportunity: "If you'd like, I can connect you with Alex to talk specifics.",
+  partnership: "Happy to route this to Alex to explore a collaboration.",
   explore: "Want to go deeper on this, or see another project?",
-  existing_network: "Would you like me to let Sari know you stopped by?",
-  general: "You can ask about a specific project, her background, or how to work together.",
-  unknown: "You can ask about a specific project, her background, or how to work together.",
+  existing_network: "Would you like me to let Alex know you stopped by?",
+  general: "You can ask about a specific project, Alex's background, or how to work together.",
+  unknown: "You can ask about a specific project, Alex's background, or how to work together.",
 };
 
 const HANDOFF_INTENTS = new Set(["hiring", "business_opportunity", "partnership"]);
@@ -110,7 +110,7 @@ export function demoResponder(req: { system?: string; messages?: { role: string;
     // No supporting evidence retrieved — friendly, honest fallback (no invented facts).
     return {
       answer:
-        "I can only speak to what's in Sari's public profile — projects, background, and how she likes to work. " +
+        "I can only speak to what's in Alex's public profile — projects, background, and how Alex likes to work. " +
         CTA[intent],
       intent,
       confidence: 0.5,
@@ -126,11 +126,11 @@ export function demoResponder(req: { system?: string; messages?: { role: string;
   const top = evidence.slice(0, intent === "explore" ? 1 : 2);
   const lead =
     intent === "hiring"
-      ? "Here's the most relevant part of Sari's background:"
+      ? "Here's the most relevant part of Alex's background:"
       : intent === "business_opportunity"
-        ? "This looks close to work Sari has done before:"
+        ? "This looks close to work Alex has done before:"
         : intent === "partnership"
-          ? "Here's a relevant example of Sari's delivery:"
+          ? "Here's a relevant example of Alex's delivery:"
           : "Here's what I found:";
 
   const body = top
