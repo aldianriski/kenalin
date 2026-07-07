@@ -44,12 +44,15 @@ project — config + example + ingest — not just files.
 **Acceptance:** from a clean dir, `npx create-kenalin demo-app` produces a project that installs, ingests, and serves a working chat turn against the demo owner.
 
 **DoD:**
-- [ ] `@kenalin/{core,server,widget}` build clean, publishable artifacts (types, exports map, `files` allowlist, `sideEffects`), versioned `0.6.0`
-- [ ] Dry-run publish (`npm publish --dry-run`) green for all three; owner-string grep gate still passes on the packed tarballs
-- [ ] `create-kenalin <name>` scaffolds config + one example + an ingest step; the generated project runs a real chat turn locally
+- [x] `@kenalin/{core,server,widget}` build clean, publishable artifacts (types, exports map, `files` allowlist, `sideEffects`), versioned `0.6.0` — *(widget now emits `.d.ts`; core/server/widget bumped 0.5.3→0.6.0)*
+- [x] Dry-run publish green for all three; owner-string grep gate still passes on the packed tarballs — *(`pnpm -r publish --dry-run`, not `npm` — npm can't resolve `workspace:*`; packed server tarball pins `@kenalin/core 0.6.0`)*
+- [x] `create-kenalin <name>` scaffolds config + one example + an ingest step *(built-bin scaffold verified: 9 files, name-substituted, dotfiles renamed; 6 vitest smokes)* — **the generated project runs a real chat turn locally is post-publish (installs `@kenalin/*` from the registry) → owner-gated**
 - [ ] Published to npm under the `@kenalin` scope (owner-gated — see checklist)
-- [ ] TD-004 marked resolved → TASK-022
-<!-- QA: create-kenalin wants a scaffold-smoke test (generate → install → assert files/boot). -->
+- [ ] TD-004 marked resolved → TASK-022 *(resolves once the portfolio consumes the published package — post-publish)*
+<!-- QA: create-kenalin scaffold-smoke test added (generate → assert files/name/deps). -->
+<!-- T1 dev-complete; the 3 remaining items are the owner-gated publish tail. -->
+
+Owner-gated tail (post `npm publish`): confirm `npx create-kenalin` from the registry produces a project that `npm install`s + runs a real chat turn; resolve TD-004 by migrating the portfolio to the package.
 
 ### T2 — Config reference doc, generated from the Zod schema `[size: M · risk: low]`
 Layers: `packages/core/schemas` (config schema — source of truth); new `docs/CONFIG.md` (or `docs/config-reference.md`); a small generator/check script.
@@ -152,6 +155,10 @@ The files that make a repo contributable and discoverable.
 ### 2026-07-07 | promote | Plan locked
 SPRINT-009 promoted from the TODO Backlog (OSS professionalization v0.6, full 7-task track). Governance review clean: no `count ≥ 2` learnings to promote; no `high`-severity tech debt to escalate (TD-002/003/004 flagged as ≥3-sprints-old but carried); TODO at 119 lines (under the soft cap). Tasks ordered by dependency (package → docs → demo → README → hygiene).
 
+### 2026-07-07 | T1 | Dev-complete (publish-prep + create-kenalin) — cfcb089, d5c2f34
+**T1a** (`cfcb089`): all three packages made publishable — `publishConfig.access:public`, widget `.d.ts` emit + `types`/`exports`/`module`/CDN entries + precise `sideEffects`, repo metadata, per-package READMEs, root `release`/`release:dry`. Verified `pnpm -r publish --dry-run` green and that pnpm rewrites `workspace:*`→`@kenalin/core 0.6.0` in the packed tarball; owner-string gate clean on tarballs; `pnpm verify` green.
+**T1b** (`d5c2f34`): new `create-kenalin` package (`npx create-kenalin <name>` → runnable template: config + case-studies + `@kenalin/server` host + `@kenalin/widget` demo page). Pure `scaffold()` + thin CLI; 6 vitest smokes + a real built-bin scaffold (9 files, name-substituted, dotfiles renamed, invalid-name rejected). Bumped everything to 0.6.0; gate extended to `create-kenalin/src`. **126 tests green.** Owner-gated tail: real `npm publish` + registry-install runtime smoke + TD-004 portfolio migration.
+
 ### 2026-07-07 | G1+G2 | Batch gates signed off
 Recon (two `Explore` agents) established: packages already `@kenalin/*`/0.5.3/non-private with `files:["dist"]`; publish blockers are mechanical (`workspace:*` refs, no `publishConfig.access:public`, widget missing `types`/`exports`, no `sideEffects`). `create-kenalin` + config-doc generator are greenfield; no `zod-to-json-schema` dep (schema at `packages/core/src/config/schema.ts`, defaults inline via `.default()`). Three owner-gated halts confirmed: real `npm publish`, Vercel demo deploy, GitHub description/topics. **Decisions:** T1 (L) split → T1a prep / T1b scaffold; config generator = custom schema-walker (no new dep) + drift-check on the field set; README single-owner = T6 (serial edit order T3→T5→T7→T6); T6 assets captured live via Chrome-MCP; D1 recorded as ADR-006. Approach: take all 7 to dev-complete, halt at each owner gate.
 
@@ -160,7 +167,12 @@ Recon (two `Explore` agents) established: packages already `@kenalin/*`/0.5.3/no
 
 | File | Task | Change (WHY) | Risk | Test |
 |------|------|--------------|------|------|
-| _pending_ | — | — | — | — |
+| `packages/{core,server,widget}/package.json` | T1a | publishConfig.access:public, exports/types/module, sideEffects, repo metadata, 0.6.0 | Low | `pnpm -r publish --dry-run` + pack inspect |
+| `packages/widget/package.json` + `build.mjs` flow | T1a | emit `.d.ts` (`tsc --emitDeclarationOnly`), unpkg/jsdelivr | Low | widget build + tarball file list |
+| `packages/{core,server,widget}/README.md` | T1a | per-package npm README | Low | present in tarball |
+| `package.json` (root) | T1a | `release`/`release:dry` scripts; 0.6.0 | Low | dry-run |
+| `packages/create-kenalin/**` | T1b | new scaffold CLI + `templates/default/` | Med | 6 vitest + built-bin scaffold |
+| `scripts/check-owner-strings.mjs` | T1b | gate now covers `create-kenalin/src` | Low | gate green |
 
 ## Retro
 <!-- Written at close. Route buckets per DOCS_Guide §10. -->
