@@ -32,8 +32,9 @@ Status: `pnpm verify` green (**117 tests**) · eval matrix **12/15/12/10 = 49, 1
       done-when: `www.aldianrizki.com/api/config/public` returns 200 and a real `/api/chat` turn answers grounded (my automated poll last saw the routes 404 mid-deploy — verify the Vercel deploy for `0a5efcf` went green and the routes are live). If 404 persists: check Vercel Production Branch = `main` + build logs.
 - [ ] **TASK-033 — Add Upstash REST env to the portfolio (cross-instance cache/limiter)** [size: S] · src: claude · state: ready
       done-when: `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` set in the portfolio Vercel env (only `REDIS_URL` is set today → cache + rate-limiter run in-memory per-instance). Resolves TD-010.
-- [ ] **TASK-041 — Merge + deploy the SPRINT-006 portfolio branch + browser-visual pass** [size: S] [HITL] · src: claude · state: ready — follow-up from SPRINT-006 T9.
-      done-when: portfolio branch `sprint/portfolio-ux-answer-quality` (`4ef9334`) merged to `main`, full `next build` green, deployed; browser pass confirms the DOM behaviors unit tests can't see — launcher clears the 68px mobile dock, Home keeps history, reload persists the chat, idle nudge→auto-minimize. (Overlaps the TASK-032 live smoke.)
+- [ ] **TASK-041 — Merge + deploy the SPRINT-006 portfolio branch** [size: S] [HITL] · src: claude · state: ready — follow-up from SPRINT-006 T9.
+      **Browser-visual pass DONE (2026-07-07)** against `next dev`: widget themed portfolio-blue (`#2563EB`), `--kenalin-pos-y-mobile:84px` + the `≤768px` launcher rule confirmed (clears the 68px dock), T3 answer evidence-led (QuickHub, no bio), evidence links → `/en/case-studies/…` + `/en/about`, Home preserved 3 rows + re-showed the grid, reload restored the full conversation. (Idle 60/30 timing is unit-tested only — not waited out live.)
+      done-when: portfolio branch `sprint/portfolio-ux-answer-quality` (`4ef9334`) merged to `main`, full `next build` green, deployed to Vercel prod (overlaps TASK-032 live smoke).
 
 ### P1 — Next Phase (v0.2 — launch polish)
 
