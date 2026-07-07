@@ -1,6 +1,6 @@
 ---
 owner: Tech Lead
-last_updated: 2026-07-06
+last_updated: 2026-07-07
 update_trigger: Sprint completed, task added, or task status changed
 status: current
 ---
@@ -17,11 +17,16 @@ status: current
 
 ## Active Sprint
 
-> **SPRINT-010 — Demo v2 + CI green** → [`docs/sprint/SPRINT-010-demo-v2-ci-green.md`](docs/sprint/SPRINT-010-demo-v2-ci-green.md) · promoted 2026-07-07 (T1 CI fix done + verified locally; T2 widget resilience, T3 icon align, T4 strengths+roadmap, T5 ship). SPRINT-001…009 archived → [`docs/sprint/archive/`](docs/sprint/archive/) · [`docs/sprint/INDEX.md`](docs/sprint/INDEX.md).
+> **SPRINT-010 — Demo v2 + CI green** → [`docs/sprint/SPRINT-010-demo-v2-ci-green.md`](docs/sprint/SPRINT-010-demo-v2-ci-green.md) · promoted 2026-07-07; **T1–T5 delivered** — CI green on [PR #1](https://github.com/aldianriski/kenalin/pull/1), widget resilience, aligned quick-action icons, strengths + Now/Next/Later roadmap, **demo live at [kenalin.vercel.app](https://kenalin.vercel.app)**. **Open:** merge PR #1 → `main`, then close the sprint. SPRINT-001…009 archived → [`docs/sprint/archive/`](docs/sprint/archive/) · [`docs/sprint/INDEX.md`](docs/sprint/INDEX.md).
 
-Status: `pnpm verify` green (**126 tests** + owner-string & config-doc gates) · widget 18.7 KB gz · **v0.6.0 PUBLISHED to npm** (`@kenalin/{core,server,widget}` + `create-kenalin`) · live demo at `https://vercel-demo-mu-seven.vercel.app` (target rename → `kenalin.vercel.app`). Demo landing page **redesigned** 2026-07-07 (frontend-design pass — self-typing intro hero, custom SVG icons, logo tile; verified light/dark in-browser) — **uncommitted, awaiting deploy** (TASK-053).
+Status: `pnpm verify` green (**126 tests**, build-before-typecheck) · widget **18.9 KB gz** · **v0.6.0 on npm** · **live demo → https://kenalin.vercel.app** (redesigned self-introducing hero, 4 aligned icons, keyless). README + ROADMAP aligned to the demo — **demo ⇄ repo cross-linked**.
 
-> **Backlog groomed 2026-07-07** (`/triage`). **Ready-to-promote → a "Go live" sprint:** TASK-053 (deploy redesign + `kenalin.vercel.app`) · TASK-041 (merge portfolio UX branch) · TASK-032 (portfolio prod smoke) · TASK-051 (portfolio → `@kenalin/*@0.6.0`) · TASK-045 (capture new-design visuals) · TASK-033 (Upstash REST env). Run `/lean-doc-generator promote` to form it.
+> **Roadmap ↔ Backlog map** — the public [ROADMAP.md](ROADMAP.md) horizons traced to tasks (horizon = when we'll likely pick it up; the internal P-tier is the real priority):
+> - **Now (shipped):** retrieval over your content · Redis cache + rate-limiter · token/context budgets · EN/ID · one-script + npm · widget resilience (TASK-054)
+> - **Next:** explicit context caching (TASK-026) · structured/graph knowledge (TASK-058) · real token streaming (TASK-014) · widget render/a11y test harness (TD-009)
+> - **Later:** learning loop (TASK-059) · no-code config studio (TASK-021) · more providers — Anthropic/OpenAI (TASK-020) · pgvector store (TASK-019) · ingestion improvements (TASK-023)
+
+> **Backlog groomed 2026-07-07** (`/triage`). **Next-sprint shortlist → "Portfolio go-live":** TASK-041 (merge portfolio UX branch) · TASK-032 (portfolio prod smoke) · TASK-051 (portfolio → `@kenalin/*@0.6.0`) · TASK-033 (Upstash REST env) · TASK-045 (capture demo visuals) · TASK-052 (repo description + CoC). Form it with `/lean-doc-generator promote` after SPRINT-010 closes (merge PR #1).
 
 ---
 
@@ -29,9 +34,6 @@ Status: `pnpm verify` green (**126 tests** + owner-string & config-doc gates) ·
 
 ### P0 — Critical / Blocking
 
-- [ ] **TASK-055 — Fix CI: bump Node 20 → 22 (pnpm 11.9.0 needs ≥22.13)** [size: S] · src: claude · state: ready — CI red on every push since the pnpm bump: `ERR_UNKNOWN_BUILTIN_MODULE: node:sqlite` + "pnpm requires Node.js v22.13". done-when: `ci.yml` + `eval.yml` pin `node-version: 22`, pushed, CI green. **Change made + `pnpm verify` green locally (Node 22.22.3); awaiting commit/push to confirm in CI.**
-- [ ] **TASK-053 — Ship the redesigned demo + rename to `kenalin.vercel.app`** [size: S] [HITL] · src: claude · state: ready — from the 2026-07-07 frontend-design pass.
-      done-when: `examples/vercel-demo/public/index.html` + the two `logo_*_nobg.png` committed; `vercel deploy --prod` live; Vercel project renamed **or** aliased to `kenalin.vercel.app` (owner action — subdomain must be free, else add a custom alias); `vercel-demo-mu-seven` URL strings updated repo-wide (TODO.md, docs). Note: the redesign is purely static (`public/`) — no rebuild needed. Verified locally: the widget launcher mounts over the new page when `/api/config/public` returns 200 (it renders nothing when config 404s — that is the "widget gone" locals see, not a regression).
 - [ ] **TASK-032 — Confirm live production deploy + `/api/chat` smoke** [size: S] · src: claude · state: ready
       done-when: `www.aldianrizki.com/api/config/public` returns 200 and a real `/api/chat` turn answers grounded (the "404 mid-deploy" note was from a poll on 2026-07-07 — likely stale; the **demo** api verified 200 today, the **portfolio** api still needs a live check). If 404 persists: check Vercel Production Branch = `main` + build logs.
 - [ ] **TASK-033 — Add Upstash REST env to the portfolio (cross-instance cache/limiter)** [size: S] · src: claude · state: ready
@@ -42,16 +44,13 @@ Status: `pnpm verify` green (**126 tests** + owner-string & config-doc gates) ·
 
 ### P1 — Next Phase (v0.2 — reliability & brand polish)
 
-- [ ] **TASK-054 — Widget resilience: never silently vanish** [size: S] · src: claude · state: ready — created 2026-07-07 from the "widget gone" diagnosis. Today the launcher renders **nothing** if `GET /api/config/public` fails (`element.ts:90-93` → `return`), so any api hiccup makes the whole chat disappear with no signal. done-when: on config-fetch failure the element still mounts a launcher from a safe default config (or a one-line retry/console error), so a demo/prod never looks broken. Touches `packages/widget` + re-vendor the demo `kenalin.js`.
-- [ ] **TASK-056 — Align quick-action icons (widget ↔ landing)** [size: M] · src: you · state: ready — created 2026-07-07. Landing "Try it now" chips use 4 distinct glyphs; the widget shows 4 identical bubbles (demo ids `what/cando/embed/oss` don't match `quickActionIcon()`, fall to default). done-when: set `branding.icons` (`quick:what|cando|embed|oss` → data-URI SVGs) in `examples/vercel-demo/src/kenalin.config.ts` so the widget renders the same 4 glyphs; use those identical glyphs on the landing chips; rebuild the demo bundle + re-vendor `kenalin.js` (no `packages/*` change — `toPublicConfig` already forwards `branding.icons`).
-- [ ] **TASK-057 — Demo landing: strengths + roadmap sections** [size: M] · src: you · state: ready — created 2026-07-07. done-when: add a "Why Kenalin" strengths block (Easy to adopt · Fully customizable · Evidence-grounded · Private & self-hosted) and a **Now / Next / Later** roadmap. Now = shipped (real RAG retrieval, Redis/Upstash cache, token/context budgets, EN/ID). Next = context caching (TASK-026), structured knowledge (TASK-058). Later = learning loop (TASK-059). Public roadmap uses theme labels, not internal task ids.
+- [ ] **TASK-014 — Real token streaming** [size: M] · src: claude · state: ready — promoted P2→P1 (2026-07-07 triage: the public roadmap's **Next**; resolves TD-003). Stream Gemini tokens for lower time-to-first-token vs the current word-by-word pseudo-stream. Note: TD-014 — Vercel functions time out on held-open SSE, so streaming needs the Edge runtime or fluid responses there.
 - [ ] **TASK-043 — Per-mode widget theme tokens** [size: M] · src: claude · state: ready — promoted from P2 (2026-07-07 triage: design-relevant + resolves TD-012). done-when: `branding.theme` accepts light/dark values (or derives AA-safe mode variants from one brand color) so mode-sensitive tokens (accentText, bg, surface, text, border) can carry brand color without breaking either mode.
 
 ### P2 — Quality / Polish
 
 - [ ] **TASK-009 — Lazy-loading skeleton placeholders** [size: S] · src: you — initial open, config fetch, evidence cards show skeletons.
 - [ ] **TASK-010 — Premium micro-animations** [size: S] · src: you — message enter/stagger, typing, evidence reveal; respect `prefers-reduced-motion`.
-- [ ] **TASK-014 — Real token streaming** [size: M] · src: claude — stream Gemini tokens for lower time-to-first-token vs the current word-by-word pseudo-stream. Resolves TD-003.
 - [ ] **TASK-015 — Analytics module (PRD B11)** [size: M] · src: claude — emit engagement/intent/conversion events via webhook/console, off by default, no PII.
 - [ ] **TASK-016 — Handoff brief enrichment** [size: S] · src: claude — capture the visitor's actual screening answers into the brief (values currently empty).
 - [ ] **TASK-018 — Launcher unread badge** [size: S] · src: claude — minimize-to-badge with an unread count.
@@ -81,7 +80,7 @@ Status: `pnpm verify` green (**126 tests** + owner-string & config-doc gates) ·
 
 > **SPRINT-009 closed** — done: TASK-022 (published `@kenalin/*@0.6.0` + `create-kenalin`), TASK-046 (live keyless demo — Deploy button deferred, see below), TASK-047 (Quickstart), TASK-048 (config ref + drift gate), TASK-049 (integration guides), TASK-050 (repo hygiene). Detail → [`docs/sprint/archive/SPRINT-009-oss-professionalization.md`](docs/sprint/archive/SPRINT-009-oss-professionalization.md).
 
-- [ ] **TASK-045 — Visual README design showcase** [size: M] · src: you · state: **owner-action (carried)** — badges done in SPRINT-009; **remaining**: capture the **redesigned** demo hero GIF (the self-typing intro animation) + light/dark/mobile screenshots and commit under `assets/img/` (human-timed, runbook `assets/CAPTURE.md`; headless capture freezes — L-014). Depends on TASK-053 (deploy the redesign first). Demo target URL → `kenalin.vercel.app`.
+- [ ] **TASK-045 — Visual README design showcase** [size: M] · src: you · state: **ready (owner-action)** — badges done in SPRINT-009; **unblocked** 2026-07-07 (demo deployed). **Remaining:** capture the redesigned hero GIF (self-typing intro) + light/dark/mobile screenshots from [kenalin.vercel.app](https://kenalin.vercel.app) and commit under `assets/img/` (human-timed, runbook `assets/CAPTURE.md`; headless capture freezes — L-014).
 - [ ] **TASK-051 — Migrate the portfolio to `@kenalin/*@0.6.0`** [size: M] · src: claude · state: ready — replace the vendored `kenalin-engine.js`/`kenalin.js` in the portfolio with `npm install @kenalin/{server,widget}@^0.6.0`. **Resolves TD-004.**
 - [ ] **TASK-052 — Finish repo/community publishing** [size: S] · src: you · state: needs-owner — set the GitHub repo description + topics (repo-admin) and the CoC maintainer contact in `CODE_OF_CONDUCT.md`. Optionally: a `create-kenalin`-based "Deploy to Vercel" button once the scaffold path is confirmed on a fresh clone (the keyless demo can't be a git-clone Deploy target — artifacts are prebuilt).
 
@@ -99,7 +98,7 @@ Status: `pnpm verify` green (**126 tests** + owner-string & config-doc gates) ·
 - **TD-010** severity: minor | status: open | created: 2026-07-07 (release) — Portfolio prod runs cache + rate-limiter **in-memory per-instance**: only `REDIS_URL` is set, not the `UPSTASH_REDIS_REST_URL`/`_TOKEN` REST pair my `resolveRedisConfig` reads. Fine at low traffic; cross-instance needs the REST vars. done-when: TASK-033.
 - **TD-013** severity: minor | status: open | created: Sprint-009 — The hosted demo (`examples/vercel-demo`) answers via a **deterministic responder** (`FakeChatProvider`), not a real LLM — by design (keyless, cost/secret-free). Retrieval is real (hash embedder) but answers are templated from the top chunk. done-when: if a live-LLM demo is wanted, add an env-gated Gemini path (`buildAppDeps` with a key) alongside the fake one.
 - **TD-014** severity: minor | status: open | created: Sprint-009 — Vercel functions time out (504) on held-open **SSE streaming**, so the demo returns the whole SSE body at once (no word-by-word). Fine for the demo; if real streaming is needed on Vercel, use the Edge runtime or fluid/streaming responses. Related: TD-003 (widget pseudo-stream). (L-015.)
-- **TD-016** severity: medium | status: open → TASK-054 | created: 2026-07-07 — The widget **renders nothing** if `GET /api/config/public` fails (`element.ts:90-93` returns early with only a `console.warn`). So any transient api/route failure makes the launcher silently vanish — indistinguishable from "no widget." Repeatedly mistaken for a regression ("widget gone again"). done-when: TASK-054 (mount a launcher from a fallback config on config-fetch failure).
+- **TD-016** severity: medium | status: **resolved → TASK-054 (SPRINT-010)** | created: 2026-07-07 — The widget rendered nothing if `GET /api/config/public` failed, so any transient api/route failure made the launcher silently vanish ("widget gone again"). Fixed: `element.ts` now retries once then mounts a fallback launcher from a safe default config — the chat can no longer disappear on an API blip (smoked with config forced to 500).
 - **TD-015** severity: minor | status: open | created: Sprint-009 — The demo build is **manual**: `pnpm --filter @kenalin/widget build` + a hash `ingest` + `node build.mjs` (locally, needs the workspace) then `vercel deploy`. Artifacts are gitignored + prebuilt (Vercel doesn't build it). done-when: a small script or CI step chains ingest→bundle→deploy if the demo needs frequent redeploys.
 - **TD-012** severity: minor | status: open | created: Sprint-006 — Widget theme tokens are single-valued but the widget has light+dark modes. So mode-sensitive brand tokens (`accentText`, `bg`, `surface`, `text`, `border`, `userBg`) can't be set to a brand color without breaking one mode (e.g. a dark-blue accentText fails contrast on the dark surface). The portfolio config therefore overrides only the mode-invariant brand tokens (accent/navy/amber/soft), leaving neutrals + accentText at the widget's adaptive defaults (minor teal residual on small links). done-when: TASK-043 (per-mode theme tokens).
 - **TD-011** severity: resolved (engine) → TASK-039 (SPRINT-006); content re-ingest → TASK-040 | created: 2026-07-07 (release) — Portfolio case-study MDX frontmatter used non-standard `type: technical`/`hybrid` → generic cards. `normalizeType()` (markdown.ts) now maps `technical`/`hybrid` → `case_study`; typed cards land once the portfolio re-ingests (TASK-040).
