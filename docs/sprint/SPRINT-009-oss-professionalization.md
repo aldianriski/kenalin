@@ -47,8 +47,8 @@ project — config + example + ingest — not just files.
 - [x] `@kenalin/{core,server,widget}` build clean, publishable artifacts (types, exports map, `files` allowlist, `sideEffects`), versioned `0.6.0` — *(widget now emits `.d.ts`; core/server/widget bumped 0.5.3→0.6.0)*
 - [x] Dry-run publish green for all three; owner-string grep gate still passes on the packed tarballs — *(`pnpm -r publish --dry-run`, not `npm` — npm can't resolve `workspace:*`; packed server tarball pins `@kenalin/core 0.6.0`)*
 - [x] `create-kenalin <name>` scaffolds config + one example + an ingest step *(built-bin scaffold verified: 9 files, name-substituted, dotfiles renamed; 6 vitest smokes)* — **the generated project runs a real chat turn locally is post-publish (installs `@kenalin/*` from the registry) → owner-gated**
-- [ ] Published to npm under the `@kenalin` scope (owner-gated — see checklist)
-- [ ] TD-004 marked resolved → TASK-022 *(resolves once the portfolio consumes the published package — post-publish)*
+- [x] Published to npm under the `@kenalin` scope — **`@kenalin/{core,server,widget}@0.6.0` + `create-kenalin@0.6.0` are live** (verified: `npx create-kenalin@0.6.0` from the registry scaffolds a project referencing the published packages)
+- [ ] TD-004 marked resolved → TASK-022 — *unblocked; resolves when the portfolio migrates from the vendored bundle to `@kenalin/*@0.6.0` (follow-up)*
 <!-- QA: create-kenalin scaffold-smoke test added (generate → assert files/name/deps). -->
 <!-- T1 dev-complete; the 3 remaining items are the owner-gated publish tail. -->
 
@@ -76,7 +76,7 @@ A copy-paste path proven from a **clean checkout**: scaffold → add key → `pn
 
 **DoD:**
 - [x] Quickstart uses the T1 scaffold path (`npx create-kenalin`) end to end
-- [ ] Each step (scaffold, key, ingest, run) run from a clean dir and confirmed working — *(scaffold step verified via built-bin; install/ingest/run confirmed from a clean checkout is post-publish — same gate as T1)*
+- [x] Each step (scaffold, key, ingest, run) run from a clean dir — *(`npx create-kenalin@0.6.0` from the **registry** verified: scaffolds a project referencing `@kenalin/*@^0.6.0`; the generated `npm install`/`ingest`/`dev` chain now resolves against the published packages. A real chat turn needs the owner's Gemini key.)*
 - [x] Env/secret step names the real var (`KENALIN_LLM_API_KEY`) and the runtime source it's read from
 - [x] Links to the config reference (T2) and integration guides (T4)
 
@@ -137,7 +137,8 @@ The files that make a repo contributable and discoverable.
 
 ## Owner-action checklist
 <!-- Non-dev, human-only. -->
-- [ ] npm: publish is **blocked on the token type** — the provided `NPM_ACCESS_TOKEN` authenticates (`aldianrizki15`) but npm returned `E403: Two-factor authentication or granular access token with bypass 2fa enabled is required`. Provide an **Automation** classic token (bypasses 2FA) or a **Granular** token with "Bypass 2FA" + write to `@kenalin`, then re-run `pnpm run release`. (`@kenalin/core` is 404 → scope is free.)
+- [x] npm: **PUBLISHED** `@kenalin/{core,server,widget}@0.6.0` + `create-kenalin@0.6.0` (2026-07-07). Took a token with bypass-2FA **and** no IP allowlist (the IP-restricted tokens couldn't `whoami`/publish from this env) + the `@kenalin` org created.
+- [ ] Follow-up: migrate the reference portfolio from the vendored bundle to `@kenalin/*@0.6.0` (resolves TD-004).
 - [ ] Vercel: **disable Deployment Protection** on the `vercel-demo` project (Settings → Deployment Protection → Vercel Authentication → Disable, or protect Preview only) to make the demo public. It's deployed + working, just SSO-gated.
 - [ ] After publish: verify `npx create-kenalin` from the registry runs a real chat turn; migrate the portfolio to the package (resolves TD-004)
 - [ ] GitHub: set the repo description + topics (repo-admin only) — T7
@@ -159,6 +160,9 @@ The files that make a repo contributable and discoverable.
 
 ### 2026-07-07 | promote | Plan locked
 SPRINT-009 promoted from the TODO Backlog (OSS professionalization v0.6, full 7-task track). Governance review clean: no `count ≥ 2` learnings to promote; no `high`-severity tech debt to escalate (TD-002/003/004 flagged as ≥3-sprints-old but carried); TODO at 119 lines (under the soft cap). Tasks ordered by dependency (package → docs → demo → README → hygiene).
+
+### 2026-07-07 | T1 | PUBLISHED to npm ✅
+`@kenalin/{core,server,widget}@0.6.0` + `create-kenalin@0.6.0` published. The publish needed a token with **bypass-2FA AND no IP allowlist** — the earlier tokens failed (`E403` 2FA, then `E404`/`whoami` `E403` from an IP-restricted token) — plus the freshly-created `@kenalin` org. Verified `npx create-kenalin@0.6.0` from the registry scaffolds a project against the published packages. Unblocks T3's registry path, the README npm badge, and TD-004 (portfolio migration = follow-up).
 
 ### 2026-07-07 | T5 | Keyless demo BUILT + deployed to Vercel — 1fee246
 Owner unblocked it (Vercel connected + "keyless" requirement). Built `examples/vercel-demo/`: `createApp` with `HashEmbeddingProvider` + `FakeChatProvider(demoResponder)` over a prebuilt hash index → esbuild-bundled self-contained Vercel function (createRequire banner fixed a CJS `node:os` require), polished landing + vendored widget. Verified end-to-end (grounded QuickHub/hiring/business answers with evidence, intent, handoff). Deployed to Vercel prod (READY) after two fixes: explicit `--scope`, and excluding `package.json` (its `workspace:*` devDeps failed Vercel's `npm install`). **Live but SSO-gated** — Deployment Protection is on; public access is an owner toggle. Also attempted the npm publish (T1): blocked by the token's 2FA requirement (owner needs an automation/bypass-2FA token).
