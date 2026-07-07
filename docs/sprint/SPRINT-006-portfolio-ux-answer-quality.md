@@ -4,7 +4,7 @@ slug: portfolio-ux-answer-quality
 owner: Tech Lead
 last_updated: 2026-07-07
 status: active
-plan_commit: [pending — set at plan-lock commit]
+plan_commit: be4de33
 close_commit: [sha — set at close]
 update_trigger: sprint execute/close events
 ---
