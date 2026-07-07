@@ -8,6 +8,7 @@
     "bundle": "node build.mjs"
   },
   "devDependencies": {
+    "@hono/node-server": "^1.13.7",
     "@kenalin/core": "workspace:*",
     "@kenalin/server": "workspace:*",
     "esbuild": "~0.27.7",

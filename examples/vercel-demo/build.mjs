@@ -1,5 +1,5 @@
 import * as esbuild from "esbuild";
-import { readFileSync, writeFileSync, copyFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, copyFileSync, mkdirSync, rmSync } from "node:fs";
 
 /**
  * Build the self-contained keyless demo (run locally, where the workspace exists):
@@ -17,9 +17,10 @@ console.log(`✓ src/chunks.json — ${chunks.length} chunks`);
 
 // 2. bundle the serverless handler, fully self-contained
 mkdirSync("api", { recursive: true });
+rmSync("api/[...path].mjs", { force: true }); // drop the old catch-all filename
 await esbuild.build({
   entryPoints: ["src/handler.ts"],
-  outfile: "api/[...path].mjs",
+  outfile: "api/index.mjs",
   bundle: true,
   format: "esm",
   platform: "node",
@@ -33,7 +34,7 @@ await esbuild.build({
     js: "import { createRequire as __cr } from 'node:module'; import { fileURLToPath as __f } from 'node:url'; import { dirname as __d } from 'node:path'; const require = __cr(import.meta.url); const __filename = __f(import.meta.url); const __dirname = __d(__filename);",
   },
 });
-console.log("✓ api/[...path].mjs — bundled");
+console.log("✓ api/index.mjs — bundled");
 
 // 3. vendor the widget + the Kenalin logo
 mkdirSync("public", { recursive: true });

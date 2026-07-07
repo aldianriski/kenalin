@@ -1,14 +1,12 @@
 /**
- * Keyless demo API for the self-referential Kenalin playground. Runs the real
- * orchestrator (retrieval + policy) with offline providers, but serves CUSTOM
- * quick actions (about Kenalin) instead of the module defaults, and a minimal
- * SSE chat route matching the widget's `delta`/`payload` contract. esbuild
- * bundles everything (core + server + hono + zod + index) into the Vercel
- * function — no workspace/npm deps, no secrets.
+ * Keyless demo API as a plain Vercel Node function. It runs the real orchestrator
+ * (retrieval + policy) with offline providers, serves CUSTOM Kenalin quick actions,
+ * and returns the SSE body all at once (the widget parses it the same way). We use
+ * the native (req,res) signature + Vercel's parsed `req.body` on purpose: the Hono
+ * `hono/vercel` adapter hangs on POST bodies under Vercel, and streaming responses
+ * hit the function timeout. esbuild bundles core+server+zod+index — no external deps.
  */
-import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { streamSSE } from "hono/streaming";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import { loadConfig, ChatRequestSchema, type KnowledgeChunk } from "@kenalin/core";
 import {
   Orchestrator,
@@ -17,7 +15,6 @@ import {
   FakeChatProvider,
   toPublicConfig,
 } from "@kenalin/server";
-import { handle } from "hono/vercel";
 import rawConfig from "./kenalin.config.js";
 import { demoResponder } from "./responder.js";
 import chunks from "./chunks.json";
@@ -39,39 +36,78 @@ const QUICK_ACTIONS = [
   { id: "embed", label: { en: "How do I add it?", id: "Cara memasang?" }, seedIntent: "explore" },
   { id: "oss", label: { en: "Free & self-hosted?", id: "Gratis & self-host?" }, seedIntent: "explore" },
 ];
+const publicConfig = JSON.stringify({ ...toPublicConfig(config), quickActions: QUICK_ACTIONS });
 
-const publicConfig = { ...toPublicConfig(config), quickActions: QUICK_ACTIONS };
+/** Encode one SSE event, splitting multi-line data into `data:` lines (SSE spec). */
+function sseEvent(event: string, data: string): string {
+  const lines = data.split("\n").map((l) => `data: ${l}`).join("\n");
+  return `event: ${event}\n${lines}\n\n`;
+}
 
-const app = new Hono();
-app.use("/api/*", cors({ origin: (o) => o ?? "*", allowMethods: ["GET", "POST", "OPTIONS"] }));
-app.get("/healthz", (c) => c.json({ ok: true, owner: config.owner.name }));
-app.get("/api/config/public", (c) => c.json(publicConfig));
-
-app.post("/api/chat", async (c) => {
-  let body: unknown;
-  try {
-    body = await c.req.json();
-  } catch {
-    return c.json({ error: "invalid_json" }, 400);
+function readBody(req: IncomingMessage): Promise<unknown> {
+  // Vercel usually parses JSON into req.body; fall back to reading the raw stream.
+  const anyReq = req as IncomingMessage & { body?: unknown };
+  if (anyReq.body !== undefined && anyReq.body !== null) {
+    return Promise.resolve(
+      typeof anyReq.body === "string" ? safeParse(anyReq.body) : anyReq.body,
+    );
   }
-  const parsed = ChatRequestSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: "invalid_request", issues: parsed.error.issues }, 400);
+  return new Promise((resolve) => {
+    let d = "";
+    req.on("data", (c) => (d += c));
+    req.on("end", () => resolve(safeParse(d)));
+    req.on("error", () => resolve({}));
+  });
+}
+function safeParse(s: string): unknown {
+  try {
+    return JSON.parse(s || "{}");
+  } catch {
+    return {};
+  }
+}
 
-  return streamSSE(c, async (stream) => {
+export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const path = (req.url || "").split("?")[0];
+  res.setHeader("access-control-allow-origin", (req.headers.origin as string) || "*");
+  res.setHeader("access-control-allow-methods", "GET, POST, OPTIONS");
+  res.setHeader("access-control-allow-headers", "content-type, accept");
+
+  if (req.method === "OPTIONS") {
+    res.statusCode = 204;
+    return void res.end();
+  }
+
+  if (path.endsWith("/api/config/public")) {
+    res.setHeader("content-type", "application/json; charset=utf-8");
+    return void res.end(publicConfig);
+  }
+
+  if (path.endsWith("/api/chat") && req.method === "POST") {
+    const parsed = ChatRequestSchema.safeParse(await readBody(req));
+    if (!parsed.success) {
+      res.statusCode = 400;
+      res.setHeader("content-type", "application/json");
+      return void res.end(JSON.stringify({ error: "invalid_request" }));
+    }
+    let sse: string;
     try {
       const { response } = await orchestrator.handle(parsed.data);
-      for (const w of response.answer.split(/(\s+)/)) {
-        await stream.writeSSE({ event: "delta", data: w });
-      }
-      await stream.writeSSE({ event: "payload", data: JSON.stringify(response) });
-    } catch (err) {
-      await stream.writeSSE({ event: "error", data: "upstream_error" });
+      sse = sseEvent("delta", response.answer) + sseEvent("payload", JSON.stringify(response));
+    } catch {
+      sse = sseEvent("error", "upstream_error");
     }
-  });
-});
+    res.setHeader("content-type", "text/event-stream; charset=utf-8");
+    res.setHeader("cache-control", "no-cache");
+    return void res.end(sse);
+  }
 
-const vercelHandler = handle(app);
-export default vercelHandler;
-export const GET = vercelHandler;
-export const POST = vercelHandler;
-export const OPTIONS = vercelHandler;
+  if (path.endsWith("/healthz")) {
+    res.setHeader("content-type", "application/json");
+    return void res.end(JSON.stringify({ ok: true, owner: config.owner.name }));
+  }
+
+  res.statusCode = 404;
+  res.setHeader("content-type", "application/json");
+  res.end(JSON.stringify({ error: "not_found" }));
+}
