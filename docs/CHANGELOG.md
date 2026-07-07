@@ -13,6 +13,31 @@ All notable changes to Kenalin. Format loosely follows Keep a Changelog.
 
 _Nothing yet._
 
+## [0.4.0] — 2026-07-07
+
+SPRINT-007 (portfolio polish round 2) — eight fixes from live inspection. `pnpm verify`
+green (120 tests); eval 49/49 (100%, safety 100%).
+
+### Added
+- **Evidence de-dup (TASK-017)**: `dedupeByProject` collapses localized/duplicate
+  variants of one project to a single card, preferring the conversation language. Also
+  fixes an id collision — markdown ingest gave same-named files in different locale dirs
+  the same `md:basename` id; ids are now path-relative and `projectId` derives from `slug`.
+- **Built-in brand marks**: `branding.marks {launcher, header}` picks `logo|chat|robot`
+  (IconChat/IconRobot) with no hosted assets — an AI chat/robot identity via config.
+- **Fullscreen toggle** in the panel header (desktop); **Home** relocated from the header
+  to a conversation chip (keeps history).
+- **Host theme sync**: the widget mirrors the host `<html>` `dark` class / `data-theme`
+  onto its own `data-theme` (MutationObserver) + a `:host([data-theme=light])` block, so
+  the chat follows the site's light/dark toggle — not just `prefers-color-scheme`.
+
+### Changed
+- **Anti-repetition** prompt tightened: no repeating prior info, no re-summarizing the
+  owner's role/company across intents (grounding kept verbatim).
+- **Reference portfolio**: assistant name "Aldi's AI assistant" (RIZVA dropped from the
+  UI), chat launcher + robot avatar, mobile full-screen, re-ingested index (unique ids +
+  projectId). Owner owns the merge + deploy.
+
 ## [0.3.0] — 2026-07-07
 
 SPRINT-006 (portfolio UX + answer quality). Widget UX + answer-quality upgrade,

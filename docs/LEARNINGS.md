@@ -13,6 +13,32 @@ rule, or a skill red-flag — and marked below. Reviewed at every **Sprint Promo
 
 ---
 
+## L-012 [tags: widget, theming, integration] [status: active]: A Shadow-DOM widget in a themed host must OBSERVE the host's theme mechanism, not just prefers-color-scheme
+- seen: Sprint-007
+- count: 1
+- promoted: no
+- related: L-009 (both: the host's theme reality constrains the widget)
+
+The widget only reacted to `@media (prefers-color-scheme)`, so it ignored the portfolio's
+manual next-themes toggle (a `dark` class on `<html>`) — the chat stayed one mode while the
+site switched. Fix: a MutationObserver on `document.documentElement` mirrors the host's
+`dark` class / `data-theme` onto the widget host's `data-theme` (+ an explicit
+`:host([data-theme=light])` to beat the OS media query). When embedding a themed component,
+follow the host's theme signal, don't assume the OS preference is the source of truth.
+
+## L-011 [tags: ingest, correctness] [status: active]: A chunk id derived from the file basename collides across parallel dirs — use a path-relative id
+- seen: Sprint-007
+- count: 1
+- promoted: no
+- related: L-010 (both: an ingest bug invisible to unit tests, caught by inspecting real data)
+
+The markdown ingest used `md:${basename}` as the sourceId, so `content/en/x.mdx` and
+`content/id/x.mdx` produced the SAME chunk id — two distinct chunks sharing an id, which
+surfaced as duplicate evidence cards (and would corrupt any id-keyed logic). Unit tests
+passed (single-dir fixtures); only inspecting the live index revealed it. Fix: derive the id
+from the path relative to the ingest root. When an id is built from a name, prove it's unique
+across the whole corpus, not just one directory.
+
 ## L-010 [tags: ingest, verification] [status: active]: A built index goes stale after an ingest-logic change — re-ingest and re-verify the real index, not just the code
 - seen: Sprint-006
 - count: 1

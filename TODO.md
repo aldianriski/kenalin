@@ -17,9 +17,9 @@ status: current
 
 ## Active Sprint
 
-> **→ — none —** · **v0.3.0** (2026-07-07) — SPRINT-006 closed (portfolio UX + answer quality). SPRINT-001…006 archived → [`docs/sprint/archive/`](docs/sprint/archive/) · [`docs/sprint/INDEX.md`](docs/sprint/INDEX.md).
+> **→ — none —** · **v0.4.0** (2026-07-07) — SPRINT-007 closed (portfolio polish round 2). SPRINT-001…007 archived → [`docs/sprint/archive/`](docs/sprint/archive/) · [`docs/sprint/INDEX.md`](docs/sprint/INDEX.md).
 
-Status: `pnpm verify` green (**117 tests**) · eval matrix **12/15/12/10 = 49, 100% id+en** (re-ingested index) · widget 53 KB (budget 60). Portfolio changes committed on branch `sprint/portfolio-ux-answer-quality` (`4ef9334`) — **owner to merge + deploy** (TASK-041). Release close-out (TASK-032/033) still open. Detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
+Status: `pnpm verify` green (**120 tests**) · eval matrix **12/15/12/10 = 49, 100% id+en** (re-ingested index) · widget < 60 KB. Portfolio branch `sprint/portfolio-ux-answer-quality` now carries SPRINT-006 + 007 (`46860f8`) — **owner to merge + deploy** (TASK-041). Release close-out (TASK-032/033) still open. Detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
 ---
 
@@ -49,10 +49,11 @@ Status: `pnpm verify` green (**117 tests**) · eval matrix **12/15/12/10 = 49, 1
 - [ ] **TASK-014 — Real token streaming** [size: M] · src: claude — stream Gemini tokens for lower time-to-first-token vs the current word-by-word pseudo-stream. Resolves TD-003.
 - [ ] **TASK-015 — Analytics module (PRD B11)** [size: M] · src: claude — emit engagement/intent/conversion events via webhook/console, off by default, no PII.
 - [ ] **TASK-016 — Handoff brief enrichment** [size: S] · src: claude — capture the visitor's actual screening answers into the brief (values currently empty).
-- [ ] **TASK-017 — Evidence dedup by projectId** [size: S] · src: claude — id/en chunks of one project currently both surface as separate cards.
+- [x] **TASK-017 — Evidence dedup by projectId** — DONE (SPRINT-007): `dedupeByProject` (language-preferred) + fixed the underlying chunk-id collision (path-relative ids) + projectId-from-slug. Verified: one card per project.
 - [ ] **TASK-018 — Launcher unread badge** [size: S] · src: claude — minimize-to-badge with an unread count.
 - [ ] **TASK-029 — Chips-based `intention` capture (UX/latency A/B)** [size: M] · src: you — closed-form tappable `intention` chips (name/purpose stay LLM-handled), measured as a latency/completion experiment, NOT a cost lever. The only safe residue of the cut TASK-028 (per ADR-005). Needs the widget behavior harness (TD-009) to test.
 - [ ] **TASK-042 — Custom icon set for the portfolio** [size: S] · src: you · state: needs-info — the `branding.icons` mechanism shipped (SPRINT-006 T2) but no icons were supplied. done-when: owner provides hosted single-color SVG/PNG URLs (send, close, minimize, home, evidence, chart, quick:*, action:*); set `branding.icons` in the portfolio config + re-vendor if needed.
+- [ ] **TASK-044 — De-emphasize the owner's role in non-role intents** [size: S] · src: you · state: needs-info — a hiring turn still leads with "Aldi is the Founding CTO of TemiDev" (relevant, but the owner flagged it as repetitive). done-when: decide + (if wanted) tune the prompt so role-adjacent intents lead with the specific ask rather than restating the current title. Judgment call — the role IS relevant to hiring.
 - [ ] **TASK-043 — Per-mode widget theme tokens** [size: M] · src: claude · state: ready — resolves TD-012. done-when: `branding.theme` accepts light/dark values (or derives AA-safe mode variants from one brand color) so mode-sensitive tokens (accentText, bg, surface, text, border) can carry brand color without breaking either mode.
 
 ### P3 — Long-term (v0.4 — scale & extensibility)
