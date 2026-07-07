@@ -1,6 +1,17 @@
 import { defineKenalinConfig } from "@kenalin/core";
 
 /**
+ * A quick-action icon as a mask-friendly data-URI SVG (stroke shapes; the widget masks it
+ * and tints with the theme accent). Same 4 glyphs as the landing "Try it now" chips, so the
+ * widget cards and the page read as one set (SPRINT-010 T3 · D1: icons via config, not core).
+ */
+const qicon = (paths: string): string =>
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`,
+  );
+
+/**
  * Self-referential demo: the "owner" is Kenalin itself, so the assistant
  * introduces the product. Knowledge = docs about Kenalin; the responder answers
  * from them. Runs KEYLESS (hash retrieval + deterministic responder).
@@ -52,6 +63,17 @@ export default defineKenalinConfig({
       amber: "#D99A2B",
     },
     marks: { launcher: "chat", header: "robot" },
+    // Distinct quick-action glyphs (match the landing chips) — help · lightning · code · heart.
+    icons: {
+      "quick:what": qicon(
+        `<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.4v.3"/><path d="M12 17h.01"/>`,
+      ),
+      "quick:cando": qicon(`<path d="M13 2 3 14h7l-1 8 10-12h-7z"/>`),
+      "quick:embed": qicon(`<path d="m8 6-6 6 6 6"/><path d="m16 6 6 6-6 6"/>`),
+      "quick:oss": qicon(
+        `<path d="M12 20.3 4.2 12.5a4.6 4.6 0 0 1 6.5-6.5l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.5 6.5Z"/>`,
+      ),
+    },
   },
   server: {
     allowedOrigins: [],

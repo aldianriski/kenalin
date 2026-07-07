@@ -86,10 +86,13 @@ export class KenalinElement extends HTMLElement {
 
     let config: PublicConfig;
     try {
-      config = await new KenalinClient(apiUrl).fetchConfig(configUrl);
+      config = await fetchConfigWithRetry(new KenalinClient(apiUrl), configUrl);
     } catch (err) {
-      console.warn("[kenalin] failed to load config:", err);
-      return;
+      // Never vanish on a config-fetch failure (TD-016): mount a launcher from a safe
+      // fallback so the surface is always present. Opening it uses the standard error UX
+      // (the chat call will surface a retryable error if the server is still down).
+      console.warn("[kenalin] config unavailable — mounting fallback launcher:", err);
+      config = FALLBACK_CONFIG;
     }
 
     // Owner theme tokens (TASK-004) + per-mode overrides are applied by followHost()
@@ -122,6 +125,33 @@ export class KenalinElement extends HTMLElement {
       ),
       mount,
     );
+  }
+}
+
+/**
+ * Minimal, generic config so the launcher still mounts when `/api/config/public` is
+ * unreachable (TD-016). No owner-specific strings — the widget package stays generic.
+ */
+const FALLBACK_CONFIG: PublicConfig = {
+  assistant: {
+    name: "Assistant",
+    launcherLabel: "Chat",
+    languages: ["en"],
+    openingMessage: "Hi — I'm having trouble reaching the server right now. Please try again in a moment.",
+  },
+  owner: { name: "", role: "" },
+  modules: [],
+  quickActions: [],
+  channels: [],
+};
+
+/** Fetch the public config with one retry — a transient blip shouldn't degrade the widget (L-001). */
+async function fetchConfigWithRetry(client: KenalinClient, configUrl?: string): Promise<PublicConfig> {
+  try {
+    return await client.fetchConfig(configUrl);
+  } catch {
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    return client.fetchConfig(configUrl);
   }
 }
 
