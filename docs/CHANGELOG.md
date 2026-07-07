@@ -13,6 +13,16 @@ All notable changes to Kenalin. Format loosely follows Keep a Changelog.
 
 _Nothing yet._
 
+## [0.5.3] — 2026-07-07
+
+### Fixed
+- **Scroll-lock now covers the root scroller**: the modal lock only set `body` overflow,
+  but many hosts (and smooth-scroll libs like Lenis) scroll the `<html>` element — so the
+  page scrollbar and scroll stayed active behind a maximized chat. Now locks BOTH `<html>`
+  and `<body>` with `!important` (beats a host `.lenis`-style class) and removes the inline
+  override on unlock. Verified: maximized → `<html>` overflow hidden, scrollbar gone, page
+  scroll blocked; restore/close → reverts to the host's own overflow.
+
 ## [0.5.2] — 2026-07-07
 
 ### Fixed

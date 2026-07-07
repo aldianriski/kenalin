@@ -152,11 +152,17 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
       window.matchMedia("(max-width: 768px)").matches &&
       (config.branding?.position?.mobile ?? "fullscreen") !== "docked";
     if (!open || !(full || mobileFs)) return;
-    document.body.style.overflow = "hidden";
-    // Clear the inline override on unlock (revert to the page's own overflow) rather than
+    // Lock BOTH <html> and <body>: the host's scroller is often the root element (and
+    // smooth-scroll libs like Lenis put the scrollbar on <html>), so body-only doesn't
+    // hide the scrollbar or stop the scroll. `important` beats a host `.lenis`-style class.
+    const html = document.documentElement;
+    html.style.setProperty("overflow", "hidden", "important");
+    document.body.style.setProperty("overflow", "hidden", "important");
+    // Remove the inline override on unlock (revert to the page's own overflow) rather than
     // restoring a captured value — avoids getting stuck "hidden" if a prior lock polluted it.
     return () => {
-      document.body.style.overflow = "";
+      html.style.removeProperty("overflow");
+      document.body.style.removeProperty("overflow");
     };
   }, [open, full]);
 
