@@ -75,10 +75,10 @@ A copy-paste path proven from a **clean checkout**: scaffold → add key → `pn
 **Acceptance:** a fresh clone following only the Quickstart reaches a working chat turn in under 5 minutes; each command verified.
 
 **DoD:**
-- [ ] Quickstart uses the T1 scaffold path (`npx create-kenalin`) end to end
-- [ ] Each step (scaffold, key, ingest, run) run from a clean dir and confirmed working
-- [ ] Env/secret step names the real var (`KENALIN_LLM_API_KEY`) and the runtime source it's read from
-- [ ] Links to the config reference (T2) and integration guides (T4)
+- [x] Quickstart uses the T1 scaffold path (`npx create-kenalin`) end to end
+- [ ] Each step (scaffold, key, ingest, run) run from a clean dir and confirmed working — *(scaffold step verified via built-bin; install/ingest/run confirmed from a clean checkout is post-publish — same gate as T1)*
+- [x] Env/secret step names the real var (`KENALIN_LLM_API_KEY`) and the runtime source it's read from
+- [x] Links to the config reference (T2) and integration guides (T4)
 
 ### T4 — Integration guides: Next.js + plain HTML `[size: S · risk: low]`
 Layers: `examples/` (plain-html, custom-ui) + new guide docs; mirrors `apps/reference-aldi` for the Next.js path.
@@ -117,8 +117,8 @@ five seconds.
 **DoD:**
 - [ ] Hero GIF: launcher → chat → evidence cards → handoff (demo owner)
 - [ ] Screenshots: light + dark; mobile full-screen; code/product mode (green vs blue)
-- [ ] Badges: npm version (from T1), CI, bundle-size (<60 KB), license
-- [ ] Assets committed under `assets/`; README renders correctly on GitHub; no owner strings
+- [x] Badges: npm version (from T1), CI, bundle-size (<60 KB), license — *(added; bundle-size corrected to measured 18.7 KB gz)*
+- [ ] Assets committed under `assets/`; README renders correctly on GitHub; no owner strings — *(hero GIF + screenshots pending Chrome capture)*
 <!-- QA: capture GIF/screenshots via Chrome-MCP against the demo widget (L-004 pattern). -->
 
 ### T7 — Community / repo hygiene `[size: S · risk: low]`
@@ -156,6 +156,11 @@ The files that make a repo contributable and discoverable.
 
 ### 2026-07-07 | promote | Plan locked
 SPRINT-009 promoted from the TODO Backlog (OSS professionalization v0.6, full 7-task track). Governance review clean: no `count ≥ 2` learnings to promote; no `high`-severity tech debt to escalate (TD-002/003/004 flagged as ≥3-sprints-old but carried); TODO at 119 lines (under the soft cap). Tasks ordered by dependency (package → docs → demo → README → hygiene).
+
+### 2026-07-07 | T3 + T6(badges) | Quickstart + README wiring — 5d527b7
+`README.md`: create-kenalin Quickstart (T3) with a from-source fallback; npm + CI badges added and the stale widget-size badge corrected to the measured 18.7 KB gz; wired CONFIG.md, integration guides, ROADMAP, CONTRIBUTING. T3 dev-complete (full clean-checkout run is post-publish, same gate as T1).
+
+**Remaining cluster (interactive / owner-gated):** T5 deployable demo app + Deploy-to-Vercel button (deploy owner-gated on a Vercel project + demo Gemini key) and T6 hero GIF + screenshots (Chrome-MCP capture, owner-approved). Checkpointed here to give the browser session fresh context budget.
 
 ### 2026-07-07 | T4, T7 | Integration guides + repo hygiene — 06e68ff, ff2ccfe
 **T4** (`06e68ff`): `docs/integration/plain-html.md` (backed by the runnable `examples/plain-html`) + `docs/integration/nextjs.md` (mount `createApp` in an App Router catch-all route via `app.fetch`, widget in layout, mirroring the reference portfolio). Confirmed `loadConfig`/`createApp`/`buildAppDeps` are surfaced by the published packages. Next.js runtime proof is the reference portfolio (external); plain-HTML is locally runnable.
