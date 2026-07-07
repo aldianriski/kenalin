@@ -209,6 +209,10 @@ export const BrandingConfigSchema = z
     position: PositionConfigSchema.optional(),
     icons: IconOverridesSchema.optional(),
     marks: BrandMarksSchema.optional(),
+    /** Per-mode theme overrides keyed by the host's `data-mode` value (TASK — round 3).
+     *  The widget observes `data-mode` on the host and applies `theme` + `modes[mode]`,
+     *  so a host with a "code"/"product" persona toggle recolors the widget to match. */
+    modes: z.record(z.string(), ThemeTokensSchema).optional(),
   })
   .strict();
 export type BrandingConfig = z.infer<typeof BrandingConfigSchema>;

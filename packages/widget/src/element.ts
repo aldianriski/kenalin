@@ -14,25 +14,45 @@ import type { PageContext, PublicConfig } from "./types.js";
 export class KenalinElement extends HTMLElement {
   private mounted = false;
   private themeObserver?: MutationObserver;
+  private branding?: PublicConfig["branding"];
+
+  /** Apply `theme` merged with `modes[<host data-mode>]` as `--kenalin-*` host vars.
+   *  Clears every token any mode could set first, so switching modes leaves no stale var. */
+  private applyTheme(): void {
+    const base = this.branding?.theme ?? {};
+    const modes = this.branding?.modes ?? {};
+    const mode = (typeof document !== "undefined" && document.documentElement.getAttribute("data-mode")) || "";
+    const merged = { ...base, ...(modes[mode] ?? {}) };
+    const all: Record<string, string> = { ...base };
+    for (const m of Object.values(modes)) Object.assign(all, m);
+    for (const [name] of themeCssVars(all)) this.style.removeProperty(name);
+    for (const [name, value] of themeCssVars(merged)) this.style.setProperty(name, value);
+  }
 
   /**
-   * Mirror the host page's light/dark theme onto this element's `data-theme` so the
-   * Shadow-DOM `:host([data-theme])` styles switch with the host's toggle — not just
-   * the OS `prefers-color-scheme`. Supports the Tailwind/next-themes `dark` class on
-   * <html> and a `data-theme` attribute.
+   * Follow the host page's theme + persona mode. Mirrors the light/dark signal (the
+   * Tailwind/next-themes `dark` class or a `data-theme` attribute) onto this element's
+   * `data-theme`, and re-applies the mode theme when the host's `data-mode` changes —
+   * so a "code"/"product" persona toggle recolors the widget.
    */
-  private followHostTheme(): void {
+  private followHost(): void {
     if (typeof document === "undefined") return;
     const root = document.documentElement;
-    const resolve = (): "dark" | "light" => {
+    const resolveTheme = (): "dark" | "light" => {
       const attr = root.getAttribute("data-theme");
       if (attr === "dark" || attr === "light") return attr;
       return root.classList.contains("dark") ? "dark" : "light";
     };
-    const apply = (): void => this.setAttribute("data-theme", resolve());
+    const apply = (): void => {
+      this.setAttribute("data-theme", resolveTheme());
+      this.applyTheme();
+    };
     apply();
     this.themeObserver = new MutationObserver(apply);
-    this.themeObserver.observe(root, { attributes: true, attributeFilter: ["class", "data-theme"] });
+    this.themeObserver.observe(root, {
+      attributes: true,
+      attributeFilter: ["class", "data-theme", "data-mode"],
+    });
   }
 
   disconnectedCallback(): void {
@@ -72,11 +92,9 @@ export class KenalinElement extends HTMLElement {
       return;
     }
 
-    // Apply owner theme tokens (TASK-004) as `--kenalin-*` overrides on the host,
-    // which `:host` in the Shadow-DOM styles resolves. Unset tokens keep defaults.
-    for (const [name, value] of themeCssVars(config.branding?.theme)) {
-      this.style.setProperty(name, value);
-    }
+    // Owner theme tokens (TASK-004) + per-mode overrides are applied by followHost()
+    // below (merged for the current host data-mode), and re-applied on theme/mode change.
+    this.branding = config.branding;
 
     // Apply widget placement (TASK-034): offsets/z-index as CSS vars; corner + mobile
     // mode as host attributes the `:host([data-*])` selectors read. safe-area insets are
@@ -88,7 +106,7 @@ export class KenalinElement extends HTMLElement {
     this.setAttribute("data-corner", position?.corner ?? "bottom-right");
     this.setAttribute("data-mobile", position?.mobile ?? "fullscreen");
     ensureViewportFitCover();
-    this.followHostTheme();
+    this.followHost();
 
     render(
       h(

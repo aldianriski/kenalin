@@ -36,6 +36,8 @@ export interface PublicConfig {
     icons?: Record<string, string>;
     /** Built-in mark selection for launcher/header (logo|chat|robot). */
     marks?: { launcher?: "logo" | "chat" | "robot"; header?: "logo" | "chat" | "robot" };
+    /** Per-mode theme overrides keyed by the host's data-mode value. */
+    modes?: Record<string, Record<string, string>>;
   };
 }
 
@@ -71,6 +73,7 @@ export function toPublicConfig(config: KenalinConfig): PublicConfig {
             position: config.branding.position,
             icons: config.branding.icons,
             marks: config.branding.marks,
+            modes: config.branding.modes as Record<string, Record<string, string>> | undefined,
           },
         }
       : {}),

@@ -234,17 +234,20 @@ export function IconHome({ size = 18 }: IconProps): JSX.Element {
     </svg>
   );
 }
-export function IconExpand({ size = 18 }: IconProps): JSX.Element {
+/** Maximize — a square, like a browser window control. */
+export function IconExpand({ size = 16 }: IconProps): JSX.Element {
   return (
     <svg {...base(size)}>
-      <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5" />
+      <rect x="5" y="5" width="14" height="14" rx="1.5" />
     </svg>
   );
 }
-export function IconCollapse({ size = 18 }: IconProps): JSX.Element {
+/** Restore — two offset squares, like a browser "restore down" control. */
+export function IconCollapse({ size = 16 }: IconProps): JSX.Element {
   return (
     <svg {...base(size)}>
-      <path d="M3 8h5V3M21 8h-5V3M3 16h5v5M21 16h-5v5" />
+      <rect x="8" y="8" width="11" height="11" rx="1.5" />
+      <path d="M5 15V6a1 1 0 0 1 1-1h9" />
     </svg>
   );
 }

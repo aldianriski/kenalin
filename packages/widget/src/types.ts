@@ -38,6 +38,7 @@ export interface PublicConfig {
     };
     icons?: Record<string, string>;
     marks?: { launcher?: "logo" | "chat" | "robot"; header?: "logo" | "chat" | "robot" };
+    modes?: Record<string, Record<string, string>>;
   };
 }
 
