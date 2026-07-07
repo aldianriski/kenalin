@@ -137,7 +137,7 @@ The files that make a repo contributable and discoverable.
 - [ ] GitHub: set the repo description + topics (repo-admin only) — T7
 
 ## Decisions (pre-locked)
-- **D1** — Adopters consume published `@kenalin/*` packages; the portfolio migrates off the vendored bundle (resolves TD-004). Trade-off: adds a semver/release step vs. copy-vendoring. **→ ADR candidate** (public package name + semver contract is hard-to-reverse) — offer at execution if it proves surprising.
+- **D1** — Adopters consume published `@kenalin/*` packages; the portfolio migrates off the vendored bundle (resolves TD-004). Trade-off: adds a semver/release step vs. copy-vendoring. **→ [ADR-006](../adr/ADR-006-publish-packages-over-vendoring.md)** (accepted 2026-07-07).
 - **D2** — The config reference is generated from / drift-checked against the Zod schema, never hand-authored — consistent with the project's "Zod is the single source of truth" rule.
 - **D3** — Every showcase, demo, example, and guide uses the **demo** owner only; the CI owner-string grep gate stays green (no "Aldi"/"TemiDev"/personal URLs in `packages/*` or the OSS surface).
 
@@ -151,6 +151,9 @@ The files that make a repo contributable and discoverable.
 
 ### 2026-07-07 | promote | Plan locked
 SPRINT-009 promoted from the TODO Backlog (OSS professionalization v0.6, full 7-task track). Governance review clean: no `count ≥ 2` learnings to promote; no `high`-severity tech debt to escalate (TD-002/003/004 flagged as ≥3-sprints-old but carried); TODO at 119 lines (under the soft cap). Tasks ordered by dependency (package → docs → demo → README → hygiene).
+
+### 2026-07-07 | G1+G2 | Batch gates signed off
+Recon (two `Explore` agents) established: packages already `@kenalin/*`/0.5.3/non-private with `files:["dist"]`; publish blockers are mechanical (`workspace:*` refs, no `publishConfig.access:public`, widget missing `types`/`exports`, no `sideEffects`). `create-kenalin` + config-doc generator are greenfield; no `zod-to-json-schema` dep (schema at `packages/core/src/config/schema.ts`, defaults inline via `.default()`). Three owner-gated halts confirmed: real `npm publish`, Vercel demo deploy, GitHub description/topics. **Decisions:** T1 (L) split → T1a prep / T1b scaffold; config generator = custom schema-walker (no new dep) + drift-check on the field set; README single-owner = T6 (serial edit order T3→T5→T7→T6); T6 assets captured live via Chrome-MCP; D1 recorded as ADR-006. Approach: take all 7 to dev-complete, halt at each owner gate.
 
 ## Files Changed
 <!-- Filled during execution; feeds CHANGELOG at close. -->

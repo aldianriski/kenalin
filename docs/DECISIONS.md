@@ -1,6 +1,6 @@
 ---
 owner: Tech Lead
-last_updated: 2026-07-06
+last_updated: 2026-07-07
 update_trigger: A new ADR is added under docs/adr/
 status: current
 ---
@@ -13,6 +13,7 @@ content here.
 
 | ADR | Title | Status | Date |
 |---|---|---|---|
+| [ADR-006](adr/ADR-006-publish-packages-over-vendoring.md) | Publish `@kenalin/*` to npm instead of vendoring built bundles | accepted | 2026-07-07 |
 | [ADR-005](adr/ADR-005-no-deterministic-freetext-intake.md) | Reject deterministic free-text intake; keep intake in the single LLM pass | accepted | 2026-07-06 |
 | [ADR-004](adr/ADR-004-stateless-no-db-default.md) | Stateless server, client-held session, no-DB default | accepted | 2026-07-06 |
 | [ADR-003](adr/ADR-003-gemini-sole-mvp-provider.md) | Gemini as the sole shipped provider for the MVP | accepted | 2026-07-06 |
