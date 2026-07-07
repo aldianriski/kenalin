@@ -115,10 +115,10 @@ five seconds.
 **Acceptance:** the README opens with a hero GIF + screenshots and a badge row; assets are committed and render on GitHub.
 
 **DoD:**
-- [ ] Hero GIF: launcher → chat → evidence cards → handoff (demo owner)
-- [ ] Screenshots: light + dark; mobile full-screen; code/product mode (green vs blue)
+- [ ] Hero GIF: launcher → chat → evidence cards → handoff (demo owner) — **owner-action: human-timed capture** (headless CDP freezes on the SSE stream — L-014; runbook at `assets/CAPTURE.md`)
+- [ ] Screenshots: light + dark; mobile full-screen; code/product mode (green vs blue) — *(light + dark verified live against the demo widget; not committable this session — `save_to_disk` didn't land in a reachable path; mobile needs device emulation; code/product is portfolio-specific, out of the demo)* → **owner-action** per `assets/CAPTURE.md`
 - [x] Badges: npm version (from T1), CI, bundle-size (<60 KB), license — *(added; bundle-size corrected to measured 18.7 KB gz)*
-- [ ] Assets committed under `assets/`; README renders correctly on GitHub; no owner strings — *(hero GIF + screenshots pending Chrome capture)*
+- [ ] Assets committed under `assets/`; README renders correctly on GitHub; no owner strings — *(README renders with the existing logo hero; demo GIF/screenshots are the owner-action above)*
 <!-- QA: capture GIF/screenshots via Chrome-MCP against the demo widget (L-004 pattern). -->
 
 ### T7 — Community / repo hygiene `[size: S · risk: low]`
@@ -140,6 +140,7 @@ The files that make a repo contributable and discoverable.
 - [ ] Vercel: a project + a demo Gemini key for the hosted demo — blocks T5 deploy
 - [ ] GitHub: set the repo description + topics (repo-admin only) — T7
 - [ ] Set the CoC maintainer contact in `CODE_OF_CONDUCT.md` — T7
+- [ ] Capture + commit the demo hero GIF + light/dark/mobile screenshots to `assets/img/` (human-timed) — T6, runbook: `assets/CAPTURE.md`
 
 ## Decisions (pre-locked)
 - **D1** — Adopters consume published `@kenalin/*` packages; the portfolio migrates off the vendored bundle (resolves TD-004). Trade-off: adds a semver/release step vs. copy-vendoring. **→ [ADR-006](../adr/ADR-006-publish-packages-over-vendoring.md)** (accepted 2026-07-07).
@@ -156,6 +157,9 @@ The files that make a repo contributable and discoverable.
 
 ### 2026-07-07 | promote | Plan locked
 SPRINT-009 promoted from the TODO Backlog (OSS professionalization v0.6, full 7-task track). Governance review clean: no `count ≥ 2` learnings to promote; no `high`-severity tech debt to escalate (TD-002/003/004 flagged as ≥3-sprints-old but carried); TODO at 119 lines (under the soft cap). Tasks ordered by dependency (package → docs → demo → README → hygiene).
+
+### 2026-07-07 | T6(assets) | Live demo verified; capture blocked headless → runbook + L-014
+Drove the demo widget live via Chrome-MCP (demo API :8787 + static :5173, both from the demo owner). **Verified working:** widget mounts, opening message + 4 quick-action cards render, light theme, and **dark theme correctly follows the host `data-theme`** (L-012/L-013) — captured both visually. **Blocked:** the hero GIF + a live "answer + evidence" shot repeatedly froze the renderer (SSE word-by-word pseudo-stream, TD-003 → 30–45s CDP timeouts); mobile-fullscreen needs device emulation the tool doesn't expose; and `save_to_disk` captures didn't land in a shell-reachable path, so none are committable. Filed **L-014**, wrote `assets/CAPTURE.md` (human-timed runbook), moved GIF+screenshots to owner-action. README keeps its existing logo hero (renders fine).
 
 ### 2026-07-07 | T3 + T6(badges) | Quickstart + README wiring — 5d527b7
 `README.md`: create-kenalin Quickstart (T3) with a from-source fallback; npm + CI badges added and the stale widget-size badge corrected to the measured 18.7 KB gz; wired CONFIG.md, integration guides, ROADMAP, CONTRIBUTING. T3 dev-complete (full clean-checkout run is post-publish, same gate as T1).
@@ -191,6 +195,8 @@ Recon (two `Explore` agents) established: packages already `@kenalin/*`/0.5.3/no
 | `scripts/check-config-doc.mjs` + `package.json` | T2 | schema→doc drift gate wired into verify | Low | verify green |
 | `docs/integration/{plain-html,nextjs}.md` | T4 | two embed guides (published packages) | Low | plain-html backed by example |
 | `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `ROADMAP.md`, `.github/**` | T7 | community + hygiene | Low | links resolve |
+| `README.md` | T3/T6 | Quickstart + npm/CI/size badges + doc links | Low | rendered |
+| `assets/CAPTURE.md` + `docs/LEARNINGS.md` (L-014) | T6 | demo-asset runbook + capture finding | Low | n/a |
 
 ## Retro
 <!-- Written at close. Route buckets per DOCS_Guide §10. -->

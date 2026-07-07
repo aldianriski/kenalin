@@ -13,6 +13,23 @@ rule, or a skill red-flag — and marked below. Reviewed at every **Sprint Promo
 
 ---
 
+## L-014 [tags: widget, verification, capture] [status: active]: The widget's word-by-word SSE pseudo-stream freezes headless CDP capture — human-time the demo assets
+- seen: Sprint-009
+- count: 1
+- promoted: no
+- related: L-004 (both: capturing/verifying the widget via the real browser has environment limits), TD-003 (real streaming would fix this)
+
+Capturing the T6 demo hero GIF + a live "answer + evidence" screenshot via Chrome-MCP
+automation failed repeatedly: the answer is a word-by-word SSE pseudo-stream (TD-003,
+`for (const w of words) await stream.writeSSE(...)` rendered through Preact) that pins the
+renderer long enough to time out `Page.captureScreenshot` / `Runtime.evaluate` (30–45s). The
+open-panel *settled* state IS capturable (open via JS → plain `wait` with no pending CDP call →
+screenshot), but any active turn re-freezes it; mobile-fullscreen needs device-metric emulation
+the browser tool doesn't expose; and `save_to_disk` screenshots didn't land in a shell-reachable
+path. Lesson: demo/marketing assets that involve the streaming widget must be **human-timed**
+(record, then interact) — script the servers (see `assets/CAPTURE.md`), not the capture. Resolving
+TD-003 (real token streaming) would also make this automatable.
+
 ## L-013 [tags: widget, integration] [status: active]: A Shadow-DOM widget can follow ANY host persona/mode signal by observing a data-* attribute on <html>
 - seen: Sprint-008
 - count: 1
