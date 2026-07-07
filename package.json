@@ -1,6 +1,6 @@
 {
   "name": "kenalin-monorepo",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "private": true,
   "description": "Kenalin — open-source, embeddable AI introduction layer for portfolio and professional websites.",
   "license": "MIT",

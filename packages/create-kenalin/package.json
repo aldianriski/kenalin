@@ -1,39 +1,30 @@
 {
-  "name": "@kenalin/core",
+  "name": "create-kenalin",
   "version": "0.6.0",
-  "description": "Kenalin core — pure TS schemas, config, orchestration, policies and interfaces. Zero I/O.",
+  "description": "Scaffold a new Kenalin project — the embeddable AI introduction layer for portfolio sites.",
   "license": "MIT",
   "type": "module",
-  "sideEffects": false,
+  "bin": {
+    "create-kenalin": "./dist/index.js"
+  },
   "homepage": "https://github.com/aldianriski/kenalin#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aldianriski/kenalin.git",
-    "directory": "packages/core"
+    "directory": "packages/create-kenalin"
   },
   "bugs": "https://github.com/aldianriski/kenalin/issues",
   "keywords": [
     "kenalin",
+    "create",
+    "scaffold",
+    "cli",
     "ai",
-    "assistant",
-    "portfolio",
-    "chatbot",
-    "rag",
-    "typescript",
-    "zod"
+    "assistant"
   ],
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./package.json": "./package.json"
-  },
   "files": [
     "dist",
+    "templates",
     "README.md"
   ],
   "publishConfig": {
@@ -44,10 +35,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
-  "dependencies": {
-    "zod": "^3.24.1"
-  },
   "devDependencies": {
+    "@types/node": "^22.10.0",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"

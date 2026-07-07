@@ -1,6 +1,6 @@
 {
   "name": "@kenalin/server",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "Kenalin server — Hono API, Gemini provider, local knowledge index, ingest CLI. The only package with I/O.",
   "license": "MIT",
   "type": "module",

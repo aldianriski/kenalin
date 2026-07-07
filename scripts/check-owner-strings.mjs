@@ -13,7 +13,12 @@ const FORBIDDEN = [
   // runs don't false-positive).
   { label: "phone number", re: /\+\d[\d\s().-]{7,}\d/ },
 ];
-const ROOTS = ["packages/core/src", "packages/server/src", "packages/widget/src"];
+const ROOTS = [
+  "packages/core/src",
+  "packages/server/src",
+  "packages/widget/src",
+  "packages/create-kenalin/src",
+];
 const CODE_EXT = new Set([".ts", ".tsx", ".js", ".mjs"]);
 
 function* walk(dir) {

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{projectName}} — powered by Kenalin</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        max-width: 42rem;
+        margin: 4rem auto;
+        padding: 0 1.25rem;
+        line-height: 1.6;
+        color: #1a1a2e;
+      }
+      code {
+        background: #f2f2f7;
+        padding: 0.1rem 0.35rem;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>{{projectName}}</h1>
+    <p>
+      Your Kenalin assistant is live. Click the launcher in the corner to chat —
+      it answers grounded in the content you ingested from <code>content/</code>.
+    </p>
+    <p>Edit <code>kenalin.config.ts</code> and your <code>content/</code> files, then re-run <code>npm run ingest</code>.</p>
+
+    <!-- The widget loads from the published package via a CDN and talks to the
+         API on this same origin. To pin a version, add @&lt;version&gt; to the URL. -->
+    <script
+      src="https://unpkg.com/@kenalin/widget/dist/kenalin.js"
+      data-api-url="http://localhost:8787"
+      defer
+    ></script>
+  </body>
+</html>

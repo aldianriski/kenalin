@@ -1,0 +1,15 @@
+{
+  "name": "{{projectName}}",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "ingest": "kenalin ingest --config kenalin.config.ts --root .",
+    "dev": "node server.mjs"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "@kenalin/server": "^0.6.0",
+    "@kenalin/widget": "^0.6.0"
+  }
+}
