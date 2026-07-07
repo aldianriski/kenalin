@@ -47,7 +47,7 @@ already existed — the L-003 anti-pattern). Fix: bump Node to 22 **and** reorde
 - [x] `ci.yml` + `eval.yml` pin `node-version: 22`
 - [x] `verify` reorders `pnpm build` before `pnpm -r run typecheck`
 - [x] `pnpm verify` green locally **from a clean `dist/`** (removed all `packages/*/dist`, re-ran → exit 0)
-- [ ] pushed; CI run for the PR is green
+- [x] pushed; **CI green on PR #1** (`✓ verify in 30s`, run 28870050184)
 
 ### T2 — Widget resilience: never silently vanish `[size: S · risk: med]`
 Layers: `packages/widget/src/element.ts` (+ a safe-default config)
