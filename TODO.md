@@ -17,9 +17,9 @@ status: current
 
 ## Active Sprint
 
-> **→ — none —** · **v0.4.0** (2026-07-07) — SPRINT-007 closed (portfolio polish round 2). SPRINT-001…007 archived → [`docs/sprint/archive/`](docs/sprint/archive/) · [`docs/sprint/INDEX.md`](docs/sprint/INDEX.md).
+> **→ — none —** · **v0.5.0** (2026-07-07) — SPRINT-008 closed (portfolio polish round 3). SPRINT-001…008 archived → [`docs/sprint/archive/`](docs/sprint/archive/) · [`docs/sprint/INDEX.md`](docs/sprint/INDEX.md).
 
-Status: `pnpm verify` green (**120 tests**) · eval matrix **12/15/12/10 = 49, 100% id+en** (re-ingested index) · widget < 60 KB. Portfolio branch `sprint/portfolio-ux-answer-quality` now carries SPRINT-006 + 007 (`46860f8`) — **owner to merge + deploy** (TASK-041). Release close-out (TASK-032/033) still open. Detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
+Status: `pnpm verify` green (**120 tests**) · eval matrix **12/15/12/10 = 49, 100% id+en** · widget < 60 KB. Portfolio branch `sprint/portfolio-ux-answer-quality` now carries SPRINT-006+007+008 (`e761dc5`) — **owner to merge + deploy** (TASK-041). Release close-out (TASK-032/033) still open. Detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
 ---
 

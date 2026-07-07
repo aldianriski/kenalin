@@ -13,6 +13,25 @@ All notable changes to Kenalin. Format loosely follows Keep a Changelog.
 
 _Nothing yet._
 
+## [0.5.0] — 2026-07-07
+
+SPRINT-008 (portfolio polish round 3). `pnpm verify` green (120 tests).
+
+### Added
+- **Persona-mode theming**: `branding.modes` — per-mode theme overrides keyed by the
+  host's `data-mode`. The widget observes `<html data-mode>` and applies `theme +
+  modes[mode]`, so a host with a code/product persona toggle recolors the widget (the
+  reference portfolio turns forest-green in code mode). Same observer as the light/dark
+  theme sync (one MutationObserver drives both).
+
+### Changed / Fixed
+- **Mobile full-screen** breakpoint raised 480→768px so the panel goes full-screen across
+  all phone widths where a host bottom-dock shows.
+- **Fullscreen** (`.panel.full`) now covers the whole viewport (`inset:0; 100vw; 100dvh`).
+- **Chrome-style window controls** — maximize = square, restore = offset squares.
+- **Launcher alignment** — `position.offsetY` / `offsetYMobile` let a deployment align the
+  launcher to the host's dock level (portfolio: 32px desktop / 14px mobile).
+
 ## [0.4.0] — 2026-07-07
 
 SPRINT-007 (portfolio polish round 2) — eight fixes from live inspection. `pnpm verify`

@@ -13,6 +13,19 @@ rule, or a skill red-flag — and marked below. Reviewed at every **Sprint Promo
 
 ---
 
+## L-013 [tags: widget, integration] [status: active]: A Shadow-DOM widget can follow ANY host persona/mode signal by observing a data-* attribute on <html>
+- seen: Sprint-008
+- count: 1
+- promoted: no
+- related: L-012 (same observer pattern, generalized from theme to persona)
+
+The portfolio has a code/product persona toggle (Zustand) that reflects to
+`document.documentElement.setAttribute('data-mode', …)`. The widget follows it the same
+way it follows dark/light: one MutationObserver on `<html>` watches `class`/`data-theme`/
+`data-mode` and re-applies a merged theme (`branding.theme + branding.modes[mode]`). Lesson:
+expose per-signal overrides in config (`branding.modes`) and observe the host's `data-*`
+signal — don't hard-code the host's persona names or colors into the widget package.
+
 ## L-012 [tags: widget, theming, integration] [status: active]: A Shadow-DOM widget in a themed host must OBSERVE the host's theme mechanism, not just prefers-color-scheme
 - seen: Sprint-007
 - count: 1

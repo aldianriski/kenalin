@@ -9,6 +9,7 @@ status: current
 
 Closed sprints, newest first. The active sprint (if any) is pointed to from `TODO.md § Active Sprint`.
 
+- [SPRINT-008](archive/SPRINT-008-portfolio-polish-round-3.md) — portfolio polish round 3 (persona-mode recolor: code=green/product=blue via `branding.modes` + `<html data-mode>`; mobile full-screen breakpoint 768; full-viewport maximize; Chrome-style controls; launcher aligned to the dock) — closed 2026-07-07 · v0.5.0
 - [SPRINT-007](archive/SPRINT-007-portfolio-polish-round-2.md) — portfolio polish round 2 (evidence de-dup + chunk-id collision fix, chat/robot brand marks, fullscreen toggle + Home chip, host light/dark theme sync, RIZVA→"Aldi's AI assistant", mobile full-screen) — closed 2026-07-07 · v0.4.0
 - [SPRINT-006](archive/SPRINT-006-portfolio-ux-answer-quality.md) — portfolio UX + answer quality (configurable position/safe-area + offsetYMobile, swappable icons, anti-repetition bio de-bias, "more" link off homepage, MDX type mapping, Home button, sessionStorage persistence, idle auto-close; applied + smoked in the portfolio) — closed 2026-07-07 · v0.3.0
 - [SPRINT-005](archive/SPRINT-005-cut-cost-to-scale.md) — cut cost to scale (production cost fix re-vendored: thinking-off + cache, ~31→~11 IDR/turn; context-trim + lite-swap evaluated not-viable) — closed 2026-07-07
