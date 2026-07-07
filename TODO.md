@@ -17,7 +17,9 @@ status: current
 
 ## Active Sprint
 
-> **→ — none —** · **v0.2.0 RELEASED** (2026-07-07) — pushed to GitHub (`main` + tag `v0.2.0`). SPRINT-001…005 all closed. Archives: [`docs/sprint/archive/`](docs/sprint/archive/) · [`docs/sprint/INDEX.md`](docs/sprint/INDEX.md).
+> **→ SPRINT-006 — Portfolio UX + answer quality** → [`docs/sprint/SPRINT-006-portfolio-ux-answer-quality.md`](docs/sprint/SPRINT-006-portfolio-ux-answer-quality.md) · promoted 2026-07-07. Full plan + DoD live in the sprint file.
+>
+> Context: **v0.2.0 RELEASED** (2026-07-07) — `main` + tag `v0.2.0` on GitHub. SPRINT-001…005 closed → [`docs/sprint/archive/`](docs/sprint/archive/) · [`docs/sprint/INDEX.md`](docs/sprint/INDEX.md). Release close-out (TASK-032/033) remains open in Backlog P0.
 
 Status: `pnpm verify` green (**102 tests**) · eval matrix **12/15/12/10 = 49, 100% id+en** · **cost/turn ~11 IDR** (thinking off + response cache). **Reference portfolio integration merged to `main` + pushed** (aldianrizki/portofolio); Next build verified; **production Vercel deploy owner-confirmed** — live `/api/chat` smoke still to confirm (TASK-032). Detail → [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
@@ -33,6 +35,18 @@ Status: `pnpm verify` green (**102 tests**) · eval matrix **12/15/12/10 = 49, 1
 - [ ] **TASK-033 — Add Upstash REST env to the portfolio (cross-instance cache/limiter)** [size: S] · src: claude · state: ready
       done-when: `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` set in the portfolio Vercel env (only `REDIS_URL` is set today → cache + rate-limiter run in-memory per-instance). Resolves TD-010.
 
+### P1 — Portfolio UX + answer quality → **promoted to SPRINT-006** (2026-07-07)
+
+> Full plan + DoD in [`docs/sprint/SPRINT-006-portfolio-ux-answer-quality.md`](docs/sprint/SPRINT-006-portfolio-ux-answer-quality.md). Tombstones below — deleted at sprint close (§11).
+
+- [ ] TASK-034 — Configurable widget position + safe-area → promoted SPRINT-006 (T1)
+- [ ] TASK-035 — Swappable icon set (URL + CSS-mask tint) → promoted SPRINT-006 (T2)
+- [ ] TASK-037 — Anti-repetition + de-bias profile bio → promoted SPRINT-006 (T3)
+- [ ] TASK-038 — Repoint profile "more" link off homepage → promoted SPRINT-006 (T4)
+- [ ] TASK-039 — MDX frontmatter type/url mapping + re-ingest (resolves TD-011) → promoted SPRINT-006 (T5)
+- [ ] TASK-036 — Header "Home" button (keep history) → promoted SPRINT-006 (T6)
+- [ ] TASK-040 — Apply to portfolio repo + verify + commit → promoted SPRINT-006 (T9)
+
 ### P1 — Next Phase (v0.2 — launch polish)
 
 - [ ] **TASK-026 — Explicit Gemini context caching** [size: M] · src: claude · state: deferred — evaluated in SPRINT-004 (spike: works, ~3%/turn, net-marginal at low traffic). done-when: revisited at sustained >5 turns/hr where the storage economics flip positive.
@@ -43,8 +57,8 @@ Status: `pnpm verify` green (**102 tests**) · eval matrix **12/15/12/10 = 49, 1
 - [ ] **TASK-009 — Lazy-loading skeleton placeholders** [size: S] · src: you — initial open, config fetch, evidence cards show skeletons.
 - [ ] **TASK-010 — Premium micro-animations** [size: S] · src: you — message enter/stagger, typing, evidence reveal; respect `prefers-reduced-motion`.
 - [ ] **TASK-011 — Sound notification** [size: S] · src: you — subtle chime on new assistant message; opt-in, muted by default.
-- [ ] **TASK-012 — Idle detection** [size: M] · src: you — inactivity timer → gentle "still there?" nudge or auto-minimize; session timeout.
-- [ ] **TASK-013 — Conversation persistence** [size: S] · src: claude — localStorage resume so a refresh keeps the chat.
+- [ ] TASK-012 — Idle detection + auto-close → promoted SPRINT-006 (T8)
+- [ ] TASK-013 — Conversation persistence (sessionStorage) → promoted SPRINT-006 (T7)
 - [ ] **TASK-014 — Real token streaming** [size: M] · src: claude — stream Gemini tokens for lower time-to-first-token vs the current word-by-word pseudo-stream. Resolves TD-003.
 - [ ] **TASK-015 — Analytics module (PRD B11)** [size: M] · src: claude — emit engagement/intent/conversion events via webhook/console, off by default, no PII.
 - [ ] **TASK-016 — Handoff brief enrichment** [size: S] · src: claude — capture the visitor's actual screening answers into the brief (values currently empty).
