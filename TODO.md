@@ -19,7 +19,7 @@ status: current
 
 > **SPRINT-009 — OSS professionalization (v0.6)** → [`docs/sprint/SPRINT-009-oss-professionalization.md`](docs/sprint/SPRINT-009-oss-professionalization.md) · promoted 2026-07-07. Full 7-task track (TASK-045, 022, 046, 047, 048, 049, 050). SPRINT-001…008 archived → [`docs/sprint/archive/`](docs/sprint/archive/) · [`docs/sprint/INDEX.md`](docs/sprint/INDEX.md).
 
-Status: `pnpm verify` green (**126 tests** + owner-string & config-doc gates) · eval matrix **49, 100% id+en** · widget 18.7 KB gz · v0.6.0 (unpublished). **SPRINT-009 dev-complete:** T2/T4/T7 done; T1 (publish-prep + `create-kenalin`) + T3 (Quickstart) dev-complete; T6 badges/wiring done. **Owner-gated tail** (sprint stays active): `npm publish` (`@kenalin` scope + `NPM_TOKEN`), T5 Vercel demo+deploy, T6 demo GIF/screenshots (`assets/CAPTURE.md`), GitHub description/topics, CoC contact. Portfolio branch `e761dc5` still owner-to-merge (TASK-041). Detail → the sprint file.
+Status: `pnpm verify` green (**126 tests** + owner-string & config-doc gates) · widget 18.7 KB gz · **v0.6.0 PUBLISHED to npm** (`@kenalin/{core,server,widget}` + `create-kenalin`). **SPRINT-009:** T1/T2/T3/T4/T7 done; T5 keyless demo built + deployed (Vercel SSO toggle pending); T6 badges/wiring done (demo GIF/screenshots → `assets/CAPTURE.md`). **Remaining owner-gated:** disable Vercel Deployment Protection on `vercel-demo`; GitHub description/topics + CoC contact; portfolio→package migration (TD-004). Detail → the sprint file.
 
 ---
 
