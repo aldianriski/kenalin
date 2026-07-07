@@ -61,10 +61,29 @@ Status: `pnpm verify` green (**120 tests**) · eval matrix **12/15/12/10 = 49, 1
 - [ ] **TASK-019 — pgvector/Postgres KnowledgeStore** [size: L] · src: claude — for corpora beyond ~10³ chunks (ADR-002 P1).
 - [ ] **TASK-020 — Anthropic + OpenAI provider adapters** [size: M] · src: claude — behind existing interfaces (ADR-003 P1).
 - [ ] **TASK-021 — Admin / config UI** [size: L] · src: claude — no-code editing of persona/modules/actions/theme (completes TASK-004 end-to-end).
-- [ ] **TASK-022 — `create-kenalin` + publish `@kenalin/*` to npm** [size: M] · src: claude — clean consumption instead of vendoring. Resolves TD-004.
 - [ ] **TASK-023 — Ingestion improvements** [size: M] · src: claude — map MDX frontmatter → type/projectId/url; incremental/scheduled re-index; PII redaction on briefs.
 
 ---
+
+### P1 — OSS professionalization (v0.6 — adoption & clear implementation flow)
+
+> Recorded 2026-07-07 from the "make Kenalin a professional open-source product" push.
+> Goal: fast adoption + a clear implementation flow. Suggested SPRINT-009 order: TASK-045
+> first (README visuals), then the chosen track. All owner-agnostic (demo content, not the portfolio).
+
+- [ ] **TASK-045 — Visual README design showcase** [size: M] · src: you · state: ready
+      done-when: README leads with a hero GIF + screenshots of the widget using the **demo** owner (launcher → chat → evidence cards → handoff; light + dark; mobile full-screen; code/product green-vs-blue mode); badges added (npm version, CI, bundle-size, license); assets committed under `assets/`.
+- [ ] **TASK-022 — `create-kenalin` + publish `@kenalin/*` to npm** [size: L] · src: claude · state: ready — **elevated from P3.** Adopters install instead of vendoring. done-when: `@kenalin/{core,server,widget}` published; `npx create-kenalin <name>` scaffolds a runnable project (config + example + ingest); portfolio can consume the package instead of a vendored bundle. Resolves TD-004.
+- [ ] **TASK-046 — Hosted demo playground + "Deploy to Vercel" button** [size: M] · src: claude · state: ready
+      done-when: a public try-it demo (demo owner) is deployed; README has a one-click Deploy-to-Vercel button that provisions a working install (env prompts for the Gemini key).
+- [ ] **TASK-047 — True <5-min Quickstart** [size: S] · src: claude · state: ready
+      done-when: README/SETUP has a copy-paste Quickstart: scaffold → add key → `pnpm ingest` → run/deploy, each step verified from a clean checkout.
+- [ ] **TASK-048 — Config reference doc (from the Zod schema)** [size: M] · src: claude · state: ready
+      done-when: one page documents every `kenalin.config.ts` field (owner, assistant, branding {theme, modes, position, marks, icons}, modules, complexity, handoff, actions, knowledge, storage, analytics, qualification, server) with types + defaults; generated from / checked against the Zod schema so it can't drift.
+- [ ] **TASK-049 — Integration guides (Next.js + plain HTML)** [size: S] · src: claude · state: ready
+      done-when: a Next.js embed guide (API routes + widget mount, mirroring the reference portfolio) and a plain-HTML guide, both runnable from the examples.
+- [ ] **TASK-050 — Community/repo hygiene** [size: S] · src: claude · state: ready
+      done-when: CONTRIBUTING.md, issue + PR templates, CODE_OF_CONDUCT, a public roadmap section, and a sharp GitHub description + topics are in place.
 
 ## Tech Debt
 
