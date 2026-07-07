@@ -100,13 +100,13 @@ provisions a working install and prompts for the Gemini key.
 
 **Acceptance:** the hosted demo answers a real grounded chat turn; the README button deploys a working install prompting only for the Gemini key.
 
-**DoD:** — **T5 is owner-gated/deferred: triple-blocked on (a) published `@kenalin/*`, (b) a Vercel project, (c) a demo Gemini key.** None are providable or verifiable this session; shipping an untested deployable app or a Deploy button pointing at a non-existent target would be a broken artifact (against L-007/L-010). Recommended approach recorded below + in the owner-action checklist.
-- [ ] Demo app (demo owner, populated index) deployed to a public URL; a real `/api/chat` turn answers grounded — **blocked on publish + Vercel**
-- [ ] Deploy-to-Vercel button in the README provisions the server with an env prompt for `KENALIN_LLM_API_KEY` — **add once the deploy target exists** (button to a missing target is broken)
-- [ ] A test deploy from the button reaches a working chat turn — **owner-gated**
-- [ ] Demo uses the demo owner only; no portfolio/owner content — *(will reuse `content/demo`)*
+**DoD:** — **Built keyless + deployed** (`examples/vercel-demo/`). Owner supplied the Vercel connection + wanted it keyless, so instead of needing published packages + a Gemini key, the demo bundles everything and runs offline (hash retrieval + a grounded deterministic responder).
+- [x] Demo app (demo owner, populated index) deployed; a real `/api/chat` turn answers grounded — *(deployed to Vercel prod, READY; grounded answers + evidence + intent + handoff verified live-locally and via the bundled function). **Public URL pending: Deployment Protection (Vercel SSO) is on — owner toggle.***
+- [ ] Deploy-to-Vercel button in the README — **deferred**: a git-clone Deploy button can't build the keyless-vendored demo (artifacts are prebuilt locally; Vercel doesn't build it) and there's no Gemini env to prompt for. Revisit as the `create-kenalin` clone path once packages publish.
+- [x] A test deploy reaches a working chat turn — *(bundled function verified end-to-end: config/public 200, grounded chat with evidence cards)*
+- [x] Demo uses the demo owner only; no portfolio/owner content — *(fictional Sari Wibowo; `content/demo`)*
 
-**Recommended build (post-publish):** a self-contained `examples/vercel-demo/` — a Hono handler via `hono/vercel` `handle(createApp(deps))` in `api/[[...route]].ts`, `public/index.html` embedding `@kenalin/widget`, `vercel.json` with `functions.includeFiles: "content/index/**"` + a `build` running `kenalin ingest`, its own copy of `content/demo`. Then the README button: `https://vercel.com/new/clone?repository-url=…/tree/main/examples/vercel-demo&env=KENALIN_LLM_API_KEY`. Verify the deployed `/api/config/public` + a real turn (L-002).
+**How built:** `src/handler.ts` = `createApp` with `HashEmbeddingProvider` + `FakeChatProvider(demoResponder)` over a prebuilt hash index, exported via `hono/vercel`; esbuild bundles core+server+hono+zod+index into `api/[...path].mjs` (self-contained, `createRequire` banner for CJS `node:*` requires); polished `public/index.html` + vendored widget. Deployed with `package.json` excluded (its `workspace:*` devDeps broke Vercel's `npm install`).
 
 ### T6 — Visual README showcase `[size: M · risk: low]`
 Layers: `README.md` + committed `assets/`.
@@ -137,9 +137,9 @@ The files that make a repo contributable and discoverable.
 
 ## Owner-action checklist
 <!-- Non-dev, human-only. -->
-- [ ] npm: create/own the `@kenalin` scope + provide an `NPM_TOKEN` (publish auth) — blocks T1 publish (`pnpm run release`)
+- [ ] npm: publish is **blocked on the token type** — the provided `NPM_ACCESS_TOKEN` authenticates (`aldianrizki15`) but npm returned `E403: Two-factor authentication or granular access token with bypass 2fa enabled is required`. Provide an **Automation** classic token (bypasses 2FA) or a **Granular** token with "Bypass 2FA" + write to `@kenalin`, then re-run `pnpm run release`. (`@kenalin/core` is 404 → scope is free.)
+- [ ] Vercel: **disable Deployment Protection** on the `vercel-demo` project (Settings → Deployment Protection → Vercel Authentication → Disable, or protect Preview only) to make the demo public. It's deployed + working, just SSO-gated.
 - [ ] After publish: verify `npx create-kenalin` from the registry runs a real chat turn; migrate the portfolio to the package (resolves TD-004)
-- [ ] Vercel: a project + a demo Gemini key for the hosted demo — blocks T5 deploy (build `examples/vercel-demo/` per the T5 recommended-build note, then add the Deploy button to the README)
 - [ ] GitHub: set the repo description + topics (repo-admin only) — T7
 - [ ] Set the CoC maintainer contact in `CODE_OF_CONDUCT.md` — T7
 - [ ] Capture + commit the demo hero GIF + light/dark/mobile screenshots to `assets/img/` (human-timed) — T6, runbook: `assets/CAPTURE.md`
@@ -160,8 +160,10 @@ The files that make a repo contributable and discoverable.
 ### 2026-07-07 | promote | Plan locked
 SPRINT-009 promoted from the TODO Backlog (OSS professionalization v0.6, full 7-task track). Governance review clean: no `count ≥ 2` learnings to promote; no `high`-severity tech debt to escalate (TD-002/003/004 flagged as ≥3-sprints-old but carried); TODO at 119 lines (under the soft cap). Tasks ordered by dependency (package → docs → demo → README → hygiene).
 
-### 2026-07-07 | T5 | Owner-gated/deferred — recorded plan, no unverified artifact
-T5 (hosted demo + Deploy button) is triple-blocked (published packages + Vercel project + demo key) and unverifiable this session. Chose NOT to ship an untested deployable app or a Deploy button to a non-existent target (would be a broken artifact — L-007/L-010). Recorded the concrete build recipe (`hono/vercel` handler + `vercel.json` includeFiles + button URL) in the Plan + owner-action for the post-publish pass.
+### 2026-07-07 | T5 | Keyless demo BUILT + deployed to Vercel — 1fee246
+Owner unblocked it (Vercel connected + "keyless" requirement). Built `examples/vercel-demo/`: `createApp` with `HashEmbeddingProvider` + `FakeChatProvider(demoResponder)` over a prebuilt hash index → esbuild-bundled self-contained Vercel function (createRequire banner fixed a CJS `node:os` require), polished landing + vendored widget. Verified end-to-end (grounded QuickHub/hiring/business answers with evidence, intent, handoff). Deployed to Vercel prod (READY) after two fixes: explicit `--scope`, and excluding `package.json` (its `workspace:*` devDeps failed Vercel's `npm install`). **Live but SSO-gated** — Deployment Protection is on; public access is an owner toggle. Also attempted the npm publish (T1): blocked by the token's 2FA requirement (owner needs an automation/bypass-2FA token).
+
+### 2026-07-07 | T5 | (superseded) Owner-gated plan — now built above
 
 ### 2026-07-07 | T6(assets) | Live demo verified; capture blocked headless → runbook + L-014
 Drove the demo widget live via Chrome-MCP (demo API :8787 + static :5173, both from the demo owner). **Verified working:** widget mounts, opening message + 4 quick-action cards render, light theme, and **dark theme correctly follows the host `data-theme`** (L-012/L-013) — captured both visually. **Blocked:** the hero GIF + a live "answer + evidence" shot repeatedly froze the renderer (SSE word-by-word pseudo-stream, TD-003 → 30–45s CDP timeouts); mobile-fullscreen needs device emulation the tool doesn't expose; and `save_to_disk` captures didn't land in a shell-reachable path, so none are committable. Filed **L-014**, wrote `assets/CAPTURE.md` (human-timed runbook), moved GIF+screenshots to owner-action. README keeps its existing logo hero (renders fine).
@@ -202,6 +204,7 @@ Recon (two `Explore` agents) established: packages already `@kenalin/*`/0.5.3/no
 | `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `ROADMAP.md`, `.github/**` | T7 | community + hygiene | Low | links resolve |
 | `README.md` | T3/T6 | Quickstart + npm/CI/size badges + doc links | Low | rendered |
 | `assets/CAPTURE.md` + `docs/LEARNINGS.md` (L-014) | T6 | demo-asset runbook + capture finding | Low | n/a |
+| `examples/vercel-demo/**` | T5 | keyless bundled demo (Fake+Hash) + Vercel deploy | Med | live + bundled-fn smoke |
 
 ## Retro
 <!-- Written at close. Route buckets per DOCS_Guide §10. -->
