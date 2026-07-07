@@ -4,6 +4,12 @@ import { KenalinClient } from "./api.js";
 import { t, quickSub, detectLang, errorMessage, isRetryable } from "./i18n.js";
 import { avatarUrl } from "./branding.js";
 import {
+  serializeSession,
+  deserializeSession,
+  sessionKey,
+  type PersistedSession,
+} from "./session-store.js";
+import {
   Icon,
   LogoMark,
   IconClose,
@@ -69,16 +75,47 @@ function now(): string {
   }
 }
 
+// sessionStorage wrappers (TASK-013). Guarded — storage may be unavailable (SSR, some
+// privacy modes); a failure never breaks the widget, it just runs without persistence.
+function loadSession(key: string): PersistedSession | null {
+  try {
+    return typeof sessionStorage === "undefined" ? null : deserializeSession(sessionStorage.getItem(key));
+  } catch {
+    return null;
+  }
+}
+function saveSession(key: string, sessionId: string, state: unknown, messages: unknown[]): void {
+  try {
+    if (typeof sessionStorage !== "undefined") sessionStorage.setItem(key, serializeSession(sessionId, state, messages));
+  } catch {
+    /* quota / disabled — persistence is best-effort */
+  }
+}
+function clearSession(key: string): void {
+  try {
+    if (typeof sessionStorage !== "undefined") sessionStorage.removeItem(key);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.Element {
   const [open, setOpen] = useState(Boolean(startOpen));
   const [lang] = useState<Lang>(detectLang((config.assistant.languages[0] as Lang) ?? "id", config.assistant.languages));
-  const [messages, setMessages] = useState<UiMessage[]>([]);
+
+  // Restore a persisted session once (TASK-013): survives reload, cleared on tab close.
+  const persistKeyRef = useRef(sessionKey(apiUrl));
+  const restoredRef = useRef<PersistedSession | null | undefined>(undefined);
+  if (restoredRef.current === undefined) restoredRef.current = loadSession(persistKeyRef.current);
+  const restored = restoredRef.current;
+
+  const [messages, setMessages] = useState<UiMessage[]>(() => (restored?.messages as UiMessage[]) ?? []);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   // TASK-036: "Home" re-surfaces the intro/quick-actions without clearing the chat.
   const [homeView, setHomeView] = useState(false);
-  const stateRef = useRef<ConversationState>({ ...EMPTY_STATE, language: lang });
-  const sessionRef = useRef<string>(uuid());
+  const stateRef = useRef<ConversationState>((restored?.state as ConversationState) ?? { ...EMPTY_STATE, language: lang });
+  const sessionRef = useRef<string>(restored?.sessionId ?? uuid());
   const clientRef = useRef(new KenalinClient(apiUrl));
   const logRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -93,6 +130,11 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
   }, [open]);
   useEffect(() => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages]);
+  // Persist the settled conversation (drop in-flight/failed turns) on every change (TASK-013).
+  useEffect(() => {
+    const settled = messages.filter((m) => !m.pending && !m.failed);
+    saveSession(persistKeyRef.current, sessionRef.current, stateRef.current, settled);
   }, [messages]);
 
   // A11y (TASK-006): move focus into the open panel, trap Tab within it, close on
@@ -286,7 +328,21 @@ export function App({ apiUrl, config, pageContext, startOpen }: AppProps): JSX.E
           <Icon name="home" fallback={<IconHome />} />
         </button>
         <button class="iconbtn" aria-label={t(lang, "minimize")} onClick={() => setOpen(false)}><Icon name="minimize" fallback={<IconMinimize />} /></button>
-        <button class="iconbtn" aria-label={t(lang, "close")} onClick={() => { setMessages([]); setOpen(false); }}><Icon name="close" fallback={<IconClose />} /></button>
+        <button
+          class="iconbtn"
+          aria-label={t(lang, "close")}
+          onClick={() => {
+            // Close = end the session: clear history, persisted state, and start fresh.
+            setMessages([]);
+            setHomeView(false);
+            stateRef.current = { ...EMPTY_STATE, language: lang };
+            sessionRef.current = uuid();
+            clearSession(persistKeyRef.current);
+            setOpen(false);
+          }}
+        >
+          <Icon name="close" fallback={<IconClose />} />
+        </button>
       </div>
 
       <div class="log" ref={logRef} role="log" aria-live="polite" aria-relevant="additions text">

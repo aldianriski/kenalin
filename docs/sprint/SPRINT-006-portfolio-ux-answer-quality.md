@@ -110,9 +110,9 @@ A reload wipes the chat (in-memory `messages` + fresh session id each mount). Pe
 **Acceptance:** reloading the page keeps the conversation; closing the tab clears it.
 
 **DoD:**
-- [ ] `messages` + conversation state + session id saved to sessionStorage and rehydrated on mount.
-- [ ] Save/restore round-trip covered by a test.
-- [ ] `pnpm verify` green.
+- [x] `messages` + conversation state + session id saved to sessionStorage (settled turns only) and rehydrated once on mount; storage I/O guarded (SSR/private-mode safe). Close = full reset + clear.
+- [x] Pure serialize/deserialize + version/shape validation covered by session-store.test.ts (round-trip, corrupt, version mismatch, key namespacing).
+- [x] typecheck + build + tests green (113); live reload-survives check **batched** to Chrome-MCP.
 
 ### T8 — Idle detection + auto-close `[size: M · risk: low]` · TASK-012
 Layers: `packages/widget` app.tsx.
@@ -166,6 +166,9 @@ Decomposed from owner notes (position, custom design, persistence, home button, 
 
 ### 2026-07-07 | T1 done | Configurable position + safe-area
 Position wired core→server→widget. The `branding.icons` **config surface** (schema + public-config + widget types + `iconOverride` helper) rides along in this commit since it shares schema.ts/public-config.ts/types.ts/branding.ts with T1 (D5); the icon *rendering* is T2. Live mobile-docked check batched to the consolidated Chrome-MCP pass. verify green, 105 tests.
+
+### 2026-07-07 | T7 done | Conversation persistence
+New pure `session-store.ts` (serialize/deserialize + version/shape validation) with sessionStorage I/O guarded in app.tsx. Restore-once on mount seeds messages/state/session id; persist effect writes settled turns on change; Close now fully resets + clears the key. `pnpm verify` hit repeated transient Windows `pnpm -r` child-spawn errors (errno -4094; core build, then core typecheck) — each passed when run directly (L-001); ran the gate piecewise green: owner-strings ✓, all typechecks ✓, builds ✓, tests 35+63+15 = 113.
 
 ### 2026-07-07 | T6 done | Home button (keep history)
 Added `homeView` state + a header Home button. Re-surfaces the quick-action grid (top when tapped mid-chat, bottom on fresh intro) without clearing messages; dismisses on send. IconHome + `home`/`idleNudge` i18n strings added (idleNudge is for T8, inert until then). Transient tinypool spawn error on the first verify (errno -4094) — re-ran widget tests green (L-001). typecheck+build green.
