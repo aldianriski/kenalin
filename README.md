@@ -8,8 +8,10 @@
 
 **An open-source, plug-and-play, embeddable AI assistant that turns a static portfolio into a guided, evidence-based conversation.**
 
+[![npm](https://img.shields.io/npm/v/@kenalin/widget?color=22B8A7&label=npm)](https://www.npmjs.com/package/@kenalin/widget)
+[![CI](https://github.com/aldianriski/kenalin/actions/workflows/ci.yml/badge.svg)](https://github.com/aldianriski/kenalin/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22B8A7.svg)](LICENSE)
-[![Widget](https://img.shields.io/badge/widget-13.5_KB_gz-0F2742.svg)](packages/widget)
+[![Widget](https://img.shields.io/badge/widget-18.7_KB_gz-0F2742.svg)](packages/widget)
 [![Powered by Gemini](https://img.shields.io/badge/LLM-Gemini-22B8A7.svg)](docs/adr/ADR-003-gemini-sole-mvp-provider.md)
 [![No database](https://img.shields.io/badge/database-optional-0F2742.svg)](docs/adr/ADR-004-stateless-no-db-default.md)
 
@@ -42,27 +44,40 @@ file. No database required for a fresh install.**
 - Node.js ≥ 20 and pnpm ≥ 11 (monorepo).
 - A Google Gemini API key (chat `gemini-2.5-flash` + embeddings `gemini-embedding-001`).
 
-## Adopt
+## Quickstart
+
+Scaffold a runnable project in under 5 minutes:
 
 ```bash
-git clone https://github.com/aldianriski/kenalin
-cd kenalin
-pnpm install
+npx create-kenalin my-site
+cd my-site && npm install
 cp .env.example .env          # add your Gemini key as KENALIN_LLM_API_KEY
-pnpm build
+npm run ingest                # build the knowledge index from content/
+npm run dev                   # http://localhost:8787
 ```
 
-Full setup: [`docs/SETUP.md`](docs/SETUP.md)
+Open <http://localhost:8787> and click the launcher. Then edit `kenalin.config.ts`
+and `content/`, and re-run `npm run ingest`.
+
+<sub>The `@kenalin/*` packages publish with **v0.6**. Prefer to work from source? →
+`git clone https://github.com/aldianriski/kenalin && cd kenalin && pnpm install && pnpm build`</sub>
+
+Full setup: [`docs/SETUP.md`](docs/SETUP.md) · every config field:
+[`docs/CONFIG.md`](docs/CONFIG.md)
 
 ## Embed
 
 ```html
 <!-- one tag, anywhere on the page -->
-<script src="/kenalin.js" data-api-url="https://your-site.example" defer></script>
+<script src="https://unpkg.com/@kenalin/widget/dist/kenalin.js"
+        data-api-url="https://your-site.example" defer></script>
 ```
 
 The `<kenalin-ai>` Web Component mounts a Shadow-DOM-isolated assistant, themeable
 via CSS custom properties on the element. See the [design system](docs/DESIGN.md).
+
+**Integration guides:** [Next.js](docs/integration/nextjs.md) ·
+[plain HTML](docs/integration/plain-html.md)
 
 ## Usage
 
@@ -84,7 +99,7 @@ packages/server   Hono API, Gemini providers, local index, ingest CLI  (all I/O 
 packages/widget   Preact Web Component + <script> embed  (talks only to /api/chat)
 ```
 
-More: [Architecture](docs/ARCHITECTURE.md) · [Decisions (ADRs)](docs/DECISIONS.md) · [Design system](docs/DESIGN.md) · [PRD](docs/PRD.md)
+More: [Architecture](docs/ARCHITECTURE.md) · [Config reference](docs/CONFIG.md) · [Decisions (ADRs)](docs/DECISIONS.md) · [Design system](docs/DESIGN.md) · [PRD](docs/PRD.md)
 
 ## Brand
 
@@ -101,7 +116,13 @@ Type: **Inter**. The full system — colors, type scale, icon set, component lib
 and interaction cues — lives in [`assets/design/guideline.png`](assets/design/guideline.png)
 and is documented in [`docs/DESIGN.md`](docs/DESIGN.md).
 
+## Contributing
+
+Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) and the
+[Code of Conduct](CODE_OF_CONDUCT.md). Where Kenalin is headed:
+[ROADMAP.md](ROADMAP.md).
+
 ## License
 MIT — see [LICENSE](LICENSE).
 
-<sub>Doc owner: Tech Lead · last updated: 2026-07-06 · status: current</sub>
+<sub>Doc owner: Tech Lead · last updated: 2026-07-07 · status: current</sub>
