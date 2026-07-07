@@ -1,0 +1,44 @@
+name: Bug report
+description: Something isn't working as expected
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Config / setup …
+        2. Ask the assistant …
+        3. See …
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which package?
+      options:
+        - "@kenalin/core"
+        - "@kenalin/server"
+        - "@kenalin/widget"
+        - create-kenalin
+        - docs / integration
+        - not sure
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: "e.g. @kenalin/widget 0.6.0"
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      placeholder: "Node version, OS, deployment (local / Vercel / …)"
